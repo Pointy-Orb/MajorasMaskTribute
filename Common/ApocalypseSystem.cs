@@ -1,4 +1,5 @@
 using Terraria;
+using MajorasMaskTribute.Content.Items;
 using Terraria.ID;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -118,6 +119,10 @@ public class ApocalypseSystem : ModSystem
         {
             FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
         }
+        if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave) && FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
+        {
+            FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
+        }
         if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave) && FileUtilities.Exists(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave))
         {
             FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
@@ -172,6 +177,15 @@ public class ApocalypseSystem : ModSystem
         FileUtilities.Copy(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
         var newPlayer = Player.LoadPlayer(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
         newPlayer.SetAsActive();
+        SoundEngine.PlaySound(SoundID.PlayerKilled);
+        if (Main.LocalPlayer.Male)
+        {
+            SoundEngine.PlaySound(SoundID.PlayerHit);
+        }
+        else
+        {
+            SoundEngine.PlaySound(SoundID.FemaleHit);
+        }
         Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
         Main.LocalPlayer.position = Vector2.Zero;
         DestroyEverything();
@@ -345,4 +359,5 @@ public class ApocalypseSystem : ModSystem
         Main.windSpeedTarget = 0;
         Main.windSpeedCurrent = 0;
     }
+
 }

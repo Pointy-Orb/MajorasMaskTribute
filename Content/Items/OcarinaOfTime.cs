@@ -1,4 +1,7 @@
 using Terraria;
+using System.IO;
+using Newtonsoft.Json;
+using Terraria.GameContent.Bestiary;
 using System.Collections.Generic;
 using MajorasMaskTribute.Common;
 using Terraria.IO;
@@ -15,28 +18,59 @@ namespace MajorasMaskTribute.Content.Items;
 
 public class OcarinaOfTime : ModItem
 {
+    public override void SetStaticDefaults()
+    {
+        ItemID.Sets.ItemsThatAllowRepeatedRightClick[Type] = true;
+    }
+
     public override void SetDefaults()
     {
         Item.useStyle = ItemUseStyleID.HoldUp;
         Item.width = 32;
         Item.height = 26;
-        Item.useTime = 1;
-        Item.useAnimation = 1;
+        Item.useTime = 2;
+        Item.useAnimation = 3;
         Item.autoReuse = true;
         Item.rare = ItemRarityID.Expert;
+        Item.useTurn = true;
     }
 
-    public override void UseAnimation(Player player)
+    public override bool? UseItem(Player player)
     {
-        player.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina = true;
-        player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
+        if (player.altFunctionUse == 2)
+        {
+            player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfHealing = true;
+            player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
+            if (player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfTime)
+            {
+                player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer = 0;
+                player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfTime = false;
+            }
+        }
+        else
+        {
+            player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfTime = true;
+            player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
+            if (player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfHealing)
+            {
+                player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer = 0;
+                player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfHealing = false;
+            }
+        }
+        return null;
+    }
+
+    public override bool AltFunctionUse(Player player)
+    {
+        return true;
     }
 
     public override void UpdateInventory(Player player)
     {
         if (player.itemAnimation <= 0 && player.HeldItem.type == Type)
         {
-            player.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina = false;
+            player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfTime = false;
+            player.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfHealing = false;
         }
     }
 
@@ -71,6 +105,25 @@ public class OcarinaOfTime : ModItem
     }
 }
 
+public class ShutUpImPlayingTheHealingSong : ModSceneEffect
+{
+    public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
+
+    public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/songofhealing");
+
+    public override bool IsSceneEffectActive(Player player)
+    {
+        foreach (Player activePlayer in Main.ActivePlayers)
+        {
+            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfHealing)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 public class ShutUpImPlayingTheOcarina : ModSceneEffect
 {
     public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
@@ -81,7 +134,7 @@ public class ShutUpImPlayingTheOcarina : ModSceneEffect
     {
         foreach (Player activePlayer in Main.ActivePlayers)
         {
-            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina)
+            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().playingSongOfTime)
             {
                 return true;
             }
@@ -92,7 +145,8 @@ public class ShutUpImPlayingTheOcarina : ModSceneEffect
 
 public class OcarinaOfTimePlayer : ModPlayer
 {
-    public bool playingOcarina = false;
+    public bool playingSongOfTime = false;
+    public bool playingSongOfHealing = false;
     public int animationTimer = 0;
 
     public override bool CanUseItem(Item item)
@@ -110,7 +164,7 @@ public class OcarinaOfTimePlayer : ModPlayer
 
     public override void PostUpdate()
     {
-        if (animationTimer >= 660)
+        if (animationTimer >= 660 && playingSongOfTime)
         {
             if (Main.netMode != NetmodeID.Server)
             {
@@ -120,6 +174,20 @@ public class OcarinaOfTimePlayer : ModPlayer
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 ResetEverything();
+            }
+            animationTimer = 0;
+        }
+        if (animationTimer >= 200 && playingSongOfHealing)
+        {
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
+                if (!homunculusNPC.isHomunculus) continue;
+                if (new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight).Intersects(npc.Hitbox))
+                {
+                    //Some healing you got there.
+                    npc.StrikeInstantKill();
+                }
             }
             animationTimer = 0;
         }
@@ -139,6 +207,13 @@ public class OcarinaOfTimePlayer : ModPlayer
     private static void ResetEverything()
     {
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
+        foreach (NPC npc in Main.ActiveNPCs)
+        {
+            npc.Transform(NPCID.Bunny);
+            npc.position = Vector2.Zero;
+            npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
+            npc.StrikeInstantKill();
+        }
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
         for (int i = 0; i < Main.maxTilesX; i++)
         {

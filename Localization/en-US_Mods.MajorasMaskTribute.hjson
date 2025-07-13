@@ -24,7 +24,13 @@ Items: {
 		Tooltip:
 			'''
 			Rewinds time to the dawn of the first day when played.
+			Can also play the song of healing to remove transformation masks from those wearing them.
 			'The Goddess of Time is protecting you.'
 			'''
+	}
+
+	GuideMask: {
+		DisplayName: Guide Mask
+		Tooltip: ""
 	}
 }

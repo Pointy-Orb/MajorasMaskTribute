@@ -74,7 +74,7 @@ public class FinalNightEffect : ModSceneEffect
     {
         get
         {
-            return Main.time >= Main.nightLength * 0.5 ? MusicID.OtherworldlyNight : 0;
+            return Main.time >= Main.nightLength * 0.6 ? MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours") : 0;
         }
     }
 
