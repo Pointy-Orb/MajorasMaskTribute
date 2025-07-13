@@ -1,0 +1,163 @@
+using Terraria;
+using System.Collections.Generic;
+using MajorasMaskTribute.Common;
+using Terraria.IO;
+using Terraria.Utilities;
+using System;
+using Terraria.GameContent;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria.Audio;
+using Terraria.ModLoader;
+using Terraria.ID;
+using Microsoft.Xna.Framework;
+
+namespace MajorasMaskTribute.Content.Items;
+
+public class OcarinaOfTime : ModItem
+{
+    public override void SetDefaults()
+    {
+        Item.useStyle = ItemUseStyleID.HoldUp;
+        Item.width = 32;
+        Item.height = 26;
+        Item.useTime = 1;
+        Item.useAnimation = 1;
+        Item.autoReuse = true;
+        Item.rare = ItemRarityID.Expert;
+    }
+
+    public override void UseAnimation(Player player)
+    {
+        player.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina = true;
+        player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
+    }
+
+    public override void UpdateInventory(Player player)
+    {
+        if (player.itemAnimation <= 0 && player.HeldItem.type == Type)
+        {
+            player.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina = false;
+        }
+    }
+
+    public override void UseStyle(Player player, Rectangle heldItemFrame)
+    {
+        player.itemLocation += new Vector2(-5 * player.direction, 13);
+    }
+
+    public override void PostDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale)
+    {
+        var ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > ocarinaTimer)
+            {
+                ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
+            }
+        }
+        if (ocarinaTimer > 0)
+        {
+            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * Utils.Remap(ocarinaTimer, 660, 470, 1, 0));
+        }
+    }
+
+    public override void AddRecipes()
+    {
+        CreateRecipe()
+            .AddIngredient(ItemID.ClayBlock, 5)
+            .AddIngredient(ItemID.FallenStar, 10)
+            .AddTile(TileID.Furnaces)
+            .Register();
+    }
+}
+
+public class ShutUpImPlayingTheOcarina : ModSceneEffect
+{
+    public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
+
+    public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/zelda-song-of-time");
+
+    public override bool IsSceneEffectActive(Player player)
+    {
+        foreach (Player activePlayer in Main.ActivePlayers)
+        {
+            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().playingOcarina)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+public class OcarinaOfTimePlayer : ModPlayer
+{
+    public bool playingOcarina = false;
+    public int animationTimer = 0;
+
+    public override bool CanUseItem(Item item)
+    {
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (player == Player) continue;
+            if (player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public override void PostUpdate()
+    {
+        if (animationTimer >= 660)
+        {
+            if (Main.netMode != NetmodeID.Server)
+            {
+                Player.SavePlayer(Main.ActivePlayerFileData);
+                FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+            }
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                ResetEverything();
+            }
+            animationTimer = 0;
+        }
+        if (animationTimer > 0)
+        {
+            animationTimer--;
+        }
+    }
+
+    public override IEnumerable<Item> AddStartingItems(bool mediumCoreDeath)
+    {
+        var ocarina = new Item();
+        ocarina.SetDefaults(ModContent.ItemType<OcarinaOfTime>());
+        yield return ocarina;
+    }
+
+    private static void ResetEverything()
+    {
+        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
+        WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
+        for (int i = 0; i < Main.maxTilesX; i++)
+        {
+            for (int j = 0; j < Main.maxTilesY; j++)
+            {
+                if (!WorldGen.InWorld(i, j)) continue;
+                WorldGen.Reframe(i, j, true);
+            }
+        }
+        foreach (Player player in Main.ActivePlayers)
+        {
+            player.Teleport(new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height), 6);
+            player.velocity = Vector2.Zero;
+        }
+        Main.raining = false;
+        Main.windSpeedTarget = 0;
+        Main.windSpeedCurrent = 0;
+        Main.time = 0;
+        Main.dayTime = true;
+        ApocalypseSystem.apocalypseDay = 0;
+    }
+}

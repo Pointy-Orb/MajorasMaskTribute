@@ -1,0 +1,30 @@
+Announcements: {
+	DawnOne: Dawn of the 1st Day (72 hours remain)
+	NightOne: Night of the 1st Day (57 hours remain)
+	DawnTwo: Dawn of the 2nd Day (48 hours remain)
+	NightTwo: Night of the 2nd Day (33 hours remain)
+	DawnThree: Dawn of the Final Day (24 hours remain)
+	NightThree: Night of the Final Day (9 hours remain)
+	DayMisc: Day {0}, {1} {^1:hour;hours} left.
+	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
+	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
+}
+
+DeathMessages: {
+	Moon1: "{0} was met with a terrible fate."
+	Moon2: "{0} got crushed by tons of lunar rock."
+	Moon3: "{0} got mooned."
+	Moon4: "{0} took a giant leap for mankind."
+	Moon5: "{0} died the same way as everyone else."
+}
+
+Items: {
+	OcarinaOfTime: {
+		DisplayName: Ocarina of Time
+		Tooltip:
+			'''
+			Rewinds time to the dawn of the first day when played.
+			'The Goddess of Time is protecting you.'
+			'''
+	}
+}
