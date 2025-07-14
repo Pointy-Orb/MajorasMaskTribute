@@ -364,7 +364,7 @@ public class ApocalypseSystem : ModSystem
             }
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (npc.type != NPCID.Guide || Main.hardMode)
+                if (npc.type != NPCID.Guide || Main.hardMode || !npc.HasGivenName)
                 {
                     npc.Transform(NPCID.Bunny);
                     npc.position = Vector2.Zero;
