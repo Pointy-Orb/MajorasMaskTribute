@@ -35,6 +35,7 @@ Announcements: {
 	DayMisc: It is day {0}, {1} {^1:hour;hours} {^1:remains;remain}.
 	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
 	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
+	EndIsNear: The end is near...
 }
 
 DeathMessages: {
@@ -86,3 +87,38 @@ Items: {
 		Tooltip: Changes the moon's phase when used
 	}
 }
+
+Configs: {
+	MajorasMaskTributeConfig: {
+		DisplayName: Majoras Mask Tribute Config
+
+		NoScaryTextures: {
+			Label: Use vanilla moon texture
+			Tooltip:
+				'''
+				Enabling will replace the Majora's Mask moon texture with the vanilla counterpart. 
+				Intended to be used with texture packs.
+				'''
+		}
+
+		RealisticPhaseShading: {
+			Label: Draw Phases Realistically
+			Tooltip:
+				'''
+				Enabling will draw black pixels in the "empty" parts of the moon phases, preventing starts from appearing behind it
+				Has no effect if the above option is enabled 
+				'''
+		}
+
+		VanillaBloodMoonLogic: {
+			Label: Vanilla Blood Moon Logic
+			Tooltip:
+				'''
+				By default, a blood moon will be triggered during the final hours (when the countdown shows up).
+				If that is not desired, this can be enabled to disable that in favor of vanilla blood moon logic.
+				'''
+		}
+	}
+}
+
+AfterPartyOfDoomCondition: Mods.MajorasMaskTribute.AfterPartyOfDoomCondition

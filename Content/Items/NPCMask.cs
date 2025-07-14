@@ -82,8 +82,33 @@ public class NPCMaskDrops : GlobalNPC
         foreach (int type in maskNPCs.Keys)
         {
             if (npc.type != type) continue;
-            npcLoot.Add(ItemDropRule.Common(maskNPCs[type].Type));
+            npcLoot.Add(ItemDropRule.ByCondition(new AfterPartyOfDoomCondition(), maskNPCs[type].Type));
         }
+    }
+}
+
+public class AfterPartyOfDoomCondition : IItemDropRuleCondition
+{
+    private static LocalizedText Description;
+
+    public AfterPartyOfDoomCondition()
+    {
+        Description ??= Language.GetOrRegister("Mods.MajorasMaskTribute.AfterPartyOfDoomCondition");
+    }
+
+    public bool CanDrop(DropAttemptInfo info)
+    {
+        return !Main.afterPartyOfDoom;
+    }
+
+    public bool CanShowItemDropInUI()
+    {
+        return true;
+    }
+
+    public string GetConditionDescription()
+    {
+        return Description.Value;
     }
 }
 

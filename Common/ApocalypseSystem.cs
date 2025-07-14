@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.GameContent.Events;
+using System.Linq;
 using MajorasMaskTribute.Content.Items;
 using Terraria.ID;
 using Terraria.Audio;
@@ -52,14 +54,27 @@ public class ApocalypseSystem : ModSystem
     static bool wasDay = true;
 
     public static Asset<Texture2D> scaryMoon;
-    public static Asset<Texture2D> scaryFrostMoon;
 
     public override void Load()
     {
-        scaryMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_scary");
-        TextureAssets.PumpkinMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Pumpkin_scary");
-        TextureAssets.SnowMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Snow_scary");
+        scaryMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
+        if (!ModContent.GetInstance<MajorasMaskTributeConfig>().NoScaryTextures)
+        {
+            TextureAssets.PumpkinMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Pumpkin_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
+            TextureAssets.SnowMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Snow_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
+        }
+        else
+        {
+            TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
+            TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
+        }
         IL_Main.DrawSunAndMoon += IL_BiggerMoon;
+    }
+
+    public override void Unload()
+    {
+        TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
+        TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
     }
 
     public static Texture2D GetScaryMoon()
@@ -79,12 +94,15 @@ public class ApocalypseSystem : ModSystem
             var c = new ILCursor(il);
             int scaleIndex = 0;
             int moonIndex = 0;
-            //Change the moon texture
-            c.GotoNext(i => i.MatchBrtrue(out _));
-            c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
-            c.GotoNext(MoveType.After, i => i.MatchStloc(out moonIndex));
-            c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryMoon"));
-            c.Emit(Stloc, moonIndex);
+            if (!ModContent.GetInstance<MajorasMaskTributeConfig>().NoScaryTextures)
+            {
+                //Change the moon texture
+                c.GotoNext(i => i.MatchBrtrue(out _));
+                c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
+                c.GotoNext(MoveType.After, i => i.MatchStloc(out moonIndex));
+                c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryMoon"));
+                c.Emit(Stloc, moonIndex);
+            }
 
             //Change the moon size depending on the current day and hour
             c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.ForcedMinimumZoom))));
@@ -106,6 +124,39 @@ public class ApocalypseSystem : ModSystem
         catch
         {
             MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+        }
+    }
+
+    public override void PreUpdateTime()
+    {
+        if (!startChat)
+        {
+            return;
+        }
+        if (wasDay && !Main.dayTime && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
+        {
+            //This prevents blood moons from spawning naturally, as new moons are the only phase where a blood moon roll is guarenteed to fail
+            Main.moonPhase = 4;
+        }
+    }
+
+    public override void PostUpdateTime()
+    {
+        if (ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
+        {
+            return;
+        }
+        if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !Main.snowMoon && !Main.pumpkinMoon)
+        {
+            if (!Main.bloodMoon)
+            {
+                Main.bloodMoon = true;
+                SendChatMessage(Language.GetText("Mods.MajorasMaskTribute.Announcements.EndIsNear"));
+            }
+        }
+        else
+        {
+            Main.bloodMoon = false;
         }
     }
 
@@ -212,7 +263,7 @@ public class ApocalypseSystem : ModSystem
         doApocalypseTimer = false;
     }
 
-    bool startChat = false;
+    public static bool startChat { get; private set; } = false;
     bool wasGeneratingHardmode = false;
     bool doApocalypseTimer = false;
     int apocalypseTimer = 0;
@@ -230,7 +281,7 @@ public class ApocalypseSystem : ModSystem
         {
             apocalypseTimer--;
         }
-        if (Main.dayTime && !wasDay)
+        if (Main.dayTime && !wasDay && startChat)
         {
             apocalypseDay++;
             if (apocalypseDay == 1)
@@ -247,6 +298,7 @@ public class ApocalypseSystem : ModSystem
                 dayOfText?.DisplayDayOf();
                 //MoonPhase.Empty
                 Main.moonPhase = 4;
+                MiniatureClockTowerPlayer.PlayRooster();
             }
             else
             {
@@ -364,7 +416,7 @@ public class ApocalypseSystem : ModSystem
             }
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (npc.type != NPCID.Guide || Main.hardMode)
+                if (!StartNPCsByWorldSeed().ToList().Contains((short)npc.type) || Main.hardMode || !npc.HasGivenName)
                 {
                     npc.Transform(NPCID.Bunny);
                     npc.position = Vector2.Zero;
@@ -378,6 +430,52 @@ public class ApocalypseSystem : ModSystem
         Main.windSpeedCurrent = 0;
         apocalypseDay = 0;
         startChat = true;
+        if (Main.zenithWorld)
+        {
+            Main.afterPartyOfDoom = true;
+            BirthdayParty.GenuineParty = true;
+        }
     }
 
+    public static IEnumerable<short> StartNPCsByWorldSeed()
+    {
+        if (Main.tenthAnniversaryWorld)
+        {
+            foreach (short id in celebrationStartNPCs)
+            {
+                yield return id;
+            }
+        }
+        bool specialWorld = false;
+        if (Main.remixWorld)
+        {
+            yield return NPCID.TaxCollector;
+            specialWorld = true;
+        }
+        if (Main.drunkWorld)
+        {
+            yield return NPCID.PartyGirl;
+            specialWorld = true;
+        }
+        if (Main.notTheBeesWorld)
+        {
+            yield return NPCID.Merchant;
+            specialWorld = true;
+        }
+        if (Main.getGoodWorld)
+        {
+            yield return NPCID.Demolitionist;
+            specialWorld = true;
+        }
+        if (Main.zenithWorld)
+        {
+            yield return NPCID.TownSlimeRainbow;
+        }
+        if (!specialWorld)
+        {
+            yield return NPCID.Guide;
+        }
+    }
+
+    private static readonly List<short> celebrationStartNPCs = new() { NPCID.Guide, NPCID.Steampunker, NPCID.TownBunny, NPCID.Princess, NPCID.PartyGirl };
 }

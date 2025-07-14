@@ -181,8 +181,15 @@ public class MiniatureClockTowerPlayer : ModPlayer
     static SoundStyle dayDoodleDoo;
 
     bool wasDay = true;
+    bool started = false;
     public override void PostUpdate()
     {
+        if (!started)
+        {
+            started = true;
+            wasDay = Main.dayTime;
+            return;
+        }
         if (Main.netMode == NetmodeID.Server)
             return;
         if (!Main.dayTime && wasDay)

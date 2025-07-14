@@ -28,7 +28,14 @@ public class FinalNightScreenShaderData : ScreenShaderData
 
     public override void Update(GameTime gameTime)
     {
-        UseColor(1, 0, 0.5f);
+        if (Main.bloodMoon && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
+        {
+            UseColor(0f, 0, 0);
+        }
+        else
+        {
+            UseColor(1, 0, 0.5f);
+        }
     }
 }
 
@@ -52,7 +59,7 @@ public class FinalNightSky : CustomSky
 
     public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
     {
-        spriteBatch.Draw(white.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White);
+        spriteBatch.Draw(white.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
     }
 
     public override void Activate(Vector2 position, params object[] args)
@@ -99,6 +106,6 @@ public class FinalNightEffect : ModSceneEffect
 
     public override bool IsSceneEffectActive(Player player)
     {
-        return !Main.dayTime && ApocalypseSystem.apocalypseDay >= 2 && !player.ZoneDirtLayerHeight && !player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight;
+        return !Main.dayTime && ApocalypseSystem.apocalypseDay >= 2 && !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld);
     }
 }

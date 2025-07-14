@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.GameContent.Events;
+using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
 using Terraria.GameContent.Bestiary;
@@ -266,7 +268,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
         foreach (NPC npc in Main.ActiveNPCs)
         {
-            if (npc.type != NPCID.Guide || Main.hardMode)
+            if (!ApocalypseSystem.StartNPCsByWorldSeed().ToList().Contains((short)npc.type) || Main.hardMode || !npc.HasGivenName)
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;
@@ -279,6 +281,11 @@ public class OcarinaOfTimePlayer : ModPlayer
         Main.windSpeedCurrent = 0;
         Main.time = 0;
         Main.dayTime = true;
+        if (Main.zenithWorld)
+        {
+            Main.afterPartyOfDoom = true;
+            BirthdayParty.GenuineParty = true;
+        }
         ApocalypseSystem.ResetCounter();
     }
 }
