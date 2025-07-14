@@ -362,6 +362,16 @@ public class ApocalypseSystem : ModSystem
                     WorldGen.Reframe(i, j, true);
                 }
             }
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (npc.type != NPCID.Guide || Main.hardMode)
+                {
+                    npc.Transform(NPCID.Bunny);
+                    npc.position = Vector2.Zero;
+                    npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
+                    npc.StrikeInstantKill();
+                }
+            }
         }
         Main.StopRain();
         Main.windSpeedTarget = 0;

@@ -264,6 +264,16 @@ public class OcarinaOfTimePlayer : ModPlayer
             player.Teleport(new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height), 6);
             player.velocity = Vector2.Zero;
         }
+        foreach (NPC npc in Main.ActiveNPCs)
+        {
+            if (npc.type != NPCID.Guide || Main.hardMode)
+            {
+                npc.Transform(NPCID.Bunny);
+                npc.position = Vector2.Zero;
+                npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
+                npc.StrikeInstantKill();
+            }
+        }
         Main.StopRain();
         Main.windSpeedTarget = 0;
         Main.windSpeedCurrent = 0;
