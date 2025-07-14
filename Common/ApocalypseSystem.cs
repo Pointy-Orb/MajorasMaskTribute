@@ -69,6 +69,7 @@ public class ApocalypseSystem : ModSystem
             TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
         }
         IL_Main.DrawSunAndMoon += IL_BiggerMoon;
+        IL_Main.UpdateTime_StartNight += IL_StopBloodMoon;
     }
 
     public override void Unload()
@@ -85,6 +86,26 @@ public class ApocalypseSystem : ModSystem
     public static int GetScaryPhase()
     {
         return scaryMoon.Value.Bounds.Width * Main.moonPhase;
+    }
+
+    private static void IL_StopBloodMoon(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var jumpLabel = il.DefineLabel();
+            c.GotoNext(i => i.MatchStsfld(typeof(Main).GetField(nameof(Main.bloodMoon))));
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.netMode))));
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+            c.GotoNext(MoveType.After, i => i.MatchBeq(out jumpLabel));
+            c.Emit(Call, typeof(ModContent).GetMethod("GetInstance").MakeGenericMethod(typeof(MajorasMaskTributeConfig)));
+            c.Emit(Call, typeof(MajorasMaskTributeConfig).GetMethod("get_" + nameof(MajorasMaskTributeConfig.VanillaBloodMoonLogic)));
+            c.Emit(Brfalse_S, jumpLabel);
+        }
+        catch
+        {
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+        }
     }
 
     private static void IL_BiggerMoon(ILContext il)
@@ -113,6 +134,7 @@ public class ApocalypseSystem : ModSystem
             c.Emit(Mul);
             c.Emit(Stloc, scaleIndex);
 
+            //Give the normal moon phases, since it is not considered a regular moon texture the phases have to be added manually
             c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.SnowMoon))));
             c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
             c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.spriteBatch))));
@@ -120,23 +142,16 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(MoveType.After, i => i.MatchLdcI4(0));
             c.Emit(Pop);
             c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryPhase"));
+
+            //Make the moon fully opaque, even during a storm.
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.atmo))));
+            c.GotoNext(i => i.MatchStloc(out _));
+            c.Emit(Pop);
+            c.Emit(Ldc_R4, 1f);
         }
         catch
         {
             MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
-        }
-    }
-
-    public override void PreUpdateTime()
-    {
-        if (!startChat)
-        {
-            return;
-        }
-        if (wasDay && !Main.dayTime && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
-        {
-            //This prevents blood moons from spawning naturally, as new moons are the only phase where a blood moon roll is guarenteed to fail
-            Main.moonPhase = 4;
         }
     }
 
@@ -264,15 +279,58 @@ public class ApocalypseSystem : ModSystem
     }
 
     public static bool startChat { get; private set; } = false;
-    bool wasGeneratingHardmode = false;
     bool doApocalypseTimer = false;
     int apocalypseTimer = 0;
+
+    private void ManageWeather()
+    {
+        if (!CreativePowerManager.Instance.GetPower<CreativePowers.FreezeRainPower>().Enabled)
+        {
+            ManageRainAndClouds();
+        }
+        if (!CreativePowerManager.Instance.GetPower<CreativePowers.FreezeWindDirectionAndStrength>().Enabled)
+        {
+            ManageWind();
+        }
+    }
+
+    private void ManageRainAndClouds()
+    {
+        if (apocalypseDay == 1 && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 26.2f)
+        {
+            if (!Main.raining)
+            {
+                Main.StartRain();
+            }
+        }
+        else if (Main.raining)
+        {
+            Main.StopRain();
+        }
+    }
+
+    private void ManageWind()
+    {
+        if (!Main.dayTime && apocalypseDay >= 2)
+        {
+            Main.windSpeedTarget = 0.8f;
+            Main.windSpeedCurrent = 0.8f;
+        }
+    }
+
+    public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
+    {
+        if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic && Main.bloodMoon)
+        {
+            //Counteract blood moon brightening by doing our own darkening
+            backgroundColor = Color.Black;
+            tileColor = new Color(0.1f, 0.1f, 0.1f);
+        }
+    }
+
     public override void PostUpdateEverything()
     {
-        if (wasGeneratingHardmode && !WorldGen.IsGeneratingHardMode)
-        {
-        }
-        wasGeneratingHardmode = WorldGen.IsGeneratingHardMode;
+        ManageWeather();
         if (apocalypseDay >= 2)
         {
             MaybeScreenShake();
@@ -284,15 +342,6 @@ public class ApocalypseSystem : ModSystem
         if (Main.dayTime && !wasDay && startChat)
         {
             apocalypseDay++;
-            if (apocalypseDay == 1)
-            {
-                Main.StartRain();
-                Main.rainTime = Main.dayLength;
-            }
-            else
-            {
-                Main.StopRain();
-            }
             if (apocalypseDay < 3)
             {
                 dayOfText?.DisplayDayOf();
@@ -322,17 +371,6 @@ public class ApocalypseSystem : ModSystem
             BroadcastCurrentDay();
         }
         wasDay = Main.dayTime;
-        if (!Main.dayTime && apocalypseDay >= 2)
-            FinalNightSpook();
-    }
-
-    private void FinalNightSpook()
-    {
-        if (!CreativePowerManager.Instance.GetPower<CreativePowers.FreezeWindDirectionAndStrength>().Enabled)
-        {
-            Main.windSpeedTarget = 0.8f;
-            Main.windSpeedCurrent = 0.8f;
-        }
     }
 
     private static void SendChatMessage(LocalizedText input)
@@ -435,6 +473,9 @@ public class ApocalypseSystem : ModSystem
             Main.afterPartyOfDoom = true;
             BirthdayParty.GenuineParty = true;
         }
+        Main.forceHalloweenForToday = false;
+        Main.forceXMasForToday = false;
+        LanternNight.NextNightIsLanternNight = false;
     }
 
     public static IEnumerable<short> StartNPCsByWorldSeed()

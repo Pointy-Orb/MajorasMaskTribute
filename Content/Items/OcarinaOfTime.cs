@@ -244,6 +244,11 @@ public class OcarinaOfTimePlayer : ModPlayer
 
     private static void ResetEverything()
     {
+        if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave))
+        {
+            return;
+        }
+        Main.CheckForMoonEventsScoreDisplay();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         foreach (NPC npc in Main.ActiveNPCs)
         {
@@ -286,6 +291,9 @@ public class OcarinaOfTimePlayer : ModPlayer
             Main.afterPartyOfDoom = true;
             BirthdayParty.GenuineParty = true;
         }
+        Main.forceHalloweenForToday = false;
+        Main.forceXMasForToday = false;
+        LanternNight.NextNightIsLanternNight = false;
         ApocalypseSystem.ResetCounter();
     }
 }

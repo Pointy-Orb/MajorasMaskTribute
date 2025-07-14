@@ -121,4 +121,4 @@ Configs: {
 	}
 }
 
-AfterPartyOfDoomCondition: Mods.MajorasMaskTribute.AfterPartyOfDoomCondition
+AfterPartyOfDoomCondition: ""

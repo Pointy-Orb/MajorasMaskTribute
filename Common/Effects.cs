@@ -89,8 +89,8 @@ public class FinalNightEffect : ModSceneEffect
 
     public override void SpecialVisuals(Player player, bool isActive)
     {
-        player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", isActive);
-        if (isActive && !SkyManager.Instance["MajorasMaskTribute:FinalNightSky"].IsActive())
+        player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", isActive && !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld));
+        if (!SkyManager.Instance["MajorasMaskTribute:FinalNightSky"].IsActive())
         {
             SkyManager.Instance["MajorasMaskTribute:FinalNightSky"].Activate(player.position);
         }
@@ -106,6 +106,14 @@ public class FinalNightEffect : ModSceneEffect
 
     public override bool IsSceneEffectActive(Player player)
     {
-        return !Main.dayTime && ApocalypseSystem.apocalypseDay >= 2 && !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld);
+        if (Main.dayTime || ApocalypseSystem.apocalypseDay < 2)
+        {
+            return false;
+        }
+        if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 25)
+        {
+            return !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld);
+        }
+        return true;
     }
 }
