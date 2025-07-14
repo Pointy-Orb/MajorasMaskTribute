@@ -1,1 +1,22 @@
-This description will show up on the steam page, check out https://steamcommunity.com/comment/Guide/formattinghelp.
+[h1]You've met with a terrible fate, haven't you?[/h1]
+
+[h3]Adds the moon from The Legend of Zelda: Majora's Mask into Terraria, complete with a 3-day cycle and an ocarina to rewind it all.[/h3]
+
+[b]Can you beat Terraria in three days time?[/b]
+
+
+[h2]FEATURES:[/h2]
+[list]
+	[*]3 day cycle (obviously)
+	[*]Ocarina of Time (Can also play the Song of Healing!)
+	[*]Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on
+	[*]NPCs drop masks when they die that allow you to hold onto them in the next cycle
+[/list]
+
+All is reset when the moon crashes into your world, including your character! (to the last time the Song of Time was played)
+Playing the song of time resets the world but preserves your character.
+
+
+[i]NOTE: Not tested in multiplayer.[/i]
+
+[i]For the 2025 tModLoader Mod Jam.[/i]

@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader.IO;
 using Terraria.GameContent.ItemDropRules;
 using System.Collections.Generic;
@@ -13,16 +14,30 @@ public abstract class NPCMask : ModItem
 {
     public abstract int targetNPC { get; }
 
+    public const string malePronounKey = "Mods.MajorasMaskTribute.Items.NPCMask.MalePronoun";
+    public const string femalePronounKey = "Mods.MajorasMaskTribute.Items.NPCMask.FemalePronoun";
+
+    public abstract bool male { get; }
+
+    private string npcName;
+
+    public sealed override LocalizedText DisplayName => Language.GetText("Mods.MajorasMaskTribute.Items.NPCMask.DisplayName").WithFormatArgs(npcName);
+
+    public sealed override LocalizedText Tooltip => Language.GetText("Mods.MajorasMaskTribute.Items.NPCMask.Tooltip").WithFormatArgs(npcName, Language.GetTextValue(male ? malePronounKey : femalePronounKey));
+
     public override void Load()
     {
         NPCMaskDrops.maskNPCs.Add(targetNPC, this);
+        var npc = new NPC();
+        npc.SetDefaults(targetNPC);
+        npcName = npc.FullName;
     }
 
     public override void SetDefaults()
     {
-        Item.rare = ItemRarityID.Blue;
-        Item.width = 20;
-        Item.height = 20;
+        Item.rare = ItemRarityID.Orange;
+        Item.width = 28;
+        Item.height = 28;
     }
 
     public override void Update(ref float gravity, ref float maxFallSpeed)
@@ -74,11 +89,13 @@ public class NPCMaskDrops : GlobalNPC
 
 public class GuideMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Guide;
 }
 
 public class MerchantMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Merchant;
     protected override void OnTransform()
     {
@@ -88,6 +105,7 @@ public class MerchantMask : NPCMask
 
 public class NurseMask : NPCMask
 {
+    public override bool male => false;
     public override int targetNPC => NPCID.Nurse;
     protected override void OnTransform()
     {
@@ -97,6 +115,7 @@ public class NurseMask : NPCMask
 
 public class DemolitionistMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Demolitionist;
     protected override void OnTransform()
     {
@@ -106,6 +125,7 @@ public class DemolitionistMask : NPCMask
 
 public class DyeTraderMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.DyeTrader;
     protected override void OnTransform()
     {
@@ -115,6 +135,7 @@ public class DyeTraderMask : NPCMask
 
 public class AnglerMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Angler;
     protected override void OnTransform()
     {
@@ -125,11 +146,13 @@ public class AnglerMask : NPCMask
 public class ZoologistMask : NPCMask
 {
     public override int targetNPC => NPCID.BestiaryGirl;
+    public override bool male => false;
 }
 
 public class DryadMask : NPCMask
 {
     public override int targetNPC => NPCID.Dryad;
+    public override bool male => false;
     protected override void OnTransform()
     {
         NPC.downedBoss1 = true;
@@ -138,11 +161,13 @@ public class DryadMask : NPCMask
 
 public class PainterMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Painter;
 }
 
 public class GolferMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Golfer;
     protected override void OnTransform()
     {
@@ -152,6 +177,7 @@ public class GolferMask : NPCMask
 
 public class ArmsDealerMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.ArmsDealer;
     protected override void OnTransform()
     {
@@ -161,6 +187,7 @@ public class ArmsDealerMask : NPCMask
 
 public class TavernkeepMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.DD2Bartender;
     protected override void OnTransform()
     {
@@ -171,6 +198,7 @@ public class TavernkeepMask : NPCMask
 public class StylistMask : NPCMask
 {
     public override int targetNPC => NPCID.Stylist;
+    public override bool male => false;
     protected override void OnTransform()
     {
         NPC.savedStylist = true;
@@ -179,6 +207,7 @@ public class StylistMask : NPCMask
 
 public class GoblinTinkererMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.GoblinTinkerer;
     protected override void OnTransform()
     {
@@ -188,6 +217,7 @@ public class GoblinTinkererMask : NPCMask
 
 public class WitchDoctorMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.WitchDoctor;
     protected override void OnTransform()
     {
@@ -197,12 +227,14 @@ public class WitchDoctorMask : NPCMask
 
 public class ClothierMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Clothier;
 }
 
 public class MechanicMask : NPCMask
 {
     public override int targetNPC => NPCID.Mechanic;
+    public override bool male => false;
     protected override void OnTransform()
     {
         NPC.savedMech = true;
@@ -212,6 +244,7 @@ public class MechanicMask : NPCMask
 public class PartyGirlMask : NPCMask
 {
     public override int targetNPC => NPCID.PartyGirl;
+    public override bool male => false;
     protected override void OnTransform()
     {
         NPC.unlockedPartyGirlSpawn = true;
@@ -220,6 +253,7 @@ public class PartyGirlMask : NPCMask
 
 public class WizardMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Wizard;
     protected override void OnTransform()
     {
@@ -229,6 +263,7 @@ public class WizardMask : NPCMask
 
 public class TaxCollectorMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.TaxCollector;
     protected override void OnTransform()
     {
@@ -238,6 +273,7 @@ public class TaxCollectorMask : NPCMask
 
 public class TruffleMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Truffle;
     protected override void OnTransform()
     {
@@ -247,6 +283,7 @@ public class TruffleMask : NPCMask
 
 public class PirateMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Pirate;
     protected override void OnTransform()
     {
@@ -257,15 +294,18 @@ public class PirateMask : NPCMask
 public class SteampunkerMask : NPCMask
 {
     public override int targetNPC => NPCID.Steampunker;
+    public override bool male => false;
 }
 
 public class CyborgMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.Cyborg;
 }
 
 public class SantaMask : NPCMask
 {
+    public override bool male => true;
     public override int targetNPC => NPCID.SantaClaus;
     protected override void OnTransform()
     {
@@ -276,6 +316,7 @@ public class SantaMask : NPCMask
 public class PrincessMask : NPCMask
 {
     public override int targetNPC => NPCID.Princess;
+    public override bool male => false;
     protected override void OnTransform()
     {
         NPC.unlockedPrincessSpawn = true;
@@ -309,7 +350,7 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         if (homunculusNPC.isHomunculus)
         {
-            maskCooldown = 40;
+            maskCooldown = 2000;
             Item.NewItem(npc.GetSource_DropAsItem(), npc.Top, Vector2.One, NPCMaskDrops.maskNPCs[npc.type].Type);
             npc.Transform(homunculusNPC.originalType);
             npc.velocity = Vector2.Zero;

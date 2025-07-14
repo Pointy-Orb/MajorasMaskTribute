@@ -1,11 +1,38 @@
+AnyWatchGroup: Any Watch
+WatchDisplay: Day {0}: {1}
+
 Announcements: {
-	DawnOne: Dawn of the 1st Day (72 hours remain)
-	NightOne: Night of the 1st Day (57 hours remain)
-	DawnTwo: Dawn of the 2nd Day (48 hours remain)
-	NightTwo: Night of the 2nd Day (33 hours remain)
-	DawnThree: Dawn of the Final Day (24 hours remain)
-	NightThree: Night of the Final Day (9 hours remain)
-	DayMisc: Day {0}, {1} {^1:hour;hours} left.
+	Dawn0: {
+		Message: Dawn of the First Day
+		Hours: 72 hours remaining
+	}
+
+	Night0: {
+		Message: Night of the First Day
+		Hours: 57 hours remaining
+	}
+
+	Dawn1: {
+		Message: Dawn of the Second Day
+		Hours: 48 hours remaining
+	}
+
+	Night1: {
+		Message: Night of the Second Day
+		Hours: 33 hours remaining
+	}
+
+	Dawn2: {
+		Message: Dawn of the Final Day
+		Hours: 24 hours remaining
+	}
+
+	Night2: {
+		Message: Night of the Final Day
+		Hours: 9 hours remaining
+	}
+
+	DayMisc: It is day {0}, {1} {^1:hour;hours} {^1:remains;remain}.
 	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
 	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
 }
@@ -29,8 +56,33 @@ Items: {
 			'''
 	}
 
-	GuideMask: {
-		DisplayName: Guide Mask
-		Tooltip: ""
+	NPCMask: {
+		DisplayName: "{0} Mask"
+		Tooltip:
+			'''
+			A mask that embodies the spirit of the {0}.
+			Throw onto any creature to impart {1} form onto it.
+			'''
+		MalePronoun: his
+		FemalePronoun: her
+	}
+
+	InvertedSongOfTime: {
+		DisplayName: Inverted Song Of Time
+		Tooltip: Slows the flow of time when equipped
+	}
+
+	MiniatureClockTower: {
+		DisplayName: Miniature Clock Tower
+		Tooltip:
+			'''
+			Rings a clock-tower bell when it is almost sunrise or sunset
+			Works in vanity slots.
+			'''
+	}
+
+	PhaseDisc: {
+		DisplayName: Phase Disc
+		Tooltip: Changes the moon's phase when used
 	}
 }

@@ -1,4 +1,4 @@
 displayName = Three Day Cycle (MM Tribute)
 author = Pointy Orb
-version = 0.1
+version = 1.0
 includeSource = true

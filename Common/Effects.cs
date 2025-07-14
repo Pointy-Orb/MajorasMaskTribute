@@ -74,7 +74,7 @@ public class FinalNightEffect : ModSceneEffect
     {
         get
         {
-            return Main.time >= Main.nightLength * 0.6 ? MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours") : 0;
+            return Utils.GetDayTimeAs24FloatStartingFromMidnight() >= 25 ? MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours") : 0;
         }
     }
 

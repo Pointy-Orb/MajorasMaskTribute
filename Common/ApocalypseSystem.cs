@@ -24,14 +24,32 @@ namespace MajorasMaskTribute.Common;
 public class ApocalypseSystem : ModSystem
 {
     //Off-by-one because I couldn't help myself
-    public static int apocalypseDay = 0;
+    public static int apocalypseDay { get; private set; } = 0;
+
+    public static bool resetCounter = false;
+
+    public static DayOfText dayOfText;
 
     public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
     {
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (player.GetModPlayer<InvertedSongOfTimePlayer>().invertedSongEquipped)
+            {
+                timeRate /= 2;
+                return;
+            }
+        }
         timeRate /= 1.5;
     }
 
-    bool wasDay = true;
+    public static void ResetCounter()
+    {
+        apocalypseDay = 0;
+        wasDay = Main.dayTime;
+    }
+
+    static bool wasDay = true;
 
     public static Asset<Texture2D> scaryMoon;
     public static Asset<Texture2D> scaryFrostMoon;
@@ -48,13 +66,10 @@ public class ApocalypseSystem : ModSystem
     {
         return scaryMoon.Value;
     }
-    public static Texture2D GetScarySnowMoon()
+
+    public static int GetScaryPhase()
     {
-        return scaryMoon.Value;
-    }
-    public static Texture2D GetScaryPumpkinMoon()
-    {
-        return scaryMoon.Value;
+        return scaryMoon.Value.Bounds.Width * Main.moonPhase;
     }
 
     private static void IL_BiggerMoon(ILContext il)
@@ -79,6 +94,14 @@ public class ApocalypseSystem : ModSystem
             c.Emit(Call, typeof(ApocalypseSystem).GetMethod("TimePassedMultiplier"));
             c.Emit(Mul);
             c.Emit(Stloc, scaleIndex);
+
+            c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.SnowMoon))));
+            c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
+            c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.spriteBatch))));
+            c.GotoNext(i => i.MatchLdcI4(0));
+            c.GotoNext(MoveType.After, i => i.MatchLdcI4(0));
+            c.Emit(Pop);
+            c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryPhase"));
         }
         catch
         {
@@ -119,10 +142,6 @@ public class ApocalypseSystem : ModSystem
         {
             FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
         }
-        if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave) && FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
-        {
-            FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
-        }
         if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave) && FileUtilities.Exists(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave))
         {
             FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
@@ -133,8 +152,8 @@ public class ApocalypseSystem : ModSystem
     {
         if (Utils.GetDayTimeAs24FloatStartingFromMidnight() >= 4.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 5 && Main.dayTime)
         {
-            LocalizedText dayOne = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.DawnOne");
-            SendChatMessage(dayOne);
+            dayOfText?.DisplayDayOf();
+            MiniatureClockTowerPlayer.PlayRooster();
         }
         else
         {
@@ -214,19 +233,18 @@ public class ApocalypseSystem : ModSystem
         if (Main.dayTime && !wasDay)
         {
             apocalypseDay++;
+            if (apocalypseDay == 1)
+            {
+                Main.StartRain();
+                Main.rainTime = Main.dayLength;
+            }
+            else
+            {
+                Main.StopRain();
+            }
             if (apocalypseDay < 3)
             {
-                LocalizedText dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.DawnOne");
-                switch (apocalypseDay)
-                {
-                    case 1:
-                        dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.DawnTwo");
-                        break;
-                    case 2:
-                        dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.DawnThree");
-                        break;
-                }
-                SendChatMessage(dayOf);
+                dayOfText?.DisplayDayOf();
                 //MoonPhase.Empty
                 Main.moonPhase = 4;
             }
@@ -242,19 +260,9 @@ public class ApocalypseSystem : ModSystem
         Main.LocalPlayer.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", doApocalypseTimer);
         if (!Main.dayTime && wasDay && startChat)
         {
-            LocalizedText dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.NightOne");
-            switch (apocalypseDay)
-            {
-                case 1:
-                    dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.NightTwo");
-                    break;
-                case 2:
-                    dayOf = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.NightThree");
-                    break;
-            }
+            dayOfText?.DisplayDayOf();
             //MoonPhase.Full
             Main.moonPhase = 0;
-            SendChatMessage(dayOf);
         }
         if (!startChat)
         {
@@ -355,9 +363,11 @@ public class ApocalypseSystem : ModSystem
                 }
             }
         }
-        Main.raining = false;
+        Main.StopRain();
         Main.windSpeedTarget = 0;
         Main.windSpeedCurrent = 0;
+        apocalypseDay = 0;
+        startChat = true;
     }
 
 }
