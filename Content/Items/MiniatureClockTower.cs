@@ -99,7 +99,7 @@ public class MiniatureClockTower : ModItem
             {
                 bellTimes.Add((double)(i * 5) / 60 + 25);
             }
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 12; i++)
             {
                 bellTimes.Add((double)(i * 2.5) / 60 + 27.5);
             }
