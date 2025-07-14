@@ -266,7 +266,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
         foreach (NPC npc in Main.ActiveNPCs)
         {
-            if (npc.type != NPCID.Guide || Main.hardMode || !npc.HasGivenName)
+            if (!npc.HasGivenName)
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;
