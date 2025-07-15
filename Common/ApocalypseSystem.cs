@@ -79,16 +79,6 @@ public class ApocalypseSystem : ModSystem
         TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
     }
 
-    public static Texture2D GetScaryMoon()
-    {
-        return scaryMoon.Value;
-    }
-
-    public static int GetScaryPhase()
-    {
-        return scaryMoon.Value.Bounds.Width * Main.moonPhase;
-    }
-
     private static void IL_StopBloodMoon(ILContext il)
     {
         try
@@ -121,7 +111,6 @@ public class ApocalypseSystem : ModSystem
                 c.GotoNext(i => i.MatchBrtrue(out _));
                 c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
                 c.GotoNext(MoveType.After, i => i.MatchStloc(out moonIndex));
-                //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryMoon"));
                 c.EmitDelegate<Func<Texture2D>>(() =>
                 {
                     return scaryMoon.Value;
@@ -135,7 +124,6 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.ForcedMinimumZoom))));
             c.GotoNext(MoveType.After, i => i.MatchStloc(out scaleIndex));
             c.Emit(Ldloc, scaleIndex);
-            //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("TimePassedMultiplier"));
             c.EmitDelegate<Func<float>>(() =>
             {
                 var startSize = 1;
@@ -177,21 +165,6 @@ public class ApocalypseSystem : ModSystem
                 return (double)Utils.Remap((float)Main.time, (float)Main.nightLength / 2f, (float)Main.nightLength, midnightValue, 0);
             });
             c.Emit(Stloc, sizeMultIndex);
-            /*
-            var sizeMultLabel = il.DefineLabel();
-            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.time))));
-            c.Emit(Ldc_R8, (double)1);
-            c.Index--;
-            c.MarkLabel(sizeMultLabel);
-            c.GotoNext(i => i.MatchLdcR8(0.5));
-            c.Remove();
-            c.Remove();
-            c.GotoNext(MoveType.After, i => i.MatchMul());
-            c.Emit(Sub);
-            c.GotoPrev(i => i.MatchBgeUn(out _));
-            c.Remove();
-            c.Emit(Bge_Un_S, sizeMultLabel);
-            */
 
             //Give the normal moon phases, since it is not considered a regular moon texture the phases have to be added manually
             c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.SnowMoon))));
@@ -200,7 +173,6 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(i => i.MatchLdcI4(0));
             c.GotoNext(MoveType.After, i => i.MatchLdcI4(0));
             c.Emit(Pop);
-            //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryPhase"));
             c.EmitDelegate<Func<int>>(() =>
             {
                 return scaryMoon.Value.Bounds.Width * Main.moonPhase;
@@ -237,35 +209,6 @@ public class ApocalypseSystem : ModSystem
         {
             Main.bloodMoon = false;
         }
-    }
-
-    public static float TimePassedMultiplier()
-    {
-        var startSize = 1;
-        var endSize = 3;
-        switch (apocalypseDay)
-        {
-            case 1:
-                startSize = 3;
-                endSize = 7;
-                break;
-            case 2:
-                startSize = 10;
-                endSize = 20;
-                break;
-        }
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon)
-        {
-            startSize *= 2;
-            endSize *= 2;
-        }
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon2)
-        {
-            startSize *= 3;
-            endSize *= 3;
-        }
-        float hoursFloat = Utils.Remap((float)Main.time, 0, (float)Main.nightLength, startSize, endSize);
-        return hoursFloat;
     }
 
     public override void PostWorldGen()
