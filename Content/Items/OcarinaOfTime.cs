@@ -273,7 +273,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
         foreach (NPC npc in Main.ActiveNPCs)
         {
-            if (!ApocalypseSystem.StartNPCsByWorldSeed().ToList().Contains((short)npc.type) || Main.hardMode || !npc.HasGivenName)
+            if (!npc.HasGivenName)
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;

@@ -9,6 +9,9 @@ public class MajorasMaskTributeConfig : ModConfig
 {
     public override ConfigScope Mode => ConfigScope.ServerSide;
 
+    [DefaultValue(1f)]
+    public float ScreenShakeStrength { get; set; }
+
     [ReloadRequired]
     public bool NoScaryTextures { get; set; }
 
@@ -17,4 +20,7 @@ public class MajorasMaskTributeConfig : ModConfig
 
     [ReloadRequired]
     public bool VanillaBloodMoonLogic { get; set; }
+
+    public bool SupersizedMoon { get; set; }
+    public bool SupersizedMoon2 { get; set; }
 }

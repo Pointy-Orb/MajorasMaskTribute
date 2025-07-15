@@ -1,4 +1,5 @@
 using Terraria;
+using System;
 using Terraria.GameContent.Events;
 using System.Linq;
 using MajorasMaskTribute.Content.Items;
@@ -96,7 +97,6 @@ public class ApocalypseSystem : ModSystem
             var jumpLabel = il.DefineLabel();
             c.GotoNext(i => i.MatchStsfld(typeof(Main).GetField(nameof(Main.bloodMoon))));
             c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.netMode))));
-            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
             c.GotoNext(MoveType.After, i => i.MatchBeq(out jumpLabel));
             c.Emit(Call, typeof(ModContent).GetMethod("GetInstance").MakeGenericMethod(typeof(MajorasMaskTributeConfig)));
             c.Emit(Call, typeof(MajorasMaskTributeConfig).GetMethod("get_" + nameof(MajorasMaskTributeConfig.VanillaBloodMoonLogic)));
@@ -121,7 +121,12 @@ public class ApocalypseSystem : ModSystem
                 c.GotoNext(i => i.MatchBrtrue(out _));
                 c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Moon))));
                 c.GotoNext(MoveType.After, i => i.MatchStloc(out moonIndex));
-                c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryMoon"));
+                //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryMoon"));
+                c.EmitDelegate<Func<Texture2D>>(() =>
+                {
+                    return scaryMoon.Value;
+                });
+
                 c.Emit(Stloc, moonIndex);
             }
 
@@ -130,9 +135,63 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.ForcedMinimumZoom))));
             c.GotoNext(MoveType.After, i => i.MatchStloc(out scaleIndex));
             c.Emit(Ldloc, scaleIndex);
-            c.Emit(Call, typeof(ApocalypseSystem).GetMethod("TimePassedMultiplier"));
+            //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("TimePassedMultiplier"));
+            c.EmitDelegate<Func<float>>(() =>
+            {
+                var startSize = 1;
+                var endSize = 3;
+                switch (apocalypseDay)
+                {
+                    case 1:
+                        startSize = 3;
+                        endSize = 7;
+                        break;
+                    case 2:
+                        startSize = 10;
+                        endSize = 20;
+                        break;
+                }
+                if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon)
+                {
+                    startSize *= 2;
+                    endSize *= 2;
+                }
+                if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon2)
+                {
+                    startSize *= 3;
+                    endSize *= 3;
+                }
+                float hoursFloat = Utils.Remap((float)Main.time, 0, (float)Main.nightLength, startSize, endSize);
+                return hoursFloat;
+            });
             c.Emit(Mul);
             c.Emit(Stloc, scaleIndex);
+
+            //Remove the moon shrinking as night closes
+            int sizeMultIndex = 0;
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.time))));
+            c.GotoNext(MoveType.After, i => i.MatchStloc(out sizeMultIndex));
+            c.EmitDelegate<Func<double>>(() =>
+            {
+                var midnightValue = (float)Math.Pow(1.0 - 0.5 * 2.0, 2.0);
+                return (double)Utils.Remap((float)Main.time, (float)Main.nightLength / 2f, (float)Main.nightLength, midnightValue, 0);
+            });
+            c.Emit(Stloc, sizeMultIndex);
+            /*
+            var sizeMultLabel = il.DefineLabel();
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.time))));
+            c.Emit(Ldc_R8, (double)1);
+            c.Index--;
+            c.MarkLabel(sizeMultLabel);
+            c.GotoNext(i => i.MatchLdcR8(0.5));
+            c.Remove();
+            c.Remove();
+            c.GotoNext(MoveType.After, i => i.MatchMul());
+            c.Emit(Sub);
+            c.GotoPrev(i => i.MatchBgeUn(out _));
+            c.Remove();
+            c.Emit(Bge_Un_S, sizeMultLabel);
+            */
 
             //Give the normal moon phases, since it is not considered a regular moon texture the phases have to be added manually
             c.GotoNext(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.SnowMoon))));
@@ -141,13 +200,18 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(i => i.MatchLdcI4(0));
             c.GotoNext(MoveType.After, i => i.MatchLdcI4(0));
             c.Emit(Pop);
-            c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryPhase"));
+            //c.Emit(Call, typeof(ApocalypseSystem).GetMethod("GetScaryPhase"));
+            c.EmitDelegate<Func<int>>(() =>
+            {
+                return scaryMoon.Value.Bounds.Width * Main.moonPhase;
+            });
 
             //Make the moon fully opaque, even during a storm.
             c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.atmo))));
             c.GotoNext(i => i.MatchStloc(out _));
             c.Emit(Pop);
             c.Emit(Ldc_R4, 1f);
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
         catch
         {
@@ -189,6 +253,16 @@ public class ApocalypseSystem : ModSystem
                 startSize = 10;
                 endSize = 20;
                 break;
+        }
+        if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon)
+        {
+            startSize *= 2;
+            endSize *= 2;
+        }
+        if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon2)
+        {
+            startSize *= 3;
+            endSize *= 3;
         }
         float hoursFloat = Utils.Remap((float)Main.time, 0, (float)Main.nightLength, startSize, endSize);
         return hoursFloat;
@@ -320,6 +394,10 @@ public class ApocalypseSystem : ModSystem
 
     public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
     {
+        if (apocalypseDay >= 2 && Main.dayTime)
+        {
+            backgroundColor = backgroundColor.MultiplyRGB(new Color(0.7f, 1f, 0.7f));
+        }
         if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic && Main.bloodMoon)
         {
             //Counteract blood moon brightening by doing our own darkening
@@ -454,7 +532,7 @@ public class ApocalypseSystem : ModSystem
             }
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (!StartNPCsByWorldSeed().ToList().Contains((short)npc.type) || Main.hardMode || !npc.HasGivenName)
+                if (!npc.HasGivenName)
                 {
                     npc.Transform(NPCID.Bunny);
                     npc.position = Vector2.Zero;
@@ -477,46 +555,4 @@ public class ApocalypseSystem : ModSystem
         Main.forceXMasForToday = false;
         LanternNight.NextNightIsLanternNight = false;
     }
-
-    public static IEnumerable<short> StartNPCsByWorldSeed()
-    {
-        if (Main.tenthAnniversaryWorld)
-        {
-            foreach (short id in celebrationStartNPCs)
-            {
-                yield return id;
-            }
-        }
-        bool specialWorld = false;
-        if (Main.remixWorld)
-        {
-            yield return NPCID.TaxCollector;
-            specialWorld = true;
-        }
-        if (Main.drunkWorld)
-        {
-            yield return NPCID.PartyGirl;
-            specialWorld = true;
-        }
-        if (Main.notTheBeesWorld)
-        {
-            yield return NPCID.Merchant;
-            specialWorld = true;
-        }
-        if (Main.getGoodWorld)
-        {
-            yield return NPCID.Demolitionist;
-            specialWorld = true;
-        }
-        if (Main.zenithWorld)
-        {
-            yield return NPCID.TownSlimeRainbow;
-        }
-        if (!specialWorld)
-        {
-            yield return NPCID.Guide;
-        }
-    }
-
-    private static readonly List<short> celebrationStartNPCs = new() { NPCID.Guide, NPCID.Steampunker, NPCID.TownBunny, NPCID.Princess, NPCID.PartyGirl };
 }

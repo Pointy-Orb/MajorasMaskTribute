@@ -118,6 +118,25 @@ Configs: {
 				If that is not desired, this can be enabled to disable that in favor of vanilla blood moon logic.
 				'''
 		}
+
+		SupersizedMoon: {
+			Label: Supersized Moon
+			Tooltip: Makes the moon really big
+		}
+
+		SupersizedMoon2: {
+			Label: Supersized Moon 2
+			Tooltip:
+				'''
+				Makes the moon even bigger than the Supersized Moon.
+				Can stack with Supersized Moon
+				'''
+		}
+
+		ScreenShakeStrength: {
+			Label: Screen Shake Strength
+			Tooltip: Controls the intensity of screen shaking on the final day.
+		}
 	}
 }
 
