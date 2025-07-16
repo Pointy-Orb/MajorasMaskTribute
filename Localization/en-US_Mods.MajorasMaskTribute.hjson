@@ -140,7 +140,14 @@ Configs: {
 
 		PauseGameDuringDayTransitions: {
 			Label: Pause Game During Day Transitions
-			Tooltip: ""
+			Tooltip:
+				'''
+				When enabled, makes it so that whenever it switches from night to day, 
+				the game pauses to display a time card of what day it is, like in Majora's Mask
+
+				Even when enabled, the game will not be paused if the sunrise happens during an 
+				invasion or most boss fights (the ones that don't end at night)
+				'''
 		}
 	}
 }
