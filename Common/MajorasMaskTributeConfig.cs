@@ -12,6 +12,9 @@ public class MajorasMaskTributeConfig : ModConfig
     [DefaultValue(1f)]
     public float ScreenShakeStrength { get; set; }
 
+    [DefaultValue(true)]
+    public bool PauseGameDuringDayTransitions { get; set; }
+
     [ReloadRequired]
     public bool NoScaryTextures { get; set; }
 

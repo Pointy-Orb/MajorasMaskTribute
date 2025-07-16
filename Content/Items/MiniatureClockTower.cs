@@ -154,7 +154,7 @@ public class BellRingingEffect : ModSceneEffect
     {
         if (!Main.dayTime && Common.ApocalypseSystem.apocalypseDay >= 2)
             return false;
-        if (Main.dayTime && Main.time < 150)
+        if (Main.dayTime && Common.ApocalypseSystem.dayOfText.time > 0)
             return true;
         return player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
     }

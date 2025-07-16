@@ -107,11 +107,10 @@ public class OcarinaOfTime : ModItem
                 ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
             }
         }
-        if (ocarinaTimer > 0)
-        {
-            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * Utils.Remap(ocarinaTimer, 660, 470, 1, 0));
-        }
+        whiteScreen.ocarinaTimer = ocarinaTimer;
     }
+
+    public static WhiteScreen whiteScreen;
 
     public override void AddRecipes()
     {

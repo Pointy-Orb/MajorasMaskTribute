@@ -137,6 +137,11 @@ Configs: {
 			Label: Screen Shake Strength
 			Tooltip: Controls the intensity of screen shaking on the final day.
 		}
+
+		PauseGameDuringDayTransitions: {
+			Label: Pause Game During Day Transitions
+			Tooltip: ""
+		}
 	}
 }
 

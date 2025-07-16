@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.GameContent;
 using System;
 using System.Collections.Generic;
 using Terraria.GameContent.UI.Elements;
@@ -7,48 +8,71 @@ using Terraria.ModLoader;
 using Terraria.ID;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace MajorasMaskTribute.Common;
 
 public class DayOfText : UIText
 {
-    int time = 0;
+    public int time { get; private set; } = 0;
     public bool visible = true;
     public HourText hourText;
+    public BlackScreen blackScreen;
+    private float defaultScale;
+    private float defaultHourScale = 0.5f;
 
-    public DayOfText(float textScale = 1f, bool large = true) : base("", textScale, large)
+    public DayOfText(float textScale = 1f, float hourScale = 0.5f) : base("", textScale, true)
     {
         HAlign = 0.5f;
         VAlign = 0.4f;
+        defaultScale = textScale;
+        defaultHourScale = hourScale;
+        hourText = new HourText(defaultHourScale);
     }
 
     public void DisplayDayOf()
     {
-        SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Message"));
-        hourText?.SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Hours"));
+        SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Message"),
+                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
+        var hourMessage = "- " + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Hours") + " -";
+        hourText?.SetText(hourMessage,
+                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
         time = 300;
     }
 
     public override void Update(GameTime gameTime)
     {
+        hourText.TextColor = Color.White;
+        TextColor = Color.White;
         if (time > 0)
         {
             time--;
+            blackScreen.display = Main.dayTime;
+            if (blackScreen.display && BlackScreen.PauseGameDuringDayTransitions)
+            {
+                hourText.TextColor *= Utils.Remap(time, 100, 200, 1, 0);
+            }
+            else
+            {
+                hourText.TextColor *= 0.4f;
+                TextColor *= 0.4f;
+            }
         }
         else
         {
             SetText("");
-            hourText?.SetText("");
+            hourText.SetText("");
+            blackScreen.display = false;
         }
     }
-}
 
-public class HourText : UIText
-{
-    public HourText(float textScale = 0.5f, bool large = true) : base("", textScale, large)
+    public class HourText : UIText
     {
-        HAlign = 0.5f;
-        VAlign = 0.45f;
+        public HourText(float textScale) : base("", textScale)
+        {
+            HAlign = 0.5f;
+            VAlign = 0.45f;
+        }
     }
 }
 
@@ -74,22 +98,209 @@ public class ApocalypseText : UIText
     }
 }
 
+public class BlackScreen : UIElement
+{
+    public bool display = false;
+
+    public static bool pausedForEffect { get; private set; } = false;
+
+    private static readonly List<short> nocturnalBosses = new() { NPCID.EyeofCthulhu, NPCID.TheDestroyer, NPCID.TheDestroyerBody, NPCID.TheDestroyerTail, NPCID.SkeletronPrime, NPCID.SkeletronHead };
+
+    public static bool PauseGameDuringDayTransitions
+    {
+        get
+        {
+            if (Main.invasionType != 0)
+            {
+                return false;
+            }
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (npc.boss && !nocturnalBosses.Contains((short)npc.type))
+                {
+                    return false;
+                }
+            }
+            return ModContent.GetInstance<MajorasMaskTributeConfig>().PauseGameDuringDayTransitions;
+        }
+    }
+
+    public override void Draw(SpriteBatch spriteBatch)
+    {
+        if (display && PauseGameDuringDayTransitions)
+        {
+            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
+            pausedForEffect = true;
+        }
+        else
+        {
+            pausedForEffect = false;
+        }
+    }
+}
+
+public class PauseGame : ModSystem
+{
+    public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
+    {
+        if (!BlackScreen.pausedForEffect)
+        {
+            return;
+        }
+        timeRate = 0;
+        tileUpdateRate = 0;
+        eventUpdateRate = 0;
+    }
+
+    private bool wasPaused = false;
+
+    Dictionary<int, Vector2> playerVelocities = new();
+    Dictionary<int, Vector2> npcVelocities = new();
+    Dictionary<int, Vector2> projectileVelocities = new();
+
+    public override void PostUpdatePlayers()
+    {
+        if (!BlackScreen.pausedForEffect)
+        {
+            if (wasPaused)
+            {
+                //Store velocities like this so that players don't get massive momentum shifts when the day starts
+                foreach (Player player in Main.ActivePlayers)
+                {
+                    if (!playerVelocities.ContainsKey(player.whoAmI))
+                        continue;
+                    player.velocity = playerVelocities[player.whoAmI];
+                }
+            }
+            return;
+        }
+        if (!wasPaused)
+        {
+            playerVelocities.Clear();
+            foreach (Player player in Main.ActivePlayers)
+            {
+                playerVelocities.Add(player.whoAmI, player.velocity);
+            }
+        }
+        foreach (Player player in Main.ActivePlayers)
+        {
+            player.position = player.oldPosition;
+            for (int i = 0; i < player.buffTime.Length; i++)
+            {
+                if (player.buffTime[i] > 0)
+                {
+                    player.buffTime[i]++;
+                }
+            }
+        }
+    }
+
+    public override void PostUpdateNPCs()
+    {
+        if (!BlackScreen.pausedForEffect)
+        {
+            if (wasPaused)
+            {
+                //Store velocities like this so that npcs don't get massive momentum shifts when the day starts
+                foreach (NPC npc in Main.ActiveNPCs)
+                {
+                    if (!npcVelocities.ContainsKey(npc.whoAmI))
+                        continue;
+                    npc.velocity = npcVelocities[npc.whoAmI];
+                }
+            }
+            return;
+        }
+        if (!wasPaused)
+        {
+            npcVelocities.Clear();
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                npcVelocities.Add(npc.whoAmI, npc.velocity);
+            }
+        }
+        foreach (NPC npc in Main.ActiveNPCs)
+        {
+            npc.position = npc.oldPosition;
+            for (int i = 0; i < npc.buffTime.Length; i++)
+            {
+                if (npc.buffTime[i] > 0)
+                {
+                    npc.buffTime[i]++;
+                }
+            }
+        }
+    }
+
+    public override void PostUpdateProjectiles()
+    {
+        if (!BlackScreen.pausedForEffect)
+        {
+            if (wasPaused)
+            {
+                //Store velocities like this so that projectiles don't get massive momentum shifts when the day starts
+                foreach (Projectile projectile in Main.ActiveProjectiles)
+                {
+                    if (!projectileVelocities.ContainsKey(projectile.whoAmI))
+                        continue;
+                    projectile.velocity = projectileVelocities[projectile.whoAmI];
+                }
+            }
+            return;
+        }
+        if (!wasPaused)
+        {
+            projectileVelocities.Clear();
+            foreach (Projectile projectile in Main.ActiveProjectiles)
+            {
+                projectileVelocities.Add(projectile.whoAmI, projectile.velocity);
+            }
+        }
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+        {
+            projectile.position = projectile.oldPosition;
+        }
+    }
+
+    public override void PostUpdateEverything()
+    {
+        wasPaused = BlackScreen.pausedForEffect;
+    }
+}
+
+public class WhiteScreen : UIElement
+{
+    public int ocarinaTimer;
+
+    public override void Draw(SpriteBatch spriteBatch)
+    {
+        spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * Utils.Remap(ocarinaTimer, 660, 470, 1, 0));
+    }
+}
+
 public class DayDisplay : UIState
 {
     public DayOfText dayOfText;
-    public HourText hourText;
     public ApocalypseText apocalypseText;
+    public WhiteScreen whiteScreen;
+    public BlackScreen blackScreen;
 
     public override void OnInitialize()
     {
         dayOfText = new();
-        hourText = new();
+        blackScreen = new();
         apocalypseText = new();
-        dayOfText.hourText = hourText;
+        whiteScreen = new();
+
+        dayOfText.blackScreen = blackScreen;
         ApocalypseSystem.dayOfText = dayOfText;
+        Content.Items.OcarinaOfTime.whiteScreen = whiteScreen;
+
+        Append(blackScreen);
         Append(dayOfText);
-        Append(hourText);
+        Append(dayOfText.hourText);
         Append(apocalypseText);
+        Append(whiteScreen);
     }
 }
 
