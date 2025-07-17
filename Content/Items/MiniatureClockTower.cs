@@ -24,6 +24,7 @@ public class MiniatureClockTower : ModItem
         Item.height = 22;
         Item.rare = ItemRarityID.Green;
         Item.accessory = true;
+        Item.vanity = true;
     }
 
     SoundStyle bellSound;
@@ -175,10 +176,12 @@ public class MiniatureClockTowerPlayer : ModPlayer
         wasDay = Main.dayTime;
         nightHowl = new SoundStyle("MajorasMaskTribute/Assets/nighthowl");
         dayDoodleDoo = new SoundStyle("MajorasMaskTribute/Assets/daydoodledoo");
+        dayRoosterReal = new SoundStyle("MajorasMaskTribute/Assets/daydoodledoo_old");
     }
 
     static SoundStyle nightHowl;
     static SoundStyle dayDoodleDoo;
+    static SoundStyle dayRoosterReal;
 
     bool wasDay = true;
     bool started = false;
@@ -198,7 +201,14 @@ public class MiniatureClockTowerPlayer : ModPlayer
         }
         if (Main.dayTime && !wasDay && Common.ApocalypseSystem.apocalypseDay <= 1)
         {
-            SoundEngine.PlaySound(dayDoodleDoo);
+            if (Common.ApocalypseSystem.cycleActive)
+            {
+                SoundEngine.PlaySound(dayDoodleDoo);
+            }
+            else
+            {
+                SoundEngine.PlaySound(dayRoosterReal);
+            }
         }
         wasDay = Main.dayTime;
     }

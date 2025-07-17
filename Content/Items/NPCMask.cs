@@ -47,6 +47,7 @@ public abstract class NPCMask : ModItem
         {
             if (npc.boss) continue;
             if (npc.type == targetNPC) continue;
+            if (npc.isLikeATownNPC) continue;
             if (NPCID.Sets.ProjectileNPC[npc.type]) continue; ;
             if (NPCID.Sets.BelongsToInvasionOldOnesArmy[npc.type]) continue; ;
             if (NPCID.Sets.ShouldBeCountedAsBoss[npc.type]) continue; ;

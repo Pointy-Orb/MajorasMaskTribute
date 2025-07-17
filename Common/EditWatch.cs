@@ -14,6 +14,10 @@ public class EditWatch : GlobalInfoDisplay
         {
             return;
         }
+        if (!ApocalypseSystem.cycleActive)
+        {
+            return;
+        }
         displayValue = Language.GetText("Mods.MajorasMaskTribute.WatchDisplay").WithFormatArgs(ApocalypseSystem.apocalypseDay + 1, displayValue).Value;
     }
 }

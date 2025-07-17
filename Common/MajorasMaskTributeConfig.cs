@@ -5,24 +5,47 @@ using Terraria.ModLoader.Config;
 
 namespace MajorasMaskTribute.Common;
 
+public enum WandOfSparkingMode
+{
+    Off,
+    On,
+    Brutal
+}
+
 public class MajorasMaskTributeConfig : ModConfig
 {
     public override ConfigScope Mode => ConfigScope.ServerSide;
 
-    [DefaultValue(1f)]
-    public float ScreenShakeStrength { get; set; }
+    [Header("GameplayConfig")]
+    [DefaultValue(WandOfSparkingMode.Off)]
+    [DrawTicks]
+    public WandOfSparkingMode WandOfSparkingMode { get; set; }
 
     [DefaultValue(true)]
     public bool PauseGameDuringDayTransitions { get; set; }
 
     [ReloadRequired]
+    public bool VanillaBloodMoonLogic { get; set; }
+
+    public bool SaveWorldAfterHardmodeStarts { get; set; }
+
+    public bool OldManDoesntAppearOnFirstDay { get; set; }
+
+    public bool NoPlanteraToSummonGolem { get; set; }
+
+    public bool VanillaTimeRate { get; set; }
+
+    [Header("VisualConfig")]
+    [DefaultValue(1f)]
+    public float ScreenShakeStrength { get; set; }
+
     public bool NoScaryTextures { get; set; }
 
     [ReloadRequired]
     public bool RealisticPhaseShading { get; set; }
 
-    [ReloadRequired]
-    public bool VanillaBloodMoonLogic { get; set; }
+    [DefaultValue(true)]
+    public bool GreenBackgroundDuringFinalDay { get; set; }
 
     public bool SupersizedMoon { get; set; }
     public bool SupersizedMoon2 { get; set; }

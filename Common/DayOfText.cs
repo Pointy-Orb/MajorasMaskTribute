@@ -18,8 +18,11 @@ public class DayOfText : UIText
     public bool visible = true;
     public HourText hourText;
     public BlackScreen blackScreen;
+
+    private Color defaultShadow;
     private float defaultScale;
     private float defaultHourScale = 0.5f;
+    public static bool newDay { get; private set; } = false;
 
     public DayOfText(float textScale = 1f, float hourScale = 0.5f) : base("", textScale, true)
     {
@@ -27,35 +30,78 @@ public class DayOfText : UIText
         VAlign = 0.4f;
         defaultScale = textScale;
         defaultHourScale = hourScale;
+        defaultShadow = ShadowColor;
         hourText = new HourText(defaultHourScale);
     }
 
-    public void DisplayDayOf()
+    public void DisplayDayOf(bool overridePause = false)
     {
-        SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Message"),
-                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
-        var hourMessage = "- " + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Hours") + " -";
+        BlackScreen.overridePauseForEffect = overridePause;
+        var message = Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Message{(Main.dayTime && BlackScreen.PauseGameDuringDayTransitions ? "Multiline" : "")}");
+        SetText(message, Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
+
+        int hours = 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - ApocalypseSystem.apocalypseDay) * 24);
+        var hourMessage = Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.HoursRemaining", hours);
         hourText?.SetText(hourMessage,
                 Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
+        time = 300;
+
+        if (!BlackScreen.PauseGameDuringDayTransitions || !Main.dayTime)
+        {
+            hourText.VAlign = HourText.defaultVAlign;
+            return;
+        }
+        hourText.TextColor = Color.Black;
+        switch (ApocalypseSystem.apocalypseDay)
+        {
+            case 0:
+                hourText.VAlign = 0.52f;
+                break;
+            case 1:
+                hourText.VAlign = 0.55f;
+                break;
+            case 2:
+                hourText.VAlign = 0.6f;
+                break;
+        }
+    }
+
+    public void BroadcastNewDay()
+    {
+        newDay = true;
+        var message = Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.NewDayMessage");
+        SetText(message, 1.5f, true);
         time = 300;
     }
 
     public override void Update(GameTime gameTime)
     {
         hourText.TextColor = Color.White;
-        TextColor = Color.White;
+        if (newDay)
+        {
+            TextColor = Color.Black;
+        }
+        else
+        {
+            TextColor = Color.White;
+        }
+        ShadowColor = defaultShadow;
         if (time > 0)
         {
             time--;
-            blackScreen.display = Main.dayTime;
+            blackScreen.display = (Main.dayTime && !BlackScreen.overridePauseForEffect) || newDay;
             if (blackScreen.display && BlackScreen.PauseGameDuringDayTransitions)
             {
                 hourText.TextColor *= Utils.Remap(time, 100, 200, 1, 0);
+                if (ApocalypseSystem.apocalypseDay >= 2)
+                {
+                    ShadowColor = Color.White;
+                }
             }
             else
             {
-                hourText.TextColor *= 0.4f;
                 TextColor *= 0.4f;
+                hourText.TextColor *= 0.4f;
             }
         }
         else
@@ -63,15 +109,20 @@ public class DayOfText : UIText
             SetText("");
             hourText.SetText("");
             blackScreen.display = false;
+            BlackScreen.overridePauseForEffect = false;
+            newDay = false;
         }
+        BlackScreen.newDay = newDay;
     }
 
     public class HourText : UIText
     {
+        public const float defaultVAlign = 0.45f;
+
         public HourText(float textScale) : base("", textScale)
         {
             HAlign = 0.5f;
-            VAlign = 0.45f;
+            VAlign = defaultVAlign;
         }
     }
 }
@@ -102,7 +153,11 @@ public class BlackScreen : UIElement
 {
     public bool display = false;
 
+    public static bool newDay = false;
+
     public static bool pausedForEffect { get; private set; } = false;
+
+    public static bool overridePauseForEffect = false;
 
     private static readonly List<short> nocturnalBosses = new() { NPCID.EyeofCthulhu, NPCID.TheDestroyer, NPCID.TheDestroyerBody, NPCID.TheDestroyerTail, NPCID.SkeletronPrime, NPCID.SkeletronHead };
 
@@ -110,6 +165,14 @@ public class BlackScreen : UIElement
     {
         get
         {
+            if (newDay)
+            {
+                return true;
+            }
+            if (overridePauseForEffect)
+            {
+                return false;
+            }
             if (Main.invasionType != 0)
             {
                 return false;
@@ -129,7 +192,7 @@ public class BlackScreen : UIElement
     {
         if (display && PauseGameDuringDayTransitions)
         {
-            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
+            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), newDay ? Color.White : Color.Black);
             pausedForEffect = true;
         }
         else
@@ -157,6 +220,8 @@ public class PauseGame : ModSystem
     Dictionary<int, Vector2> playerVelocities = new();
     Dictionary<int, Vector2> npcVelocities = new();
     Dictionary<int, Vector2> projectileVelocities = new();
+    Dictionary<int, Vector2> itemVelocities = new();
+    Dictionary<int, Vector2> goreVelocities = new();
 
     public override void PostUpdatePlayers()
     {
@@ -170,6 +235,7 @@ public class PauseGame : ModSystem
                     if (!playerVelocities.ContainsKey(player.whoAmI))
                         continue;
                     player.velocity = playerVelocities[player.whoAmI];
+                    player.frozen = false;
                 }
             }
             return;
@@ -185,6 +251,7 @@ public class PauseGame : ModSystem
         foreach (Player player in Main.ActivePlayers)
         {
             player.position = player.oldPosition;
+            player.frozen = true;
             for (int i = 0; i < player.buffTime.Length; i++)
             {
                 if (player.buffTime[i] > 0)
@@ -259,6 +326,36 @@ public class PauseGame : ModSystem
         foreach (Projectile projectile in Main.ActiveProjectiles)
         {
             projectile.position = projectile.oldPosition;
+        }
+    }
+
+    public override void PostUpdateItems()
+    {
+        if (!BlackScreen.pausedForEffect)
+        {
+            if (wasPaused)
+            {
+                //Store velocities like this so that items don't get massive momentum shifts when the day starts
+                foreach (Item item in Main.ActiveItems)
+                {
+                    if (!itemVelocities.ContainsKey(item.whoAmI))
+                        continue;
+                    item.velocity = itemVelocities[item.whoAmI];
+                }
+            }
+            return;
+        }
+        if (!wasPaused)
+        {
+            itemVelocities.Clear();
+            foreach (Item item in Main.ActiveItems)
+            {
+                itemVelocities.Add(item.whoAmI, item.velocity);
+            }
+        }
+        foreach (Item item in Main.ActiveItems)
+        {
+            item.velocity = Vector2.Zero;
         }
     }
 

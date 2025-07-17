@@ -71,7 +71,7 @@ public class OcarinaOfTime : ModItem
         }
         player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying = desiredSongPlaying;
         player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
-        return null;
+        return true;
     }
 
     public override bool AltFunctionUse(Player player)
@@ -81,7 +81,7 @@ public class OcarinaOfTime : ModItem
 
     public override void UpdateInventory(Player player)
     {
-        if (player.itemAnimation <= 0 && player.HeldItem.type == Type)
+        if (player.itemTime <= 0 && player.HeldItem.type == Type)
         {
             player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying = SongPlaying.None;
         }
@@ -239,6 +239,12 @@ public class OcarinaOfTimePlayer : ModPlayer
         var ocarina = new Item();
         ocarina.SetDefaults(ModContent.ItemType<OcarinaOfTime>());
         yield return ocarina;
+        if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+        {
+            var item = new Item();
+            item.SetDefaults(ItemID.GoldWatch);
+            yield return item;
+        }
     }
 
     private static void ResetEverything()
@@ -248,7 +254,6 @@ public class OcarinaOfTimePlayer : ModPlayer
             return;
         }
         Main.CheckForMoonEventsScoreDisplay();
-        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         foreach (NPC npc in Main.ActiveNPCs)
         {
             npc.Transform(NPCID.Bunny);
@@ -256,6 +261,11 @@ public class OcarinaOfTimePlayer : ModPlayer
             npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
             npc.StrikeInstantKill();
         }
+        int tempResets = ApocalypseSystem.resets;
+        WorldGen.clearWorld();
+        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
+        FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
+        ApocalypseSystem.resets = tempResets;
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
         for (int i = 0; i < Main.maxTilesX; i++)
         {
@@ -269,10 +279,14 @@ public class OcarinaOfTimePlayer : ModPlayer
         {
             player.Teleport(new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height), 6);
             player.velocity = Vector2.Zero;
+            if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+            {
+                player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
+            }
         }
         foreach (NPC npc in Main.ActiveNPCs)
         {
-            if (!npc.HasGivenName)
+            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay))
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;
@@ -280,19 +294,6 @@ public class OcarinaOfTimePlayer : ModPlayer
                 npc.StrikeInstantKill();
             }
         }
-        Main.StopRain();
-        Main.windSpeedTarget = 0;
-        Main.windSpeedCurrent = 0;
-        Main.time = 0;
-        Main.dayTime = true;
-        if (Main.zenithWorld)
-        {
-            Main.afterPartyOfDoom = true;
-            BirthdayParty.GenuineParty = true;
-        }
-        Main.forceHalloweenForToday = false;
-        Main.forceXMasForToday = false;
-        LanternNight.NextNightIsLanternNight = false;
-        ApocalypseSystem.ResetCounter();
+        ApocalypseSystem.ResetApocalypseVariables();
     }
 }

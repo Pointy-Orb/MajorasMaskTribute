@@ -14,8 +14,11 @@ namespace MajorasMaskTribute
     // Please read https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Modding-Guide#mod-skeleton-contents for more information about the various files in a mod.
     public class MajorasMaskTribute : Mod
     {
+        internal static Mod mod;
+
         public override void Load()
         {
+            mod = this;
             if (!Main.dedServ)
             {
                 Filters.Scene["MajorasMaskTribute:FinalNightShader"] = new Filter(new FinalNightScreenShaderData("FilterBloodMoon"), EffectPriority.High);
