@@ -12,6 +12,6 @@ public class MiscPlayer : ModPlayer
         {
             return true;
         }
-        return ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic;
+        return ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic;
     }
 }

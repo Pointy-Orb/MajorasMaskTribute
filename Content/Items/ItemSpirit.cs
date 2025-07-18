@@ -49,10 +49,10 @@ public class ItemSpirit : ModItem
 
     public override void SetDefaults()
     {
-        Main.instance.LoadItem(targetItem);
-        var textureAsset = TextureAssets.Item[targetItem];
-        Item.width = textureAsset.Value.Width;
-        Item.height = textureAsset.Value.Height;
+        var sourceItem = new Item();
+        sourceItem.SetDefaults(targetItem);
+        Item.width = sourceItem.width;
+        Item.height = sourceItem.height;
         Item.color = spiritColor;
         Item.SetShopValues(ItemRarityColor.LightRed4, Item.sellPrice(silver: 75));
     }
@@ -151,12 +151,12 @@ public class WandOfSparkingOnCondition : IItemDropRuleCondition
     public bool CanDrop(DropAttemptInfo info)
     {
         //Item spirits don't matter in Brutal anyway
-        return ModContent.GetInstance<Common.MajorasMaskTributeConfig>().WandOfSparkingMode == Common.WandOfSparkingMode.On;
+        return ModContent.GetInstance<Common.ServerConfig>().WandOfSparkingMode == Common.WandOfSparkingMode.On;
     }
 
     public bool CanShowItemDropInUI()
     {
-        return ModContent.GetInstance<Common.MajorasMaskTributeConfig>().WandOfSparkingMode == Common.WandOfSparkingMode.On;
+        return ModContent.GetInstance<Common.ServerConfig>().WandOfSparkingMode == Common.WandOfSparkingMode.On;
     }
 
     public string GetConditionDescription()

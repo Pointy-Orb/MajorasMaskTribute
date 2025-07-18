@@ -45,7 +45,7 @@ public class MajorasMask : ModItem
             {
                 Main.time = 0;
                 Main.dayTime = true;
-                ApocalypseSystem.dayOfText.BroadcastNewDay();
+                ApocalypseSystem.dayOfText?.BroadcastNewDay();
             }
             ApocalypseSystem.DisableCycle();
         }
@@ -70,7 +70,7 @@ public class MoonlordStuff : GlobalNPC
 {
     public override void OnKill(NPC npc)
     {
-        if (!ModContent.GetInstance<MajorasMaskTributeConfig>().SaveWorldAfterHardmodeStarts)
+        if (!ModContent.GetInstance<ServerConfig>().SaveWorldAfterHardmodeStarts)
             return;
         if (NPC.downedMoonlord)
             return;

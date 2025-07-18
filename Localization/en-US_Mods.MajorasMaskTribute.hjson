@@ -107,6 +107,69 @@ Configs: {
 	MajorasMaskTributeConfig: {
 		DisplayName: Settings
 
+		VanillaBloodMoonLogic: {
+			Label: Vanilla Blood Moon Logic
+			Tooltip:
+				'''
+				By default, a blood moon will be triggered during the final hours (when the countdown shows up).
+				If that is not desired, this can be enabled to disable that in favor of vanilla blood moon logic.
+				'''
+		}
+
+		PauseGameDuringDayTransitions: {
+			Label: Pause Game During Day Transitions
+			Tooltip:
+				'''
+				When enabled, makes it so that whenever it switches from night to day, 
+				the game pauses to display a time card of what day it is, like in Majora's Mask
+
+				Even when enabled, the game will not be paused if the sunrise happens during an 
+				invasion or most boss fights (the ones that don't end at night)
+				'''
+		}
+
+		SaveWorldAfterHardmodeStarts: {
+			Label: Save World After Hardmode Starts
+			Tooltip: When enabled, a new 'first day' will be made for your world once after you beat the Wall of Flesh and once after beating the Moonlord.
+		}
+
+		OldManDoesntAppearOnFirstDay: {
+			Label: Old Man Doesn't Appear On First Day
+			Tooltip:
+				'''
+				Originally a bug, but I thought the implications were interesting.
+				Hopefully self-explanatory.
+				'''
+		}
+
+		NoPlanteraToSummonGolem: {
+			Label: Defeating Plantera Not Required to Summon Golem
+			Tooltip:
+				'''
+				By default, you can't summon Golem unless Plantera is defeated first.
+				Enabling will replace that requirement for checking if you either have used a temple key
+				or have had a Lihzahrd altar in your inventory.
+				'''
+		}
+
+		VanillaTimeRate: {
+			Label: Vanilla Time Rate
+			Tooltip:
+				'''
+				By default, time will move 1.5x more slowly than in vanilla.
+				For extra challenge, turn this on for vanilla time speed.
+				'''
+		}
+
+		WandOfSparkingMode: {
+			Label: Wand of Sparking Mode
+			Tooltip: ""
+		}
+	}
+
+	ClientConfig: {
+		DisplayName: Visual Settings
+
 		NoScaryTextures: {
 			Label: Use Vanilla Moon Texture
 			Tooltip:
@@ -124,15 +187,6 @@ Configs: {
 				preventing starts from appearing behind it
 
 				Does nothing if "Use Vanilla Moon Texture" is enabled.
-				'''
-		}
-
-		VanillaBloodMoonLogic: {
-			Label: Vanilla Blood Moon Logic
-			Tooltip:
-				'''
-				By default, a blood moon will be triggered during the final hours (when the countdown shows up).
-				If that is not desired, this can be enabled to disable that in favor of vanilla blood moon logic.
 				'''
 		}
 
@@ -155,47 +209,6 @@ Configs: {
 			Tooltip: Controls the intensity of screen shaking on the final day.
 		}
 
-		PauseGameDuringDayTransitions: {
-			Label: Pause Game During Day Transitions
-			Tooltip:
-				'''
-				When enabled, makes it so that whenever it switches from night to day, 
-				the game pauses to display a time card of what day it is, like in Majora's Mask
-
-				Even when enabled, the game will not be paused if the sunrise happens during an 
-				invasion or most boss fights (the ones that don't end at night)
-				'''
-		}
-
-		SaveWorldAfterHardmodeStarts: {
-			Label: Save World After Hardmode Starts
-			Tooltip: When enabled, a new 'first day' will be made for your world once after you beat the Wall of Flesh and once after beating the Moonlord.
-		}
-
-		Headers: {
-			GameplayConfig: Gameplay
-			VisualConfig: Visual
-		}
-
-		OldManDoesntAppearOnFirstDay: {
-			Label: Old Man Doesn't Appear On First Day
-			Tooltip:
-				'''
-				Originally a bug, but I thought the implications were interesting.
-				Hopefully self-explanatory.
-				'''
-		}
-
-		NoPlanteraToSummonGolem: {
-			Label: Defeating Plantera Not Required to Summon Golem
-			Tooltip:
-				'''
-				By default, you can't summon Golem unless Plantera is defeated first.
-				Enabling will replace that requirement for checking if you either have used a temple key
-				or have had a Lihzahrd altar in your inventory.
-				'''
-		}
-
 		GreenBackgroundDuringFinalDay: {
 			Label: Green-tinted Background during Final Day
 			Tooltip:
@@ -204,20 +217,6 @@ Configs: {
 				during the final day to mimic how the sky looks during the final
 				day in Majora's Mask.
 				'''
-		}
-
-		VanillaTimeRate: {
-			Label: Vanilla Time Rate
-			Tooltip:
-				'''
-				By default, time will move 1.5x more slowly than in vanilla.
-				For extra challenge, turn this on for vanilla time speed.
-				'''
-		}
-
-		WandOfSparkingMode: {
-			Label: Wand of Sparking Mode
-			Tooltip: ""
 		}
 	}
 
@@ -244,6 +243,45 @@ Configs: {
 		Off.Label: Off
 		On.Label: On
 		Brutal.Label: Brutal
+	}
+
+	ServerConfig: {
+		DisplayName: Server Config
+
+		WandOfSparkingMode: {
+			Label: Wand Of Sparking Mode
+			Tooltip: ""
+		}
+
+		PauseGameDuringDayTransitions: {
+			Label: Pause Game During Day Transitions
+			Tooltip: ""
+		}
+
+		VanillaBloodMoonLogic: {
+			Label: Vanilla Blood Moon Logic
+			Tooltip: ""
+		}
+
+		SaveWorldAfterHardmodeStarts: {
+			Label: Save World After Hardmode Starts
+			Tooltip: ""
+		}
+
+		OldManDoesntAppearOnFirstDay: {
+			Label: Old Man Doesnt Appear On First Day
+			Tooltip: ""
+		}
+
+		NoPlanteraToSummonGolem: {
+			Label: No Plantera To Summon Golem
+			Tooltip: ""
+		}
+
+		VanillaTimeRate: {
+			Label: Vanilla Time Rate
+			Tooltip: ""
+		}
 	}
 }
 

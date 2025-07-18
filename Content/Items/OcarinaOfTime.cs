@@ -210,7 +210,7 @@ public class OcarinaOfTimePlayer : ModPlayer
             animationTimer = 0;
             Main.time = 0;
             Main.dayTime = true;
-            ApocalypseSystem.dayOfText.DisplayDayOf();
+            ApocalypseSystem.dayOfText?.DisplayDayOf();
             MiniatureClockTowerPlayer.PlayRooster();
         }
         if (animationTimer >= 300 && songPlaying == SongPlaying.InvertedSongOfTime)
@@ -243,7 +243,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         var ocarina = new Item();
         ocarina.SetDefaults(ModContent.ItemType<OcarinaOfTime>());
         yield return ocarina;
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+        if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
         {
             var item = new Item();
             item.SetDefaults(ItemID.GoldWatch);
@@ -276,7 +276,7 @@ public class OcarinaOfTimePlayer : ModPlayer
                 NetMessage.SendData(MessageID.TeleportEntity, -1, -1, null, 0, player.whoAmI, spawnPos.X, spawnPos.Y, 6);
             }
             player.velocity = Vector2.Zero;
-            if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+            if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
             {
                 player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
                 player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();

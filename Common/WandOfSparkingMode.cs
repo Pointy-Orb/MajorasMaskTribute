@@ -15,7 +15,7 @@ public class WandOfSparkingModePlayer : ModPlayer
     {
         get
         {
-            return ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode == WandOfSparkingMode.Brutal;
+            return ModContent.GetInstance<ServerConfig>().WandOfSparkingMode == WandOfSparkingMode.Brutal;
         }
     }
 
@@ -268,7 +268,7 @@ public class PurgeAccessoriesAddMaskTooltip : GlobalItem
 
     public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
     {
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.On)
+        if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.On)
         {
             return;
         }

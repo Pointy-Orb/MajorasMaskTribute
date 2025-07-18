@@ -69,7 +69,7 @@ public class TempleKeySystem : ModSystem
             c.Remove();
             c.EmitDelegate<Func<bool>>(() =>
             {
-                if (ModContent.GetInstance<MajorasMaskTributeConfig>().NoPlanteraToSummonGolem)
+                if (ModContent.GetInstance<ServerConfig>().NoPlanteraToSummonGolem)
                 {
                     return anybodyUsedTempleKey;
                 }
@@ -119,7 +119,7 @@ public class KillOldGeezer : GlobalNPC
 {
     public override void PostAI(NPC npc)
     {
-        if (npc.type == NPCID.OldMan && ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay)
+        if (npc.type == NPCID.OldMan && ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay)
         {
             npc.Transform(NPCID.Bunny);
             npc.position = Microsoft.Xna.Framework.Vector2.Zero;

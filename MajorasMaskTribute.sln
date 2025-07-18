@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MajorasMaskTribute", "MajorasMaskTribute.csproj", "{528D9B14-BD31-B532-64AF-81402D0CAF9C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{528D9B14-BD31-B532-64AF-81402D0CAF9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{528D9B14-BD31-B532-64AF-81402D0CAF9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{528D9B14-BD31-B532-64AF-81402D0CAF9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{528D9B14-BD31-B532-64AF-81402D0CAF9C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {80F63197-6F67-424C-9DF5-4405B3E82C3B}
+	EndGlobalSection
+EndGlobal

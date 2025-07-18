@@ -41,7 +41,7 @@ public class ApocalypseSystem : ModSystem
 
     public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
     {
-        bool vanillaTimeRate = ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaTimeRate;
+        bool vanillaTimeRate = ModContent.GetInstance<ServerConfig>().VanillaTimeRate;
         foreach (Player player in Main.ActivePlayers)
         {
             if (player.GetModPlayer<InvertedSongOfTimePlayer>().invertedSongEquipped)
@@ -75,16 +75,24 @@ public class ApocalypseSystem : ModSystem
 
     public override void Load()
     {
-        scaryMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
-        if (!ModContent.GetInstance<MajorasMaskTributeConfig>().NoScaryTextures)
+        try
         {
-            TextureAssets.PumpkinMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Pumpkin_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
-            TextureAssets.SnowMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Snow_scary" + (ModContent.GetInstance<MajorasMaskTributeConfig>().RealisticPhaseShading ? "_realistic" : ""));
+            scaryMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_scary" + (ModContent.GetInstance<ClientConfig>().RealisticPhaseShading ? "_realistic" : ""));
+            if (!ModContent.GetInstance<ClientConfig>().NoScaryTextures)
+            {
+                TextureAssets.PumpkinMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Pumpkin_scary" + (ModContent.GetInstance<ClientConfig>().RealisticPhaseShading ? "_realistic" : ""));
+                TextureAssets.SnowMoon = ModContent.Request<Texture2D>("MajorasMaskTribute/Assets/Moon_Snow_scary" + (ModContent.GetInstance<ClientConfig>().RealisticPhaseShading ? "_realistic" : ""));
+            }
+            else
+            {
+                TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
+                TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
+            }
         }
-        else
+        catch (Exception e)
         {
-            TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
-            TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
+            Mod.Logger.Error($"Error loading textures: {e}");
+            throw;
         }
         IL_Main.DrawSunAndMoon += IL_BiggerMoon;
         IL_Main.UpdateTime_StartNight += IL_StopBloodMoon;
@@ -109,7 +117,7 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(MoveType.After, i => i.MatchBeq(out jumpLabel));
             c.EmitDelegate<Func<bool>>(() =>
             {
-                return ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic || !cycleActive;
+                return ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic || !cycleActive;
             });
             c.Emit(Brfalse_S, jumpLabel);
         }
@@ -134,7 +142,7 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(MoveType.After, i => i.MatchStloc(out moonIndex));
             c.EmitDelegate<Func<bool>>(() =>
             {
-                return ModContent.GetInstance<MajorasMaskTributeConfig>().NoScaryTextures || apocalypseDay < 0;
+                return ModContent.GetInstance<ClientConfig>().NoScaryTextures || apocalypseDay < 0;
             });
             c.Emit(Brtrue_S, skipTextureSetLabel);
             c.EmitDelegate<Func<Texture2D>>(() =>
@@ -168,12 +176,12 @@ public class ApocalypseSystem : ModSystem
                         endSize = 20;
                         break;
                 }
-                if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon)
+                if (ModContent.GetInstance<ClientConfig>().SupersizedMoon)
                 {
                     startSize *= 2;
                     endSize *= 2;
                 }
-                if (ModContent.GetInstance<MajorasMaskTributeConfig>().SupersizedMoon2)
+                if (ModContent.GetInstance<ClientConfig>().SupersizedMoon2)
                 {
                     startSize *= 3;
                     endSize *= 3;
@@ -281,7 +289,7 @@ public class ApocalypseSystem : ModSystem
             //MoonPhase.Full
             Main.moonPhase = 0;
         }
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
+        if (ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic)
         {
             return;
         }
@@ -424,7 +432,7 @@ public class ApocalypseSystem : ModSystem
 
     public override void ModifySunLightColor(ref Color tileColor, ref Color backgroundColor)
     {
-        if (!ModContent.GetInstance<MajorasMaskTributeConfig>().GreenBackgroundDuringFinalDay)
+        if (!ModContent.GetInstance<ClientConfig>().GreenBackgroundDuringFinalDay)
         {
             return;
         }
@@ -432,7 +440,7 @@ public class ApocalypseSystem : ModSystem
         {
             backgroundColor = backgroundColor.MultiplyRGB(new Color(0.7f, 1f, 0.7f));
         }
-        if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic && Main.bloodMoon)
+        if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic && Main.bloodMoon)
         {
             //Counteract blood moon brightening by doing our own darkening
             backgroundColor = Color.Black;
@@ -529,7 +537,7 @@ public class ApocalypseSystem : ModSystem
 
         protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration)
         {
-            if (!ModContent.GetInstance<MajorasMaskTributeConfig>().SaveWorldAfterHardmodeStarts)
+            if (!ModContent.GetInstance<ServerConfig>().SaveWorldAfterHardmodeStarts)
                 return;
             WorldGen.IsGeneratingHardMode = false;
             apocalypseDay = 0;
@@ -559,7 +567,7 @@ public class ApocalypseSystem : ModSystem
                 var deathReason = new PlayerDeathReason();
                 var messageNumber = Main.rand.Next(1, 6);
                 deathReason.CustomReason = Language.GetText($"Mods.MajorasMaskTribute.DeathMessages.Moon{messageNumber}").WithFormatArgs(player.name).ToNetworkText();
-                if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+                if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
                 {
                     player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
                 }
@@ -638,7 +646,7 @@ public class ApocalypseSystem : ModSystem
             if (!Main.npc[i].active)
                 return;
             var npc = Main.npc[i];
-            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay))
+            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay))
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;
@@ -670,7 +678,7 @@ public class ApocalypseSystem : ModSystem
         Main.fastForwardTimeToDusk = false;
         TempleKeySystem.anybodyUsedTempleKey = false;
         LanternNight.NextNightIsLanternNight = false;
-        if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode == WandOfSparkingMode.On)
+        if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode == WandOfSparkingMode.On)
         {
             foreach (Player player in Main.ActivePlayers)
             {
