@@ -194,7 +194,7 @@ public class BlackScreen : UIElement
                     return false;
                 }
             }
-            return ModContent.GetInstance<GameplayConfig>().PauseGameDuringDayTransitions;
+            return ModContent.GetInstance<MajorasMaskTributeConfig>().PauseGameDuringDayTransitions;
         }
     }
 

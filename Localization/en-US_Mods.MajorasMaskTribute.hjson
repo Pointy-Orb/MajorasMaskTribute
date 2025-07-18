@@ -8,7 +8,6 @@ MultiplayerResetMessage: {
 }
 
 Announcements: {
-	HoursRemaining: -{0} hours remaining-
 	HoursRemaining: -{0} hours remain-
 	NewDayMessage:
 		'''

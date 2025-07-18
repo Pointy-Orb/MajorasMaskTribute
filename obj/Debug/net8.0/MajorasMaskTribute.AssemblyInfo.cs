@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MajorasMaskTribute")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2bd93070d2dd450ea7f859115b6db64ef34a0435")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37f81f0b16f5352b7b42821bee8c14281e0217f6")]
 [assembly: System.Reflection.AssemblyProductAttribute("MajorasMaskTribute")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MajorasMaskTribute")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
