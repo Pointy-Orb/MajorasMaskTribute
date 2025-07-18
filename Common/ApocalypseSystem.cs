@@ -255,7 +255,7 @@ public class ApocalypseSystem : ModSystem
     private static void On_Delete(On_FileUtilities.orig_Delete orig, string path, bool cloud, bool forceDeleteFile = false)
     {
         orig(path, cloud, forceDeleteFile);
-        if (!File.Exists(path + ".dayone"))
+        if (!FileUtilities.Exists(path + ".dayone", cloud))
         {
             return;
         }
@@ -275,6 +275,12 @@ public class ApocalypseSystem : ModSystem
 
     public override void PostUpdateTime()
     {
+        if (!Main.dayTime && wasDay && startChat)
+        {
+            dayOfText?.DisplayDayOf();
+            //MoonPhase.Full
+            Main.moonPhase = 0;
+        }
         if (ModContent.GetInstance<MajorasMaskTributeConfig>().VanillaBloodMoonLogic)
         {
             return;
@@ -374,9 +380,6 @@ public class ApocalypseSystem : ModSystem
         }
         Main.LocalPlayer.Spawn(PlayerSpawnContext.SpawningIntoWorld);
         Main.LocalPlayer.position = Vector2.Zero;
-        DestroyEverything();
-        apocalypseDay = 0;
-        doApocalypseTimer = false;
     }
 
     public static bool startChat { get; private set; } = false;
@@ -449,6 +452,12 @@ public class ApocalypseSystem : ModSystem
         {
             MaybeScreenShake();
         }
+        if (apocalypseTimer <= 0 && doApocalypseTimer)
+        {
+            DestroyEverything();
+            apocalypseDay = 0;
+            doApocalypseTimer = false;
+        }
         if (apocalypseTimer > 0)
         {
             apocalypseTimer--;
@@ -472,12 +481,9 @@ public class ApocalypseSystem : ModSystem
                 SoundEngine.PlaySound(explooood);
             }
         }
-        Main.LocalPlayer.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", doApocalypseTimer);
-        if (!Main.dayTime && wasDay && startChat)
+        foreach (Player player in Main.ActivePlayers)
         {
-            dayOfText?.DisplayDayOf();
-            //MoonPhase.Full
-            Main.moonPhase = 0;
+            player.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", doApocalypseTimer);
         }
         if (!startChat)
         {
@@ -564,32 +570,83 @@ public class ApocalypseSystem : ModSystem
                 if (npc.boss) npc.Transform(NPCID.Bunny);
                 npc.StrikeInstantKill();
             }
-            int tempResets = resets;
-            WorldGen.clearWorld();
-            FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
-            FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
-            resets = tempResets;
-            WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
-            for (int i = 0; i < Main.maxTilesX; i++)
+            ResetWorldInner();
+            if (Main.netMode != NetmodeID.SinglePlayer)
             {
-                for (int j = 0; j < Main.maxTilesY; j++)
+                foreach (Player player in Main.ActivePlayers)
                 {
-                    if (!WorldGen.InWorld(i, j)) continue;
-                    WorldGen.Reframe(i, j, true);
+                    NetMessage.BootPlayer(player.whoAmI, NetworkText.FromKey("Mods.MajorasMaskTribute.MultiplayerResetMessage.Violent"));
                 }
-            }
-            foreach (NPC npc in Main.ActiveNPCs)
-            {
-                if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay))
-                {
-                    npc.Transform(NPCID.Bunny);
-                    npc.position = Vector2.Zero;
-                    npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-                    npc.StrikeInstantKill();
-                }
+                Netplay.Disconnect = true;
             }
         }
+    }
+
+    public static void ResetWorldInner()
+    {
+        int tempResets = resets;
+        WorldGen.clearWorld();
+        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
+        FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
+        resets = tempResets;
+        WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
         startChat = true;
+        for (int i = 0; i < Main.maxTilesX; i++)
+        {
+            for (int j = 0; j < Main.maxTilesY; j++)
+            {
+                if (!WorldGen.InWorld(i, j)) continue;
+                WorldGen.Reframe(i, j, true);
+            }
+        }
+        if (Main.netMode != NetmodeID.SinglePlayer)
+        {
+            var chunkSize = 50;
+            for (int i = 0; i < Main.maxTilesX; i += chunkSize)
+            {
+                for (int j = 0; j < Main.maxTilesY; j += chunkSize)
+                {
+                    var rangeX = chunkSize;
+                    var rangeY = chunkSize;
+                    if (!WorldGen.InWorld(i + rangeX, j))
+                    {
+                        rangeX = Main.maxTilesX - i;
+                    }
+                    if (!WorldGen.InWorld(i, j + rangeY))
+                    {
+                        rangeY = Main.maxTilesY - j;
+                    }
+                    NetMessage.SendTileSquare(-1, i, j, rangeX, rangeY);
+                }
+            }
+            NetMessage.SendData(MessageID.WorldData);
+        }
+        foreach (Projectile projectile in Main.ActiveProjectiles)
+        {
+            projectile.Kill();
+        }
+        foreach (Item item in Main.ActiveItems)
+        {
+            item.active = false;
+            if (Main.netMode != NetmodeID.SinglePlayer)
+            {
+                NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
+            }
+        }
+        for (int i = 0; i < Main.npc.Length; i++)
+        {
+            if (!Main.npc[i].active)
+                return;
+            var npc = Main.npc[i];
+            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay))
+            {
+                npc.Transform(NPCID.Bunny);
+                npc.position = Vector2.Zero;
+                npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
+                npc.StrikeInstantKill();
+            }
+            npc.netUpdate = true;
+        }
         ResetApocalypseVariables();
     }
 
@@ -622,5 +679,9 @@ public class ApocalypseSystem : ModSystem
         }
         resets++;
         ResetCounter();
+        if (Main.netMode != NetmodeID.SinglePlayer)
+        {
+            NetMessage.SendData(MessageID.WorldData);
+        }
     }
 }

@@ -2,6 +2,11 @@ AnyWatchGroup: Any Watch
 WatchDisplay: Day {0}: {1}
 ResetXTimes: This world has been reset {0} {^0:time;times}.
 
+MultiplayerResetMessage: {
+	Violent: The moon has destroyed your world, you must rejoin now.
+	Peaceful: ""
+}
+
 Announcements: {
 	HoursRemaining: -{0} hours remaining-
 	NewDayMessage:
@@ -114,6 +119,29 @@ Items: {
 			'Will you play...with me?'
 			'''
 	}
+
+	ItemSpirit: {
+		DisplayName: "{0} Spirit"
+		Tooltip:
+			'''
+			When placed in one of your first three inventory slots, 
+			this spirit will be converted into the appropriate mask 
+			on the next cycle.
+			'''
+		# Used for find-and-replace
+		Mask: " Mask"
+	}
+
+	WoSMaskTooltip:
+		'''
+		{0} will count as defeated for all future cycles 
+		where this is in your inventory.
+		'''
+	TheWoSMaskTooltip:
+		'''
+		The {0} will count as defeated for all future cycles 
+		where this is in your inventory.
+		'''
 }
 
 Configs: {
@@ -260,5 +288,7 @@ Configs: {
 	}
 }
 
+TwinsBossName: Twins
 AfterPartyOfDoomCondition: ""
-MajorasMaskDropCondition: Nobody already has Majora's Mask
+Conditions.MajorasMask: Nobody already has Majora's Mask
+DropConditions.WandOfSparkingOn: Mods.MajorasMaskTribute.DropConditions.WandOfSparkingOn

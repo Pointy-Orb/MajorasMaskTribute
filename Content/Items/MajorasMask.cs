@@ -104,7 +104,7 @@ public class DoesntHaveMaskAlreadyCondition : IItemDropRuleCondition
 
     public DoesntHaveMaskAlreadyCondition()
     {
-        Descripition ??= Language.GetOrRegister("Mods.MajorasMaskTribute.MajorasMaskDropCondition");
+        Descripition ??= Language.GetOrRegister("Mods.MajorasMaskTribute.Conditions.MajorasMask");
     }
 
     public bool CanDrop(DropAttemptInfo info)

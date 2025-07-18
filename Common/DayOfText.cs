@@ -55,13 +55,13 @@ public class DayOfText : UIText
         switch (ApocalypseSystem.apocalypseDay)
         {
             case 0:
-                hourText.VAlign = 0.52f;
+                hourText.VAlign = 0.56f;
                 break;
             case 1:
-                hourText.VAlign = 0.55f;
+                hourText.VAlign = 0.6f;
                 break;
             case 2:
-                hourText.VAlign = 0.6f;
+                hourText.VAlign = 0.64f;
                 break;
         }
     }

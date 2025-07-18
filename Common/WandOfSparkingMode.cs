@@ -19,7 +19,7 @@ public class WandOfSparkingModePlayer : ModPlayer
         }
     }
 
-    private static readonly List<short> masks = new()
+    public static readonly List<short> masks = new()
     {
         ItemID.KingSlimeMask,
         ItemID.EyeMask,
@@ -60,12 +60,26 @@ public class WandOfSparkingModePlayer : ModPlayer
         Player.trashItem.TurnToAir();
         //Accomodate for modded accessory slots
         deleteAccessoriesNextTick = true;
+        ConvertSpirits();
     }
 
     public bool deleteAccessoriesNextTick = false;
     public override void PostUpdateEquips()
     {
         deleteAccessoriesNextTick = false;
+    }
+
+    private void ConvertSpirits()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            if (Player.inventory[i].ModItem is ItemSpirit spirit)
+            {
+                var newItem = new Item();
+                newItem.SetDefaults(spirit.targetItem);
+                Player.inventory[i] = newItem;
+            }
+        }
     }
 
     private void ResetInventoryInner(Item[] inventory, bool fullReset = false, bool keepVanity = false)
@@ -234,7 +248,7 @@ public class WandOfSparkingModePlayer : ModPlayer
     }
 }
 
-public class PurgeAccessories : GlobalItem
+public class PurgeAccessoriesAddMaskTooltip : GlobalItem
 {
     public override void UpdateVanity(Item item, Player player)
     {
@@ -250,5 +264,34 @@ public class PurgeAccessories : GlobalItem
         {
             item.TurnToAir();
         }
+    }
+
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+    {
+        if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.On)
+        {
+            return;
+        }
+        if (!WandOfSparkingModePlayer.masks.Contains((short)item.type))
+            return;
+        var bossName = item.Name.Replace(Language.GetTextValue("Mods.MajorasMaskTribute.Items.ItemSpirit.Mask"), "");
+        if (item.type == ItemID.TwinMask)
+        {
+            bossName = Language.GetTextValue("Mods.MajorasMaskTribute.TwinsBossName");
+        }
+        bool useThe = false;
+        switch (item.type)
+        {
+            case ItemID.EyeMask:
+            case ItemID.EaterMask:
+            case ItemID.BrainMask:
+            case ItemID.TwinMask:
+            case ItemID.FleshMask:
+            case ItemID.DestroyerMask:
+                useThe = true;
+                break;
+        }
+        string key = $"Mods.MajorasMaskTribute.Items.{(useThe ? "The" : "")}WoSMaskTooltip";
+        tooltips.Add(new TooltipLine(Mod, "WoSMask", Language.GetTextValue(key, bossName)));
     }
 }

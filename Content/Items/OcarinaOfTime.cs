@@ -208,6 +208,10 @@ public class OcarinaOfTimePlayer : ModPlayer
                 ResetEverything();
             }
             animationTimer = 0;
+            Main.time = 0;
+            Main.dayTime = true;
+            ApocalypseSystem.dayOfText.DisplayDayOf();
+            MiniatureClockTowerPlayer.PlayRooster();
         }
         if (animationTimer >= 300 && songPlaying == SongPlaying.InvertedSongOfTime)
         {
@@ -259,41 +263,26 @@ public class OcarinaOfTimePlayer : ModPlayer
             npc.Transform(NPCID.Bunny);
             npc.position = Vector2.Zero;
             npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-            npc.StrikeInstantKill();
+            npc.active = false;
         }
-        int tempResets = ApocalypseSystem.resets;
-        WorldGen.clearWorld();
-        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
-        FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
-        ApocalypseSystem.resets = tempResets;
-        WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
-        for (int i = 0; i < Main.maxTilesX; i++)
-        {
-            for (int j = 0; j < Main.maxTilesY; j++)
-            {
-                if (!WorldGen.InWorld(i, j)) continue;
-                WorldGen.Reframe(i, j, true);
-            }
-        }
+        ApocalypseSystem.ResetWorldInner();
         foreach (Player player in Main.ActivePlayers)
         {
-            player.Teleport(new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height), 6);
+            var spawnPos = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height);
+            player.Teleport(spawnPos, 6);
+            if (Main.netMode == NetmodeID.Server)
+            {
+                RemoteClient.CheckSection(player.whoAmI, spawnPos);
+                NetMessage.SendData(MessageID.TeleportEntity, -1, -1, null, 0, player.whoAmI, spawnPos.X, spawnPos.Y, 6);
+            }
             player.velocity = Vector2.Zero;
             if (ModContent.GetInstance<MajorasMaskTributeConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
             {
                 player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
+                player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();
             }
         }
-        foreach (NPC npc in Main.ActiveNPCs)
-        {
-            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<MajorasMaskTributeConfig>().OldManDoesntAppearOnFirstDay))
-            {
-                npc.Transform(NPCID.Bunny);
-                npc.position = Vector2.Zero;
-                npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-                npc.StrikeInstantKill();
-            }
-        }
-        ApocalypseSystem.ResetApocalypseVariables();
+        Main.time = 0;
+        Main.dayTime = true;
     }
 }

@@ -1,0 +1,1 @@
+Rework "Dawn Of" text to work better with multiline anchoring and be more faithful to the original card
