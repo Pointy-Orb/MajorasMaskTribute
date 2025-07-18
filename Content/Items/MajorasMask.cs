@@ -77,7 +77,6 @@ public class MoonlordStuff : GlobalNPC
         if (npc.type != NPCID.MoonLordCore)
             return;
 
-        WorldGen.IsGeneratingHardMode = false;
         ApocalypseSystem.ResetCounter();
         Main.time = 0;
         Main.dayTime = true;

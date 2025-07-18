@@ -588,8 +588,8 @@ public class ApocalypseSystem : ModSystem
         WorldGen.clearWorld();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
-        resets = tempResets;
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
+        resets = tempResets;
         startChat = true;
         for (int i = 0; i < Main.maxTilesX; i++)
         {

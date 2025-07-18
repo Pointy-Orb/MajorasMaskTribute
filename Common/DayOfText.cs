@@ -17,27 +17,43 @@ public class DayOfText : UIText
     public int time { get; private set; } = 0;
     public bool visible = true;
     public HourText hourText;
+    public UIText Dawn;
     public BlackScreen blackScreen;
 
     private Color defaultShadow;
     private float defaultScale;
-    private float defaultHourScale = 0.5f;
+    private float defaultHourScale => defaultScale * hourScaleRelative;
+    private float defaultDawnScale => defaultScale * 0.7f;
+    private float hourScaleRelative = 0.5f;
     public static bool newDay { get; private set; } = false;
 
-    public DayOfText(float textScale = 1f, float hourScale = 0.5f) : base("", textScale, true)
+    public DayOfText(float textScale = 1f, float hourScaleRelative = 0.5f) : base("", textScale, true)
     {
         HAlign = 0.5f;
         VAlign = 0.4f;
         defaultScale = textScale;
-        defaultHourScale = hourScale;
+        Dawn = new("", defaultDawnScale, true);
+        Dawn.HAlign = 0.5f;
+        Dawn.VAlign = 0.35f * textScale;
         defaultShadow = ShadowColor;
+        this.hourScaleRelative = hourScaleRelative;
         hourText = new HourText(defaultHourScale);
     }
 
     public void DisplayDayOf(bool overridePause = false)
     {
         BlackScreen.overridePauseForEffect = overridePause;
-        var message = Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "Dawn" : "Night")}{ApocalypseSystem.apocalypseDay}.Message{(Main.dayTime && BlackScreen.PauseGameDuringDayTransitions ? "Multiline" : "")}");
+
+        if (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime)
+        {
+            defaultScale = 1.4f;
+        }
+        else
+        {
+            defaultScale = 1;
+        }
+
+        var message = (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{ApocalypseSystem.apocalypseDay}");
         SetText(message, Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
 
         int hours = 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - ApocalypseSystem.apocalypseDay) * 24);
@@ -51,19 +67,10 @@ public class DayOfText : UIText
             hourText.VAlign = HourText.defaultVAlign;
             return;
         }
+        Dawn.VAlign = 0.35f - (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 0, 0.03f)) - 0.02f;
         hourText.TextColor = Color.Black;
-        switch (ApocalypseSystem.apocalypseDay)
-        {
-            case 0:
-                hourText.VAlign = 0.56f;
-                break;
-            case 1:
-                hourText.VAlign = 0.6f;
-                break;
-            case 2:
-                hourText.VAlign = 0.64f;
-                break;
-        }
+        hourText.VAlign = (HourText.defaultVAlign + (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 0, 0.03f))) + 0.03f;
+        Dawn.SetText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.DawnOf"), defaultDawnScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)), true);
     }
 
     public void BroadcastNewDay()
@@ -86,6 +93,7 @@ public class DayOfText : UIText
             TextColor = Color.White;
         }
         ShadowColor = defaultShadow;
+        Dawn.ShadowColor = defaultShadow;
         if (time > 0)
         {
             time--;
@@ -96,6 +104,7 @@ public class DayOfText : UIText
                 if (ApocalypseSystem.apocalypseDay >= 2)
                 {
                     ShadowColor = Color.White;
+                    Dawn.ShadowColor = Color.White;
                 }
             }
             else
@@ -108,6 +117,7 @@ public class DayOfText : UIText
         {
             SetText("");
             hourText.SetText("");
+            Dawn.SetText("");
             blackScreen.display = false;
             BlackScreen.overridePauseForEffect = false;
             newDay = false;
@@ -184,7 +194,7 @@ public class BlackScreen : UIElement
                     return false;
                 }
             }
-            return ModContent.GetInstance<MajorasMaskTributeConfig>().PauseGameDuringDayTransitions;
+            return ModContent.GetInstance<GameplayConfig>().PauseGameDuringDayTransitions;
         }
     }
 
@@ -395,6 +405,7 @@ public class DayDisplay : UIState
 
         Append(blackScreen);
         Append(dayOfText);
+        Append(dayOfText.Dawn);
         Append(dayOfText.hourText);
         Append(apocalypseText);
         Append(whiteScreen);
