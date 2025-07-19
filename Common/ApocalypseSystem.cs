@@ -623,6 +623,7 @@ public class ApocalypseSystem : ModSystem
                 }
                 Netplay.Disconnect = true;
             }
+            /*
             foreach (Item item in Main.ActiveItems)
             {
                 item.active = false;
@@ -631,32 +632,25 @@ public class ApocalypseSystem : ModSystem
                     NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
                 }
             }
-	    foreach (Projectile projectile in Main.ActiveProjectiles)
-		{
-		    projectile.Kill();
-		}
-		foreach (Item item in Main.ActiveItems)
-		{
-		    item.active = false;
-		    if (Main.netMode != NetmodeID.SinglePlayer)
-		    {
-			NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
-		    }
-		}
-		for (int i = 0; i < Main.npc.Length; i++)
-		{
-		    if (!Main.npc[i].active)
-			return;
-		    var npc = Main.npc[i];
-		    if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay))
-		    {
-			npc.Transform(NPCID.Bunny);
-			npc.position = Vector2.Zero;
-			npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-			npc.StrikeInstantKill();
-		    }
-		    npc.netUpdate = true;
-		}
+			foreach (Projectile projectile in Main.ActiveProjectiles)
+			{
+				projectile.Kill();
+			}
+			for (int i = 0; i < Main.npc.Length; i++)
+			{
+				if (!Main.npc[i].active)
+				return;
+				var npc = Main.npc[i];
+				if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay))
+				{
+				npc.Transform(NPCID.Bunny);
+				npc.position = Vector2.Zero;
+				npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
+				npc.StrikeInstantKill();
+				}
+				npc.netUpdate = true;
+			}
+			*/
         }
     }
 
