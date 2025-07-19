@@ -27,7 +27,7 @@ public class ApocalypseScreenShake : ICameraModifier
         progress -= (float)((int)(progress / 0.025f)) * 0.025f;
         float lerpAmount = Utils.Remap(progress, 0, 0.025f, -1, 1);
         var targetPos = new Vector2(cameraInfo.CameraPosition.X, cameraInfo.CameraPosition.Y + _shakeStrength);
-        cameraInfo.CameraPosition = Vector2.Lerp(cameraInfo.CameraPosition, targetPos, lerpAmount);
+        cameraInfo.CameraPosition = Vector2.Lerp(cameraInfo.CameraPosition, targetPos, lerpAmount * ModContent.GetInstance<ClientConfig>().ScreenShakeStrength);
         if (!Main.gameInactive && !Main.gamePaused)
         {
             framesElapsed++;

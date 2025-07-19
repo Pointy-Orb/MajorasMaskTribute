@@ -24,6 +24,7 @@ public class MiniatureClockTower : ModItem
         Item.height = 22;
         Item.rare = ItemRarityID.Green;
         Item.accessory = true;
+        Item.vanity = true;
     }
 
     SoundStyle bellSound;
@@ -154,7 +155,7 @@ public class BellRingingEffect : ModSceneEffect
     {
         if (!Main.dayTime && Common.ApocalypseSystem.apocalypseDay >= 2)
             return false;
-        if (Main.dayTime && Main.time < 150)
+        if (Main.dayTime && Common.ApocalypseSystem.dayOfText.time > 0)
             return true;
         return player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
     }
@@ -175,14 +176,23 @@ public class MiniatureClockTowerPlayer : ModPlayer
         wasDay = Main.dayTime;
         nightHowl = new SoundStyle("MajorasMaskTribute/Assets/nighthowl");
         dayDoodleDoo = new SoundStyle("MajorasMaskTribute/Assets/daydoodledoo");
+        dayRoosterReal = new SoundStyle("MajorasMaskTribute/Assets/daydoodledoo_old");
     }
 
     static SoundStyle nightHowl;
     static SoundStyle dayDoodleDoo;
+    static SoundStyle dayRoosterReal;
 
     bool wasDay = true;
+    bool started = false;
     public override void PostUpdate()
     {
+        if (!started)
+        {
+            started = true;
+            wasDay = Main.dayTime;
+            return;
+        }
         if (Main.netMode == NetmodeID.Server)
             return;
         if (!Main.dayTime && wasDay)
@@ -191,7 +201,14 @@ public class MiniatureClockTowerPlayer : ModPlayer
         }
         if (Main.dayTime && !wasDay && Common.ApocalypseSystem.apocalypseDay <= 1)
         {
-            SoundEngine.PlaySound(dayDoodleDoo);
+            if (Common.ApocalypseSystem.cycleActive)
+            {
+                SoundEngine.PlaySound(dayDoodleDoo);
+            }
+            else
+            {
+                SoundEngine.PlaySound(dayRoosterReal);
+            }
         }
         wasDay = Main.dayTime;
     }

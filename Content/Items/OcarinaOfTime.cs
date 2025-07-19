@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.GameContent.Events;
+using System.Linq;
 using System.IO;
 using Newtonsoft.Json;
 using Terraria.GameContent.Bestiary;
@@ -37,7 +39,7 @@ public class OcarinaOfTime : ModItem
         Item.width = 26;
         Item.height = 22;
         Item.useTime = 1;
-        Item.useAnimation = 5;
+        Item.useAnimation = 20;
         Item.autoReuse = true;
         Item.rare = ItemRarityID.Expert;
         Item.useTurn = true;
@@ -69,7 +71,7 @@ public class OcarinaOfTime : ModItem
         }
         player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying = desiredSongPlaying;
         player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
-        return null;
+        return true;
     }
 
     public override bool AltFunctionUse(Player player)
@@ -79,7 +81,7 @@ public class OcarinaOfTime : ModItem
 
     public override void UpdateInventory(Player player)
     {
-        if (player.itemAnimation <= 0 && player.HeldItem.type == Type)
+        if (player.itemTime <= 0 && player.HeldItem.type == Type)
         {
             player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying = SongPlaying.None;
         }
@@ -100,16 +102,15 @@ public class OcarinaOfTime : ModItem
         var ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
         foreach (Player player in Main.ActivePlayers)
         {
-            if (Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > ocarinaTimer)
+            if (player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > ocarinaTimer)
             {
-                ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
+                ocarinaTimer = player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
             }
         }
-        if (ocarinaTimer > 0)
-        {
-            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * Utils.Remap(ocarinaTimer, 660, 470, 1, 0));
-        }
+        whiteScreen.ocarinaTimer = ocarinaTimer;
     }
+
+    public static WhiteScreen whiteScreen;
 
     public override void AddRecipes()
     {
@@ -131,6 +132,10 @@ public class ShutUpImPlayingTheHealingSong : ModSceneEffect
     {
         foreach (Player activePlayer in Main.ActivePlayers)
         {
+            if (activePlayer.position.DistanceSQ(player.position) > 1600)
+            {
+                continue;
+            }
             if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.SongOfHealing)
             {
                 return true;
@@ -167,9 +172,16 @@ public class ShutUpImPlayingTheOcarinaBackwards : ModSceneEffect
 
     public override bool IsSceneEffectActive(Player player)
     {
-        if (player.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.InvertedSongOfTime)
+        foreach (Player activePlayer in Main.ActivePlayers)
         {
-            return true;
+            if (activePlayer.position.Distance(player.position) > 1600)
+            {
+                continue;
+            }
+            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.InvertedSongOfTime)
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -206,20 +218,25 @@ public class OcarinaOfTimePlayer : ModPlayer
             {
                 ResetEverything();
             }
+            ApocalypseSystem.ResetCounter();
             animationTimer = 0;
+            Main.time = 0;
+            Main.dayTime = true;
+            ApocalypseSystem.dayOfText?.DisplayDayOf();
+            MiniatureClockTowerPlayer.PlayRooster();
         }
         if (animationTimer >= 300 && songPlaying == SongPlaying.InvertedSongOfTime)
         {
             Player.QuickSpawnItem(Player.GetSource_DropAsItem(), ModContent.ItemType<InvertedSongOfTime>());
             animationTimer = 0;
         }
-        if (animationTimer >= 250 && songPlaying == SongPlaying.SongOfHealing)
+        if (animationTimer >= 300 && songPlaying == SongPlaying.SongOfHealing)
         {
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
                 if (!homunculusNPC.isHomunculus) continue;
-                if (new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight).Intersects(npc.Hitbox))
+                if (Player.position.Distance(npc.position) < 1600)
                 {
                     //Some healing you got there.
                     npc.StrikeInstantKill();
@@ -238,47 +255,78 @@ public class OcarinaOfTimePlayer : ModPlayer
         var ocarina = new Item();
         ocarina.SetDefaults(ModContent.ItemType<OcarinaOfTime>());
         yield return ocarina;
+        if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
+        {
+            var item = new Item();
+            item.SetDefaults(ItemID.GoldWatch);
+            yield return item;
+        }
     }
 
     private static void ResetEverything()
     {
-        FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
+        if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave))
+        {
+            return;
+        }
+        Main.CheckForMoonEventsScoreDisplay();
         foreach (NPC npc in Main.ActiveNPCs)
         {
             npc.Transform(NPCID.Bunny);
             npc.position = Vector2.Zero;
             npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-            npc.StrikeInstantKill();
+            npc.active = false;
         }
-        WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
-        for (int i = 0; i < Main.maxTilesX; i++)
+        ApocalypseSystem.ResetWorldInner();
+	foreach (Player player in Main.ActivePlayers)
         {
-            for (int j = 0; j < Main.maxTilesY; j++)
+            var spawnPos = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height);
+            player.Teleport(spawnPos, 6);
+            if (Main.netMode == NetmodeID.Server)
             {
-                if (!WorldGen.InWorld(i, j)) continue;
-                WorldGen.Reframe(i, j, true);
+                RemoteClient.CheckSection(player.whoAmI, spawnPos);
+                NetMessage.SendData(MessageID.TeleportEntity, -1, -1, null, 0, player.whoAmI, spawnPos.X, spawnPos.Y, 6);
             }
-        }
-        foreach (Player player in Main.ActivePlayers)
-        {
-            player.Teleport(new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height), 6);
             player.velocity = Vector2.Zero;
-        }
-        foreach (NPC npc in Main.ActiveNPCs)
-        {
-            if (!npc.HasGivenName)
+            if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
             {
-                npc.Transform(NPCID.Bunny);
-                npc.position = Vector2.Zero;
-                npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-                npc.StrikeInstantKill();
+                player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
+                player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();
             }
         }
-        Main.StopRain();
-        Main.windSpeedTarget = 0;
-        Main.windSpeedCurrent = 0;
         Main.time = 0;
         Main.dayTime = true;
-        ApocalypseSystem.ResetCounter();
+    }
+
+    public override void CopyClientState(ModPlayer targetCopy)
+    {
+        OcarinaOfTimePlayer clone = (OcarinaOfTimePlayer)targetCopy;
+        clone.animationTimer = animationTimer;
+    }
+
+    public override void SendClientChanges(ModPlayer clientPlayer)
+    {
+        OcarinaOfTimePlayer clone = (OcarinaOfTimePlayer)clientPlayer;
+
+        if (animationTimer != clone.animationTimer || songPlaying != clone.songPlaying)
+        {
+            SyncPlayer(-1, Main.myPlayer, false);
+        }
+    }
+
+    public override void SyncPlayer(int toWho, int fromWho, bool newPlayer)
+    {
+        ModPacket packet = Mod.GetPacket();
+        packet.Write((byte)MajorasMaskTribute.MessageType.SyncAnimationTimer);
+        packet.Write((byte)Player.whoAmI);
+        packet.Write((short)animationTimer);
+        packet.Write((byte)songPlaying);
+        packet.Send(toWho, fromWho);
+    }
+
+    public void RecievePlayerSync(BinaryReader reader)
+    {
+        animationTimer = reader.ReadInt16();
+        songPlaying = (SongPlaying)reader.ReadByte();
     }
 }

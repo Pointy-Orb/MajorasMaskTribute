@@ -1,40 +1,28 @@
 AnyWatchGroup: Any Watch
 WatchDisplay: Day {0}: {1}
+ResetXTimes: This world has been reset {0} {^0:time;times}.
+
+MultiplayerResetMessage: {
+	Violent: The moon has destroyed your world, you must rejoin now.
+	Peaceful: ""
+}
 
 Announcements: {
-	Dawn0: {
-		Message: Dawn of the First Day
-		Hours: 72 hours remaining
-	}
-
-	Night0: {
-		Message: Night of the First Day
-		Hours: 57 hours remaining
-	}
-
-	Dawn1: {
-		Message: Dawn of the Second Day
-		Hours: 48 hours remaining
-	}
-
-	Night1: {
-		Message: Night of the Second Day
-		Hours: 33 hours remaining
-	}
-
-	Dawn2: {
-		Message: Dawn of the Final Day
-		Hours: 24 hours remaining
-	}
-
-	Night2: {
-		Message: Night of the Final Day
-		Hours: 9 hours remaining
-	}
-
+	HoursRemaining: -{0} hours remain-
+	NewDayMessage:
+		'''
+		 Dawn of
+		A New Day
+		'''
+	Day0: The First Day
+	Day1: The Second Day
+	Day2: The Final Day
+	DawnOf: "Dawn of "
+	NightOf: "Night of "
 	DayMisc: It is day {0}, {1} {^1:hour;hours} {^1:remains;remain}.
 	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
 	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
+	EndIsNear: The end is near...
 }
 
 DeathMessages: {
@@ -74,15 +62,231 @@ Items: {
 
 	MiniatureClockTower: {
 		DisplayName: Miniature Clock Tower
-		Tooltip:
-			'''
-			Rings a clock-tower bell when it is almost sunrise or sunset
-			Works in vanity slots.
-			'''
+		Tooltip: Rings a clock-tower bell when it is almost sunrise or sunset
 	}
 
 	PhaseDisc: {
 		DisplayName: Phase Disc
 		Tooltip: Changes the moon's phase when used
 	}
+
+	MajorasMask: {
+		DisplayName: Majora's Mask
+		Tooltip:
+			'''
+			Can be used to toggle the 3-day cycle on and off
+			'Will you play...with me?'
+			'''
+	}
+
+	ItemSpirit: {
+		DisplayName: "{0} Spirit"
+		Tooltip:
+			'''
+			When placed in one of your first three inventory slots, 
+			this spirit will be converted into the appropriate mask 
+			on the next cycle.
+			'''
+		# Used for find-and-replace
+		Mask: " Mask"
+	}
+
+	WoSMaskTooltip:
+		'''
+		{0} will count as defeated for all future cycles 
+		where this is in your inventory.
+		'''
+	TheWoSMaskTooltip:
+		'''
+		The {0} will count as defeated for all future cycles 
+		where this is in your inventory.
+		'''
 }
+
+Configs: {
+	MajorasMaskTributeConfig: {
+		DisplayName: Settings
+
+		VanillaBloodMoonLogic: {
+			Label: Vanilla Blood Moon Logic
+			Tooltip:
+				'''
+				By default, a blood moon will be triggered during the final hours (when the countdown shows up).
+				If that is not desired, this can be enabled to disable that in favor of vanilla blood moon logic.
+				'''
+		}
+
+		PauseGameDuringDayTransitions: {
+			Label: Pause Game During Day Transitions
+			Tooltip:
+				'''
+				When enabled, makes it so that whenever it switches from night to day, 
+				the game pauses to display a time card of what day it is, like in Majora's Mask
+
+				Even when enabled, the game will not be paused if the sunrise happens during an 
+				invasion or most boss fights (the ones that don't end at night)
+				'''
+		}
+
+		SaveWorldAfterHardmodeStarts: {
+			Label: Save World After Hardmode Starts
+			Tooltip: When enabled, a new 'first day' will be made for your world once after you beat the Wall of Flesh and once after beating the Moonlord.
+		}
+
+		OldManDoesntAppearOnFirstDay: {
+			Label: Old Man Doesn't Appear On First Day
+			Tooltip:
+				'''
+				Originally a bug, but I thought the implications were interesting.
+				Hopefully self-explanatory.
+				'''
+		}
+
+		NoPlanteraToSummonGolem: {
+			Label: Defeating Plantera Not Required to Summon Golem
+			Tooltip:
+				'''
+				By default, you can't summon Golem unless Plantera is defeated first.
+				Enabling will replace that requirement for checking if you either have used a temple key
+				or have had a Lihzahrd altar in your inventory.
+				'''
+		}
+
+		VanillaTimeRate: {
+			Label: Vanilla Time Rate
+			Tooltip:
+				'''
+				By default, time will move 1.5x more slowly than in vanilla.
+				For extra challenge, turn this on for vanilla time speed.
+				'''
+		}
+
+		WandOfSparkingMode: {
+			Label: Wand of Sparking Mode
+			Tooltip: ""
+		}
+	}
+
+	ClientConfig: {
+		DisplayName: Visual Settings
+
+		NoScaryTextures: {
+			Label: Use Vanilla Moon Texture
+			Tooltip:
+				'''
+				Enabling will replace the Majora's Mask moon texture with the vanilla counterpart. 
+				Intended to be used with texture packs.
+				'''
+		}
+
+		RealisticPhaseShading: {
+			Label: Draw Phases Realistically
+			Tooltip:
+				'''
+				Enabling will draw black pixels in the "empty" parts of the moon phases, 
+				preventing starts from appearing behind it
+
+				Does nothing if "Use Vanilla Moon Texture" is enabled.
+				'''
+		}
+
+		SupersizedMoon: {
+			Label: Supersized Moon
+			Tooltip: Makes the moon really big
+		}
+
+		SupersizedMoon2: {
+			Label: Supersized Moon 2
+			Tooltip:
+				'''
+				Makes the moon even bigger than the Supersized Moon.
+				Can stack with Supersized Moon
+				'''
+		}
+
+		ScreenShakeStrength: {
+			Label: Screen Shake Strength
+			Tooltip: Controls the intensity of screen shaking on the final day.
+		}
+
+		GreenBackgroundDuringFinalDay: {
+			Label: Green-tinted Background during Final Day
+			Tooltip:
+				'''
+				When enabled, tints the background on the surface slightly green
+				during the final day to mimic how the sky looks during the final
+				day in Majora's Mask.
+				'''
+		}
+	}
+
+	WandOfSparkingMode: {
+		Tooltip:
+			'''
+			Inspired by Wand of Sparking's similar challenge.
+
+			Setting to 'On' will will make it so that every time you reset, you lose all of your items except:
+			The items in your first three inventory slots
+			Any axes, pickaxes, or hammers
+			Your ocarina
+			Your watch
+			Any boss masks you collect
+			Any money in your piggy bank
+			Equipped vanity items
+
+			It also makes it so that any boss masks you have count as that boss being defeated in future cycles,
+			as long as it is in your inventory.
+
+			Setting to brutal will change it to the challenge's original rules, where you only keep the items in
+			your first three slots, your ocarina, your watch, equipped vanity items, and nothing else.
+			'''
+		Off.Label: Off
+		On.Label: On
+		Brutal.Label: Brutal
+	}
+
+	ServerConfig: {
+		DisplayName: Gameplay Settings
+
+		WandOfSparkingMode: {
+			Label: Wand Of Sparking Mode
+			Tooltip: ""
+		}
+
+		PauseGameDuringDayTransitions: {
+			Label: Pause Game During Day Transitions
+			Tooltip: ""
+		}
+
+		VanillaBloodMoonLogic: {
+			Label: Vanilla Blood Moon Logic
+			Tooltip: ""
+		}
+
+		SaveWorldAfterHardmodeStarts: {
+			Label: Save World After Hardmode Starts
+			Tooltip: ""
+		}
+
+		OldManDoesntAppearOnFirstDay: {
+			Label: Old Man Doesnt Appear On First Day
+			Tooltip: ""
+		}
+
+		NoPlanteraToSummonGolem: {
+			Label: No Plantera To Summon Golem
+			Tooltip: ""
+		}
+
+		VanillaTimeRate: {
+			Label: Vanilla Time Rate
+			Tooltip: ""
+		}
+	}
+}
+
+DroppedMask: "{0} has dropped the {1} mask!"
+TwinsBossName: Twins
+AfterPartyOfDoomCondition: ""
+Conditions.MajorasMask: Nobody already has Majora's Mask
+DropConditions.WandOfSparkingOn: Mods.MajorasMaskTribute.DropConditions.WandOfSparkingOn
