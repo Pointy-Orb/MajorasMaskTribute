@@ -246,7 +246,7 @@ Configs: {
 	}
 
 	ServerConfig: {
-		DisplayName: Server Config
+		DisplayName: Gameplay Settings
 
 		WandOfSparkingMode: {
 			Label: Wand Of Sparking Mode
@@ -285,6 +285,7 @@ Configs: {
 	}
 }
 
+DroppedMask: "{0} has dropped the {1} mask!"
 TwinsBossName: Twins
 AfterPartyOfDoomCondition: ""
 Conditions.MajorasMask: Nobody already has Majora's Mask

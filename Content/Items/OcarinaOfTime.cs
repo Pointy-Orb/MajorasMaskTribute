@@ -39,7 +39,7 @@ public class OcarinaOfTime : ModItem
         Item.width = 26;
         Item.height = 22;
         Item.useTime = 1;
-        Item.useAnimation = 5;
+        Item.useAnimation = 20;
         Item.autoReuse = true;
         Item.rare = ItemRarityID.Expert;
         Item.useTurn = true;
@@ -102,9 +102,9 @@ public class OcarinaOfTime : ModItem
         var ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
         foreach (Player player in Main.ActivePlayers)
         {
-            if (Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > ocarinaTimer)
+            if (player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > ocarinaTimer)
             {
-                ocarinaTimer = Main.LocalPlayer.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
+                ocarinaTimer = player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer;
             }
         }
         whiteScreen.ocarinaTimer = ocarinaTimer;
@@ -132,6 +132,10 @@ public class ShutUpImPlayingTheHealingSong : ModSceneEffect
     {
         foreach (Player activePlayer in Main.ActivePlayers)
         {
+            if (activePlayer.position.DistanceSQ(player.position) > 1600)
+            {
+                continue;
+            }
             if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.SongOfHealing)
             {
                 return true;
@@ -168,9 +172,16 @@ public class ShutUpImPlayingTheOcarinaBackwards : ModSceneEffect
 
     public override bool IsSceneEffectActive(Player player)
     {
-        if (player.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.InvertedSongOfTime)
+        foreach (Player activePlayer in Main.ActivePlayers)
         {
-            return true;
+            if (activePlayer.position.Distance(player.position) > 1600)
+            {
+                continue;
+            }
+            if (activePlayer.HeldItem.type == ModContent.ItemType<OcarinaOfTime>() && activePlayer.GetModPlayer<OcarinaOfTimePlayer>().songPlaying == SongPlaying.InvertedSongOfTime)
+            {
+                return true;
+            }
         }
         return false;
     }
@@ -207,6 +218,7 @@ public class OcarinaOfTimePlayer : ModPlayer
             {
                 ResetEverything();
             }
+            ApocalypseSystem.ResetCounter();
             animationTimer = 0;
             Main.time = 0;
             Main.dayTime = true;
@@ -218,13 +230,13 @@ public class OcarinaOfTimePlayer : ModPlayer
             Player.QuickSpawnItem(Player.GetSource_DropAsItem(), ModContent.ItemType<InvertedSongOfTime>());
             animationTimer = 0;
         }
-        if (animationTimer >= 250 && songPlaying == SongPlaying.SongOfHealing)
+        if (animationTimer >= 300 && songPlaying == SongPlaying.SongOfHealing)
         {
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
                 if (!homunculusNPC.isHomunculus) continue;
-                if (new Rectangle((int)Main.screenPosition.X, (int)Main.screenPosition.Y, Main.screenWidth, Main.screenHeight).Intersects(npc.Hitbox))
+                if (Player.position.Distance(npc.position) < 1600)
                 {
                     //Some healing you got there.
                     npc.StrikeInstantKill();
@@ -284,5 +296,37 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
         Main.time = 0;
         Main.dayTime = true;
+    }
+
+    public override void CopyClientState(ModPlayer targetCopy)
+    {
+        OcarinaOfTimePlayer clone = (OcarinaOfTimePlayer)targetCopy;
+        clone.animationTimer = animationTimer;
+    }
+
+    public override void SendClientChanges(ModPlayer clientPlayer)
+    {
+        OcarinaOfTimePlayer clone = (OcarinaOfTimePlayer)clientPlayer;
+
+        if (animationTimer != clone.animationTimer || songPlaying != clone.songPlaying)
+        {
+            SyncPlayer(-1, Main.myPlayer, false);
+        }
+    }
+
+    public override void SyncPlayer(int toWho, int fromWho, bool newPlayer)
+    {
+        ModPacket packet = Mod.GetPacket();
+        packet.Write((byte)MajorasMaskTribute.MessageType.SyncAnimationTimer);
+        packet.Write((byte)Player.whoAmI);
+        packet.Write((short)animationTimer);
+        packet.Write((byte)songPlaying);
+        packet.Send(toWho, fromWho);
+    }
+
+    public void RecievePlayerSync(BinaryReader reader)
+    {
+        animationTimer = reader.ReadInt16();
+        songPlaying = (SongPlaying)reader.ReadByte();
     }
 }

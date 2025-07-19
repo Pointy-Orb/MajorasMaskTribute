@@ -47,6 +47,7 @@ public class ApocalypseSystem : ModSystem
             if (player.GetModPlayer<InvertedSongOfTimePlayer>().invertedSongEquipped)
             {
                 timeRate /= vanillaTimeRate ? 1.5 : 2.0;
+                tileUpdateRate /= 1.5;
                 return;
             }
         }
@@ -67,6 +68,10 @@ public class ApocalypseSystem : ModSystem
     {
         apocalypseDay = 0;
         wasDay = Main.dayTime;
+        if (Main.dedServ)
+        {
+            NetMessage.SendData(MessageID.WorldData);
+        }
     }
 
     static bool wasDay = true;
@@ -285,7 +290,14 @@ public class ApocalypseSystem : ModSystem
     {
         if (!Main.dayTime && wasDay && startChat)
         {
-            dayOfText?.DisplayDayOf();
+            if (Main.dedServ)
+            {
+                MajorasMaskTribute.NetData.NetDisplayDayOf(false, (byte)apocalypseDay);
+            }
+            else
+            {
+                dayOfText?.DisplayDayOf();
+            }
             //MoonPhase.Full
             Main.moonPhase = 0;
         }
@@ -377,6 +389,10 @@ public class ApocalypseSystem : ModSystem
         FileUtilities.Copy(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
         var newPlayer = Player.LoadPlayer(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
         newPlayer.SetAsActive();
+        if (Main.netMode != NetmodeID.SinglePlayer)
+        {
+            Player.SavePlayer(newPlayer, true);
+        }
         SoundEngine.PlaySound(SoundID.PlayerKilled);
         if (Main.LocalPlayer.Male)
         {
@@ -423,10 +439,23 @@ public class ApocalypseSystem : ModSystem
 
     private void ManageWind()
     {
-        if (!Main.dayTime && apocalypseDay >= 2)
+        if (apocalypseDay >= 2)
         {
-            Main.windSpeedTarget = 0.8f;
-            Main.windSpeedCurrent = 0.8f;
+            float speed;
+            speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 4.5f, 8.2f, 0, 0.8f);
+            Main.windSpeedTarget = speed;
+            Main.windSpeedCurrent = speed;
+        }
+        if (apocalypseDay == 0)
+        {
+            float speed;
+            speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 4.5f, 16f, 0, -0.3f);
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 16)
+            {
+                speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 16, 28, -0.3f, 0);
+            }
+            Main.windSpeedTarget = speed;
+            Main.windSpeedCurrent = speed;
         }
     }
 
@@ -448,7 +477,7 @@ public class ApocalypseSystem : ModSystem
         }
     }
 
-    public override void PostUpdateEverything()
+    public override void PostUpdateWorld()
     {
         if (apocalypseDay < 0)
         {
@@ -475,7 +504,14 @@ public class ApocalypseSystem : ModSystem
             apocalypseDay++;
             if (apocalypseDay < 3)
             {
-                dayOfText?.DisplayDayOf();
+                if (Main.dedServ)
+                {
+                    MajorasMaskTribute.NetData.NetDisplayDayOf(false, (byte)apocalypseDay);
+                }
+                else
+                {
+                    dayOfText?.DisplayDayOf();
+                }
                 //MoonPhase.Empty
                 Main.moonPhase = 4;
                 MiniatureClockTowerPlayer.PlayRooster();
@@ -488,17 +524,17 @@ public class ApocalypseSystem : ModSystem
                 SoundStyle explooood = new SoundStyle("MajorasMaskTribute/Assets/impact");
                 SoundEngine.PlaySound(explooood);
             }
+            if (Main.dedServ)
+            {
+                NetMessage.SendData(MessageID.WorldData);
+            }
         }
-        foreach (Player player in Main.ActivePlayers)
-        {
-            player.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", doApocalypseTimer);
-        }
+        wasDay = Main.dayTime;
         if (!startChat)
         {
             startChat = true;
             BroadcastCurrentDay();
         }
-        wasDay = Main.dayTime;
     }
 
     private static void SendChatMessage(LocalizedText input)
@@ -587,6 +623,18 @@ public class ApocalypseSystem : ModSystem
                 }
                 Netplay.Disconnect = true;
             }
+            foreach (Item item in Main.ActiveItems)
+            {
+                item.active = false;
+                if (Main.netMode != NetmodeID.SinglePlayer)
+                {
+                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
+                }
+            }
+            foreach (Projectile projectile in Main.ActiveProjectiles)
+            {
+                projectile.Kill();
+            }
         }
     }
 
@@ -607,7 +655,7 @@ public class ApocalypseSystem : ModSystem
                 WorldGen.Reframe(i, j, true);
             }
         }
-        if (Main.netMode != NetmodeID.SinglePlayer)
+        if (Main.dedServ)
         {
             var chunkSize = 50;
             for (int i = 0; i < Main.maxTilesX; i += chunkSize)
@@ -691,5 +739,19 @@ public class ApocalypseSystem : ModSystem
         {
             NetMessage.SendData(MessageID.WorldData);
         }
+    }
+
+    public override void NetSend(BinaryWriter writer)
+    {
+        writer.Write(apocalypseDay);
+        writer.Write(apocalypseTimer);
+        writer.Write(doApocalypseTimer);
+    }
+
+    public override void NetReceive(BinaryReader reader)
+    {
+        apocalypseDay = reader.ReadInt32();
+        apocalypseTimer = reader.ReadInt32();
+        doApocalypseTimer = reader.ReadBoolean();
     }
 }

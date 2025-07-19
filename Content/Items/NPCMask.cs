@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Chat;
 using Terraria.Localization;
 using Terraria.ModLoader.IO;
 using Terraria.GameContent.ItemDropRules;
@@ -7,6 +8,7 @@ using Terraria.GameContent.Drawing;
 using Microsoft.Xna.Framework;
 using Terraria.ModLoader;
 using Terraria.ID;
+using System.IO;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -30,7 +32,7 @@ public abstract class NPCMask : ModItem
         NPCMaskDrops.maskNPCs.Add(targetNPC, this);
         var npc = new NPC();
         npc.SetDefaults(targetNPC);
-        npcName = npc.FullName;
+        npcName = npc.TypeName;
     }
 
     public override void SetDefaults()
@@ -64,6 +66,17 @@ public abstract class NPCMask : ModItem
                     MovementVector = Vector2.Zero,
                     UniqueInfoPiece = 1
                 });
+                if (npc.townNPC)
+                {
+                    if (Main.dedServ)
+                    {
+                        ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Announcement.HasArrived", npc.FullName), new Color(50, 125, byte.MaxValue));
+                    }
+                    else
+                    {
+                        Main.NewText(Language.GetTextValue("Announcement.HasArrived", npc.FullName), 50, 125, byte.MaxValue);
+                    }
+                }
                 OnTransform();
                 break;
             }
@@ -363,6 +376,7 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = target.GetGlobalNPC<HomunculusNPC>();
         homunculusNPC.isHomunculus = true;
         homunculusNPC.originalType = originalType;
+        target.netUpdate = true;
     }
 
     public override void PostAI(NPC npc)
@@ -378,9 +392,20 @@ public class HomunculusNPC : GlobalNPC
         {
             maskCooldown = 2000;
             Item.NewItem(npc.GetSource_DropAsItem(), npc.Top, Vector2.One, NPCMaskDrops.maskNPCs[npc.type].Type);
+            string oldForm = npc.TypeName;
+            string newForm = npc.GivenName;
             npc.Transform(homunculusNPC.originalType);
             npc.velocity = Vector2.Zero;
             homunculusNPC.isHomunculus = false;
+            npc.netUpdate = true;
+            if (Main.dedServ)
+            {
+                ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.MajorasMaskTribute.DroppedMask", npc.TypeName, oldForm), new Color(byte.MaxValue, 25, 25));
+            }
+            else if (Main.netMode == NetmodeID.SinglePlayer)
+            {
+                Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.DroppedMask", newForm, oldForm), byte.MaxValue, 25, 25);
+            }
             return false;
         }
         return true;
@@ -401,5 +426,19 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         homunculusNPC.isHomunculus = tag.GetBool("isHomunculus");
         homunculusNPC.originalType = tag.GetInt("originalType");
+    }
+
+    public override void SendExtraAI(NPC npc, BitWriter bitWriter, BinaryWriter binaryWriter)
+    {
+        var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
+        bitWriter.WriteBit(homunculusNPC.isHomunculus);
+        binaryWriter.Write((short)homunculusNPC.originalType);
+    }
+
+    public override void ReceiveExtraAI(NPC npc, BitReader bitReader, BinaryReader binaryReader)
+    {
+        var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
+        homunculusNPC.isHomunculus = bitReader.ReadBit();
+        homunculusNPC.originalType = binaryReader.ReadInt16();
     }
 }

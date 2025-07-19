@@ -40,9 +40,10 @@ public class DayOfText : UIText
         hourText = new HourText(defaultHourScale);
     }
 
-    public void DisplayDayOf(bool overridePause = false)
+    public void DisplayDayOf(bool overridePause = false, int? dayOverride = null)
     {
         BlackScreen.overridePauseForEffect = overridePause;
+        int day = dayOverride ?? ApocalypseSystem.apocalypseDay;
 
         if (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime)
         {
@@ -53,13 +54,13 @@ public class DayOfText : UIText
             defaultScale = 1;
         }
 
-        var message = (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{ApocalypseSystem.apocalypseDay}");
-        SetText(message, Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
+        var message = (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{day}");
+        SetText(message, Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
 
-        int hours = 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - ApocalypseSystem.apocalypseDay) * 24);
+        int hours = 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - day) * 24);
         var hourMessage = Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.HoursRemaining", hours);
         hourText?.SetText(hourMessage,
-                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
+                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
         time = 300;
 
         if (!BlackScreen.PauseGameDuringDayTransitions || !Main.dayTime)
@@ -67,10 +68,10 @@ public class DayOfText : UIText
             hourText.VAlign = HourText.defaultVAlign;
             return;
         }
-        Dawn.VAlign = 0.35f - (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 0, 0.03f)) - 0.02f;
+        Dawn.VAlign = 0.35f - (Utils.Remap(day, 0, 2, 0, 0.03f)) - 0.02f;
         hourText.TextColor = Color.Black;
-        hourText.VAlign = (HourText.defaultVAlign + (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 0, 0.03f))) + 0.03f;
-        Dawn.SetText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.DawnOf"), defaultDawnScale * (Utils.Remap(ApocalypseSystem.apocalypseDay, 0, 2, 1, 1.5f)), true);
+        hourText.VAlign = (HourText.defaultVAlign + (Utils.Remap(day, 0, 2, 0, 0.03f))) + 0.03f;
+        Dawn.SetText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.DawnOf"), defaultDawnScale * (Utils.Remap(day, 0, 2, 1, 1.5f)), true);
     }
 
     public void BroadcastNewDay()
