@@ -203,7 +203,7 @@ public class BlackScreen : UIElement
     {
         if (display && PauseGameDuringDayTransitions)
         {
-            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), newDay ? Color.White : Color.Black);
+            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight + 1), newDay ? Color.White : Color.Black);
             pausedForEffect = true;
         }
         else
