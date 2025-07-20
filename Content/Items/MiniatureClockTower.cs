@@ -147,13 +147,16 @@ public class AnyWatchSystem : ModSystem
 
 public class BellRingingEffect : ModSceneEffect
 {
-    public override int Music => 0;
+    //Using actual silence (Music => 0) will cut the preceding music off abruptly instead of fading it out.
+    public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
 
     public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 
     public override bool IsSceneEffectActive(Player player)
     {
         if (!Main.dayTime && Common.ApocalypseSystem.apocalypseDay >= 2)
+            return false;
+        if (Main.eclipse && !ModContent.GetInstance<Common.ServerConfig>().VanillaEclipseLogic)
             return false;
         if (Main.dayTime && Common.ApocalypseSystem.dayOfText.time > 0)
             return true;
@@ -199,7 +202,7 @@ public class MiniatureClockTowerPlayer : ModPlayer
         {
             SoundEngine.PlaySound(nightHowl);
         }
-        if (Main.dayTime && !wasDay && Common.ApocalypseSystem.apocalypseDay <= 1)
+        if (Main.dayTime && !wasDay && Common.ApocalypseSystem.apocalypseDay <= 1 && !(Main.eclipse && !ModContent.GetInstance<Common.ServerConfig>().VanillaEclipseLogic))
         {
             if (Common.ApocalypseSystem.cycleActive)
             {
@@ -215,6 +218,10 @@ public class MiniatureClockTowerPlayer : ModPlayer
 
     public static void PlayRooster()
     {
+        if (Main.eclipse && !ModContent.GetInstance<Common.ServerConfig>().VanillaEclipseLogic)
+        {
+            return;
+        }
         SoundEngine.PlaySound(dayDoodleDoo);
     }
 }

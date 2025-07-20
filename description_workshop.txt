@@ -2,7 +2,7 @@
 
 [h3]Adds the moon from The Legend of Zelda: Majora's Mask into Terraria, complete with a 3-day cycle and an ocarina to rewind it all.[/h3]
 
-[b]Can you beat Terraria in three days time?[/b]
+[b]How many resets will it take for you to beat Terraria?[/b]
 
 
 [h2]FEATURES:[/h2]
@@ -11,12 +11,28 @@
 	[*]Ocarina of Time (Can also play the Song of Healing!)
 	[*]Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on
 	[*]NPCs drop masks when they die that allow you to hold onto them in the next cycle
+	[*]You can play the Inverted Song of Time when you are in inverted gravity
 [/list]
 
 All is reset when the moon crashes into your world, including your character! (to the last time the Song of Time was played)
 Playing the song of time resets the world but preserves your character.
 
+v1.1 changes:
+	- Multiplayer compatible!
+	- Wand of Sparking mode for those who want an experience similar to that challenge.
+	- Reworked blood moons to happen during the final hours (can be changed in config)
+	- Reworked solar eclipses to be triggered using a new item that can be obtained after one mech boss (can be changed in config)
+	- Music fades out when bells are ringing instead of abruptly cutting off
+	- Checkpoint after starting hardmode can now be disabled.
+	- Proper "day of" screens that resemble those from Majora's Mask (can be changed to old verison in config)
+	- Config option to use vanilla textures for the moon so that you can use any moon texture pack.
+	- Screen-shake strength during final day is now adjustable and can be turned off.
+	- Config option that, when turned on, removes the need to kill Plantera to summon Golem.
+	- 'Majora's Mask' item obtained post-Moonlord that allows the cycle to be disabled.
+	- And more!
 
-[i]NOTE: Not tested in multiplayer.[/i]
+[url=https://github.com/Pointy-Orb/MajorasMaskTribute]Source code[/url]
 
 [i]For the 2025 tModLoader Mod Jam.[/i]
+[quote=tModLoader MajorasMaskTribute]
+Developed By Pointy Orb[/quote]

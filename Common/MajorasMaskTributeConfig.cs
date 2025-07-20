@@ -30,6 +30,8 @@ public class ServerConfig : ModConfig
 
     public bool VanillaBloodMoonLogic { get; set; }
 
+    public bool VanillaEclipseLogic { get; set; }
+
     public bool SaveWorldAfterHardmodeStarts { get; set; }
 
     public bool OldManDoesntAppearOnFirstDay { get; set; }

@@ -33,8 +33,6 @@ public class ApocalypseSystem : ModSystem
     //Off-by-one because I couldn't help myself
     public static int apocalypseDay { get; private set; } = 0;
 
-    public static int resets { get; set; } = 0;
-
     public static bool cycleNeverDisabled { get; private set; } = true;
 
     public static DayOfText dayOfText;
@@ -110,6 +108,28 @@ public class ApocalypseSystem : ModSystem
         TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
         TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
     }
+
+    /*
+    private static void IL_StopEclipse(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var jumpLabel = il.DefineLabel();
+            c.GotoNext(i => i.MatchStsfld(typeof(Main).GetField(nameof(Main.eclipse))));
+            c.GotoPrev(MoveType.After, i => i.MatchBrtrue(out jumpLabel));
+            c.EmitDelegate<Func<bool>>(() =>
+            {
+                return ModContent.GetInstance<ServerConfig>().VanillaEclipseLogic || !cycleActive;
+            });
+            c.Emit(Brfalse_S, jumpLabel);
+        }
+        catch
+        {
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+        }
+    }
+	*/
 
     private static void IL_StopBloodMoon(ILContext il)
     {
@@ -233,6 +253,42 @@ public class ApocalypseSystem : ModSystem
             c.GotoNext(i => i.MatchStloc(out _));
             c.Emit(Pop);
             c.Emit(Ldc_R4, 1f);
+
+            //Change the size of the sun during an eclipse
+            c.GotoPrev(i => i.MatchLdsfld(typeof(TextureAssets).GetField(nameof(TextureAssets.Sun3))));
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.cloudAlpha))));
+            c.GotoPrev(i => i.MatchLdarg(out _));
+            var sunSizeIndex = 0;
+            c.GotoPrev(MoveType.After, i => i.MatchStloc(out sunSizeIndex));
+            c.Emit(Ldloc, sunSizeIndex);
+            c.EmitDelegate<Func<float>>(() =>
+            {
+                if (!Main.eclipse)
+                {
+                    return 1f;
+                }
+                var multiplier = 1f;
+                if (apocalypseDay >= 2)
+                {
+                    multiplier = Utils.Remap((float)Main.time, 0, (float)Main.dayLength, 7f, 10f);
+                }
+                else if (apocalypseDay == 1)
+                {
+                    multiplier = 3f;
+                }
+                if (ModContent.GetInstance<ClientConfig>().SupersizedMoon)
+                {
+                    multiplier *= 2;
+                }
+                if (ModContent.GetInstance<ClientConfig>().SupersizedMoon2)
+                {
+                    multiplier *= 3;
+                }
+                return multiplier;
+            });
+            c.Emit(Mul);
+            c.Emit(Stloc, sunSizeIndex);
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
         catch
         {
@@ -284,6 +340,23 @@ public class ApocalypseSystem : ModSystem
         {
             Platform.Get<IPathService>().MoveToRecycleBin(path + ".dayone");
         }
+        var tPath = Path.ChangeExtension(path, ".tplr");
+        if (!FileUtilities.Exists(tPath + ".dayone", cloud))
+        {
+            return;
+        }
+        if (cloud && SocialAPI.Cloud != null)
+        {
+            SocialAPI.Cloud.Delete(tPath + ".dayone");
+        }
+        else if (forceDeleteFile)
+        {
+            File.Delete(tPath + ".dayone");
+        }
+        else
+        {
+            Platform.Get<IPathService>().MoveToRecycleBin(tPath + ".dayone");
+        }
     }
 
     public override void PostUpdateTime()
@@ -325,19 +398,23 @@ public class ApocalypseSystem : ModSystem
     {
         apocalypseDay = 0;
         cycleNeverDisabled = true;
-        resets = 0;
         startChat = false;
         if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave) && FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
         {
             FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
         }
+        if (!FileUtilities.Exists(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Main.ActiveWorldFileData.IsCloudSave) && FileUtilities.Exists(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave))
+        {
+            FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
+        }
+
         if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave) && FileUtilities.Exists(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave))
         {
             FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
         }
-        if (!FileUtilities.Exists(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Main.ActiveWorldFileData.IsCloudSave) && FileUtilities.Exists(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave))
+        if (!FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave) && FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave))
         {
-            FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
+            FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
         }
     }
 
@@ -363,7 +440,7 @@ public class ApocalypseSystem : ModSystem
     private void MaybeScreenShake()
     {
         int hours = (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() - 4;
-        if ((int)Utils.GetDayTimeAs24FloatStartingFromMidnight() < 4.5)
+        if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 4.5)
         {
             hours = 20 + (int)Utils.GetDayTimeAs24FloatStartingFromMidnight();
         }
@@ -380,19 +457,23 @@ public class ApocalypseSystem : ModSystem
         {
             return;
         }
-        if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave))
-            return;
         if (Main.netMode == NetmodeID.Server)
         {
             return;
         }
+        ResetLocalPlayer();
+    }
+
+    public static void ResetLocalPlayer()
+    {
+        if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave))
+            return;
         FileUtilities.Copy(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
+        if (FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave))
+            FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave);
         var newPlayer = Player.LoadPlayer(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
+        //Main.player[Main.myPlayer] = newPlayer.Player;
         newPlayer.SetAsActive();
-        if (Main.netMode != NetmodeID.SinglePlayer)
-        {
-            Player.SavePlayer(newPlayer, true);
-        }
         SoundEngine.PlaySound(SoundID.PlayerKilled);
         if (Main.LocalPlayer.Male)
         {
@@ -430,6 +511,26 @@ public class ApocalypseSystem : ModSystem
             {
                 Main.StartRain();
             }
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 11.8f)
+            {
+                Main.maxRaining = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 5.1f, 9.7f, 0.24f, 0.61f);
+            }
+            else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 14.1f)
+            {
+                Main.maxRaining = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 11.8f, 12.3f, 0.61f, 0.97f);
+            }
+            else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 18.4f)
+            {
+                Main.maxRaining = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 14.1f, 16.6f, 0.97f, 0.31f);
+            }
+            else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 22.3f)
+            {
+                Main.maxRaining = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 18.4f, 21.9f, 0.31f, 0.64f);
+            }
+            else
+            {
+                Main.maxRaining = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 22.3f, 26.1f, 0.64f, 0.34f);
+            }
         }
         else if (Main.raining)
         {
@@ -442,9 +543,11 @@ public class ApocalypseSystem : ModSystem
         if (apocalypseDay >= 2)
         {
             float speed;
-            speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 4.5f, 8.2f, 0, 0.8f);
+            speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 4.5f, 8.2f, -0.1f, 0.8f);
             Main.windSpeedTarget = speed;
             Main.windSpeedCurrent = speed;
+            Sandstorm.Happening = Utils.GetDayTimeAs24FloatStartingFromMidnight() > 11.7f;
+            Sandstorm.Severity = speed;
         }
         if (apocalypseDay == 0)
         {
@@ -456,6 +559,22 @@ public class ApocalypseSystem : ModSystem
             }
             Main.windSpeedTarget = speed;
             Main.windSpeedCurrent = speed;
+        }
+        if (apocalypseDay == 1)
+        {
+            float speed;
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 13.1)
+            {
+                speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 4.5f, 11.1f, 0, -0.62f);
+            }
+            else
+            {
+                speed = Utils.Remap(Utils.GetDayTimeAs24FloatStartingFromMidnight(), 13.1f, 17.5f, -0.62f, -0.1f);
+            }
+            Main.windSpeedTarget = speed;
+            Main.windSpeedCurrent = speed;
+            Sandstorm.Happening = MathF.Abs(speed) >= 0.62f;
+            Sandstorm.Severity = 0.41f;
         }
     }
 
@@ -491,9 +610,18 @@ public class ApocalypseSystem : ModSystem
         }
         if (apocalypseTimer <= 0 && doApocalypseTimer)
         {
+            if (Main.dedServ)
+            {
+                MajorasMaskTribute.NetData.ResetPlayers();
+            }
             DestroyEverything();
             apocalypseDay = 0;
             doApocalypseTimer = false;
+            NetMessage.SendData(MessageID.WorldData);
+            if (Main.dedServ)
+            {
+                MajorasMaskTribute.NetData.TurnOffBlowUpShader();
+            }
         }
         if (apocalypseTimer > 0)
         {
@@ -520,14 +648,25 @@ public class ApocalypseSystem : ModSystem
             {
                 apocalypseTimer = 30;
                 doApocalypseTimer = true;
-                Main.instance.CameraModifiers.Add(new ApocalypseScreenShake(80, FullName));
-                SoundStyle explooood = new SoundStyle("MajorasMaskTribute/Assets/impact");
-                SoundEngine.PlaySound(explooood);
+                if (Main.dedServ)
+                {
+                    MajorasMaskTribute.NetData.BlowUpClient(FullName);
+                }
+                else
+                {
+                    Main.instance.CameraModifiers.Add(new ApocalypseScreenShake(80, FullName));
+                    SoundStyle explooood = new SoundStyle("MajorasMaskTribute/Assets/impact");
+                    SoundEngine.PlaySound(explooood);
+                }
             }
             if (Main.dedServ)
             {
                 NetMessage.SendData(MessageID.WorldData);
             }
+        }
+        if (!Main.dedServ)
+        {
+            Main.LocalPlayer.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", doApocalypseTimer);
         }
         wasDay = Main.dayTime;
         if (!startChat)
@@ -555,16 +694,11 @@ public class ApocalypseSystem : ModSystem
         {
             tag["apocalypseDay"] = apocalypseDay;
         }
-        if (resets > 0)
-        {
-            tag["resets"] = resets;
-        }
     }
 
     public override void LoadWorldData(TagCompound tag)
     {
         apocalypseDay = tag.GetInt("apocalypseDay");
-        resets = tag.GetInt("resets");
     }
 
     public class SaveDayOnePass : GenPass
@@ -608,6 +742,10 @@ public class ApocalypseSystem : ModSystem
                     player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
                 }
                 player.KillMe(deathReason, 99999, 0);
+                if (Main.dedServ)
+                {
+                    NetMessage.SendPlayerDeath(player.whoAmI, deathReason, 99999, 0, false);
+                }
             }
             foreach (NPC npc in Main.ActiveNPCs)
             {
@@ -615,53 +753,16 @@ public class ApocalypseSystem : ModSystem
                 npc.StrikeInstantKill();
             }
             ResetWorldInner();
-            if (Main.netMode != NetmodeID.SinglePlayer)
-            {
-                foreach (Player player in Main.ActivePlayers)
-                {
-                    NetMessage.BootPlayer(player.whoAmI, NetworkText.FromKey("Mods.MajorasMaskTribute.MultiplayerResetMessage.Violent"));
-                }
-                Netplay.Disconnect = true;
-            }
-            /*
-            foreach (Item item in Main.ActiveItems)
-            {
-                item.active = false;
-                if (Main.netMode != NetmodeID.SinglePlayer)
-                {
-                    NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
-                }
-            }
-			foreach (Projectile projectile in Main.ActiveProjectiles)
-			{
-				projectile.Kill();
-			}
-			for (int i = 0; i < Main.npc.Length; i++)
-			{
-				if (!Main.npc[i].active)
-				return;
-				var npc = Main.npc[i];
-				if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay))
-				{
-				npc.Transform(NPCID.Bunny);
-				npc.position = Vector2.Zero;
-				npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-				npc.StrikeInstantKill();
-				}
-				npc.netUpdate = true;
-			}
-			*/
         }
     }
 
     public static void ResetWorldInner()
     {
-        int tempResets = resets;
+        Rain.ClearRain();
         WorldGen.clearWorld();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
-        resets = tempResets;
         startChat = true;
         for (int i = 0; i < Main.maxTilesX; i++)
         {
@@ -705,17 +806,22 @@ public class ApocalypseSystem : ModSystem
                 NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
             }
         }
+        bool sparedOldMan = ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay;
         for (int i = 0; i < Main.npc.Length; i++)
         {
             if (!Main.npc[i].active)
-                return;
+                continue;
             var npc = Main.npc[i];
-            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay))
+            if (!npc.HasGivenName && (npc.type != NPCID.OldMan || sparedOldMan))
             {
                 npc.Transform(NPCID.Bunny);
                 npc.position = Vector2.Zero;
                 npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
                 npc.StrikeInstantKill();
+            }
+            else if (npc.type == NPCID.OldMan)
+            {
+                sparedOldMan = true;
             }
             npc.netUpdate = true;
         }
@@ -725,8 +831,9 @@ public class ApocalypseSystem : ModSystem
     public static void ResetApocalypseVariables()
     {
         Main.StopRain();
+        Main.moonPhase = 0;
         Main.raining = false;
-        Main.maxRain = 0;
+        Main.maxRaining = 0;
         Main.windSpeedTarget = 0;
         Main.windSpeedCurrent = 0;
         Main.time = 0;
@@ -749,7 +856,6 @@ public class ApocalypseSystem : ModSystem
                 player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();
             }
         }
-        resets++;
         ResetCounter();
         if (Main.netMode != NetmodeID.SinglePlayer)
         {

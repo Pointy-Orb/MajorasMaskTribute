@@ -101,11 +101,30 @@ Items: {
 		The {0} will count as defeated for all future cycles 
 		where this is in your inventory.
 		'''
+
+	EclipseDisc: {
+		DisplayName: Eclipsing Stone
+		Tooltip:
+			'''
+			Playing the Song of Time while this is in your inventory will trigger a Solar Eclipse at the start of the next cycle.
+			That eclipse will be equivalent to one at your current level of progression.
+			Consumed upon usage.
+			'''
+	}
+
+	MoonTear: {
+		DisplayName: Moon's Tear
+		Tooltip:
+			'''
+			Rumored to be the shiniest stone in the world.
+			Many will pay high for this.
+			'''
+	}
 }
 
 Configs: {
-	MajorasMaskTributeConfig: {
-		DisplayName: Settings
+	ServerConfig: {
+		DisplayName: Gameplay Settings
 
 		VanillaBloodMoonLogic: {
 			Label: Vanilla Blood Moon Logic
@@ -130,7 +149,11 @@ Configs: {
 
 		SaveWorldAfterHardmodeStarts: {
 			Label: Save World After Hardmode Starts
-			Tooltip: When enabled, a new 'first day' will be made for your world once after you beat the Wall of Flesh and once after beating the Moonlord.
+			Tooltip:
+				'''
+				When enabled, a new 'first day' will be made for your world 
+				once after you beat the Wall of Flesh and once after beating the Moonlord.
+				'''
 		}
 
 		OldManDoesntAppearOnFirstDay: {
@@ -164,6 +187,17 @@ Configs: {
 		WandOfSparkingMode: {
 			Label: Wand of Sparking Mode
 			Tooltip: ""
+		}
+
+		VanillaEclipseLogic: {
+			Label: Vanilla Eclipse Logic
+			Tooltip:
+				'''
+				By default, random eclipses will be disabled and the player will be expected to use Eclipsing Stones
+				and Solar Tablets to summon them instead.
+
+				Enabling will bring back random eclipses.
+				'''
 		}
 	}
 
@@ -244,49 +278,17 @@ Configs: {
 		On.Label: On
 		Brutal.Label: Brutal
 	}
-
-	ServerConfig: {
-		DisplayName: Gameplay Settings
-
-		WandOfSparkingMode: {
-			Label: Wand Of Sparking Mode
-			Tooltip: ""
-		}
-
-		PauseGameDuringDayTransitions: {
-			Label: Pause Game During Day Transitions
-			Tooltip: ""
-		}
-
-		VanillaBloodMoonLogic: {
-			Label: Vanilla Blood Moon Logic
-			Tooltip: ""
-		}
-
-		SaveWorldAfterHardmodeStarts: {
-			Label: Save World After Hardmode Starts
-			Tooltip: ""
-		}
-
-		OldManDoesntAppearOnFirstDay: {
-			Label: Old Man Doesnt Appear On First Day
-			Tooltip: ""
-		}
-
-		NoPlanteraToSummonGolem: {
-			Label: No Plantera To Summon Golem
-			Tooltip: ""
-		}
-
-		VanillaTimeRate: {
-			Label: Vanilla Time Rate
-			Tooltip: ""
-		}
-	}
 }
 
 DroppedMask: "{0} has dropped the {1} mask!"
 TwinsBossName: Twins
 AfterPartyOfDoomCondition: ""
-Conditions.MajorasMask: Nobody already has Majora's Mask
-DropConditions.WandOfSparkingOn: Mods.MajorasMaskTribute.DropConditions.WandOfSparkingOn
+Conditions.MajorasMask: Drops when nobody already has Majora's Mask
+
+DropConditions: {
+	WandOfSparkingOn: Wand of Sparking Mode item
+	VanillaBloodMoonOn: Drops when Vanilla Blood Moon Logic Enabled
+	VanillaBloodMoonOff: Drops when Vanilla Blood Moon Logic Disabled
+}
+
+VanillaEclipseLogicDisabled: When Vanilla Eclipse Logic is disabled

@@ -10,8 +10,8 @@ public class PhaseDisc : ModItem
     {
         Item.width = 24;
         Item.height = 24;
-        Item.useAnimation = 1;
-        Item.useTime = 1;
+        Item.useAnimation = 5;
+        Item.useTime = 5;
         Item.useStyle = ItemUseStyleID.HoldUp;
         Item.UseSound = SoundID.Item4;
         Item.rare = ItemRarityID.Orange;
@@ -24,7 +24,7 @@ public class PhaseDisc : ModItem
         {
             Main.moonPhase = 0;
         }
-        return null;
+        return true;
     }
 
     public override void AddRecipes()

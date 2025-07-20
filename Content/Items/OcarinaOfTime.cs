@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.Localization;
+using Terraria.Chat;
 using Terraria.GameContent.Events;
 using System.Linq;
 using System.IO;
@@ -15,6 +17,7 @@ using Terraria.Audio;
 using Terraria.ModLoader;
 using Terraria.ID;
 using Microsoft.Xna.Framework;
+using Terraria.DataStructures;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -44,6 +47,17 @@ public class OcarinaOfTime : ModItem
         Item.rare = ItemRarityID.Expert;
         Item.useTurn = true;
         Item.holdStyle = ItemHoldStyleID.HoldFront;
+    }
+
+    //Prevent those with bad connections from having the song of time trigger again due to lag
+    public override bool CanUseItem(Player player)
+    {
+        if (Main.netMode != NetmodeID.SinglePlayer && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 5)
+        {
+            player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer = 0;
+            return false;
+        }
+        return true;
     }
 
     public override bool? UseItem(Player player)
@@ -81,7 +95,7 @@ public class OcarinaOfTime : ModItem
 
     public override void UpdateInventory(Player player)
     {
-        if (player.itemTime <= 0 && player.HeldItem.type == Type)
+        if (player.itemTime <= 0 || player.HeldItem.type != Type)
         {
             player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying = SongPlaying.None;
         }
@@ -132,7 +146,7 @@ public class ShutUpImPlayingTheHealingSong : ModSceneEffect
     {
         foreach (Player activePlayer in Main.ActivePlayers)
         {
-            if (activePlayer.position.DistanceSQ(player.position) > 1600)
+            if (activePlayer.position.Distance(player.position) > 1600)
             {
                 continue;
             }
@@ -209,17 +223,24 @@ public class OcarinaOfTimePlayer : ModPlayer
     {
         if (animationTimer >= 660 && songPlaying == SongPlaying.SongOfTime)
         {
-            if (Main.netMode != NetmodeID.Server)
+            if (Main.netMode == NetmodeID.SinglePlayer)
             {
                 Player.SavePlayer(Main.ActivePlayerFileData);
                 FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+                if (FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave))
+                    FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
             }
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
                 ResetEverything();
             }
+            if (Main.dedServ)
+            {
+                MajorasMaskTribute.NetData.SavePlayerBackups();
+            }
             ApocalypseSystem.ResetCounter();
             animationTimer = 0;
+            songPlaying = SongPlaying.None;
             Main.time = 0;
             Main.dayTime = true;
             ApocalypseSystem.dayOfText?.DisplayDayOf();
@@ -261,6 +282,12 @@ public class OcarinaOfTimePlayer : ModPlayer
             item.SetDefaults(ItemID.GoldWatch);
             yield return item;
         }
+        else
+        {
+            var item = new Item();
+            item.SetDefaults(ItemID.CopperWatch);
+            yield return item;
+        }
     }
 
     private static void ResetEverything()
@@ -276,9 +303,10 @@ public class OcarinaOfTimePlayer : ModPlayer
             npc.position = Vector2.Zero;
             npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
             npc.active = false;
+            npc.netUpdate = true;
         }
         ApocalypseSystem.ResetWorldInner();
-	foreach (Player player in Main.ActivePlayers)
+        foreach (Player player in Main.ActivePlayers)
         {
             var spawnPos = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height);
             player.Teleport(spawnPos, 6);
@@ -294,8 +322,31 @@ public class OcarinaOfTimePlayer : ModPlayer
                 player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();
             }
         }
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (player.GetModPlayer<EclipseDiscPlayer>().CheckForEclipseDisc())
+            {
+                var key = Main.remixWorld ? "LegacyMisc.106" : "LegacyMisc.20";
+                if (Main.dedServ)
+                {
+                    ChatHelper.BroadcastChatMessage(NetworkText.FromKey(key), new Color(50, byte.MaxValue, 130));
+                    MajorasMaskTribute.NetData.RemoveEclipseDisc((byte)player.whoAmI);
+                }
+                else
+                {
+                    Main.NewText(Language.GetTextValue(key), 50, byte.MaxValue, 130);
+                }
+                break;
+            }
+        }
         Main.time = 0;
         Main.dayTime = true;
+    }
+
+    public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)
+    {
+        animationTimer = 0;
+        songPlaying = SongPlaying.None;
     }
 
     public override void CopyClientState(ModPlayer targetCopy)

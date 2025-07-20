@@ -93,6 +93,10 @@ public class DayOfText : UIText
         {
             TextColor = Color.White;
         }
+        if (!Main.dayTime || !BlackScreen.PauseGameDuringDayTransitions)
+        {
+            Dawn.SetText("");
+        }
         ShadowColor = defaultShadow;
         Dawn.ShadowColor = defaultShadow;
         if (time > 0)

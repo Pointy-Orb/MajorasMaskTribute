@@ -106,6 +106,10 @@ public class FinalNightEffect : ModSceneEffect
 
     public override bool IsSceneEffectActive(Player player)
     {
+        if (ApocalypseSystem.apocalypseDay > 2)
+        {
+            return true;
+        }
         if (Main.dayTime || ApocalypseSystem.apocalypseDay < 2)
         {
             return false;

@@ -1,4 +1,7 @@
 using System;
+using Terraria.Localization;
+using Terraria.Utilities;
+using Terraria.Audio;
 using Terraria.ID;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +25,13 @@ namespace MajorasMaskTribute
         internal enum MessageType : byte
         {
             SyncAnimationTimer,
-            DisplayDayOf
+            DisplayDayOf,
+            BlowUpClient,
+            TurnOffBlowUpShader,
+            ResetPlayers,
+            SavePlayerBackups,
+            StartEclipse,
+            RemoveEclipseDisc
         }
 
         public override void Load()
@@ -59,6 +68,48 @@ namespace MajorasMaskTribute
                         MiniatureClockTowerPlayer.PlayRooster();
                     }
                     break;
+                case MessageType.BlowUpClient:
+                    string name = reader.ReadString();
+                    Main.instance.CameraModifiers.Add(new ApocalypseScreenShake(80, name));
+                    SoundStyle explooood = new SoundStyle("MajorasMaskTribute/Assets/impact");
+                    Main.LocalPlayer.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", true);
+                    SoundEngine.PlaySound(explooood);
+                    break;
+                case MessageType.TurnOffBlowUpShader:
+                    Main.LocalPlayer.ManageSpecialBiomeVisuals("MajorasMaskTribute:BigScaryFlashShader", false);
+                    break;
+                case MessageType.ResetPlayers:
+                    ApocalypseSystem.ResetLocalPlayer();
+                    break;
+                case MessageType.SavePlayerBackups:
+                    Player.SavePlayer(Main.ActivePlayerFileData);
+                    FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+                    if (FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave))
+                    {
+                        FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+                    }
+                    break;
+                case MessageType.StartEclipse:
+                    Main.eclipse = true;
+                    var key = Main.remixWorld ? "LegacyMisc.106" : "LegacyMisc.20";
+                    Main.NewText(Language.GetTextValue(key), 50, byte.MaxValue, 130);
+                    break;
+                case MessageType.RemoveEclipseDisc:
+                    var player = reader.ReadByte();
+                    if (player != Main.myPlayer)
+                    {
+                        return;
+                    }
+                    int disc = Main.player[player].FindItem(ModContent.ItemType<EclipseDisc>(), Main.player[player].inventory);
+                    if (disc < 0)
+                        return;
+                    var discItem = Main.player[player].inventory[disc];
+                    discItem.stack--;
+                    if (discItem.stack <= 0)
+                    {
+                        discItem.TurnToAir();
+                    }
+                    break;
             }
         }
 
@@ -71,6 +122,50 @@ namespace MajorasMaskTribute
                 alertPacket.Write(overridePause);
                 alertPacket.Write(day);
                 alertPacket.Send();
+            }
+
+            public static void BlowUpClient(string name)
+            {
+                var explodePacket = MajorasMaskTribute.mod.GetPacket();
+                explodePacket.Write((byte)MajorasMaskTribute.MessageType.BlowUpClient);
+                explodePacket.Write(name);
+                explodePacket.Send();
+            }
+
+            public static void TurnOffBlowUpShader()
+            {
+                var shaderPacket = MajorasMaskTribute.mod.GetPacket();
+                shaderPacket.Write((byte)MajorasMaskTribute.MessageType.TurnOffBlowUpShader);
+                shaderPacket.Send();
+            }
+
+            public static void ResetPlayers()
+            {
+                var resetPacket = MajorasMaskTribute.mod.GetPacket();
+                resetPacket.Write((byte)MajorasMaskTribute.MessageType.ResetPlayers);
+                resetPacket.Send();
+            }
+
+            public static void SavePlayerBackups()
+            {
+                var backupPacket = MajorasMaskTribute.mod.GetPacket();
+                backupPacket.Write((byte)MajorasMaskTribute.MessageType.SavePlayerBackups);
+                backupPacket.Send();
+            }
+
+            public static void StartEclipse()
+            {
+                var eclipsePacket = MajorasMaskTribute.mod.GetPacket();
+                eclipsePacket.Write((byte)MajorasMaskTribute.MessageType.StartEclipse);
+                eclipsePacket.Send();
+            }
+
+            public static void RemoveEclipseDisc(byte player)
+            {
+                var rmPacket = MajorasMaskTribute.mod.GetPacket();
+                rmPacket.Write((byte)MajorasMaskTribute.MessageType.RemoveEclipseDisc);
+                rmPacket.Write(player);
+                rmPacket.Send();
             }
         }
     }
