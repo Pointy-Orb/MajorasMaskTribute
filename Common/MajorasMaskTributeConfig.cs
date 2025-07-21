@@ -34,9 +34,15 @@ public class ServerConfig : ModConfig
 
     public bool SaveWorldAfterHardmodeStarts { get; set; }
 
+    [DefaultValue(true)]
+    public bool WOFDropsDemonConch { get; set; }
+
     public bool OldManDoesntAppearOnFirstDay { get; set; }
 
     public bool NoPlanteraToSummonGolem { get; set; }
+
+    [DefaultValue(true)]
+    public bool EatTempleKey { get; set; }
 
     public bool VanillaTimeRate { get; set; }
 }
@@ -57,6 +63,10 @@ public class ClientConfig : ModConfig
 
     public bool SupersizedMoon { get; set; }
     public bool SupersizedMoon2 { get; set; }
+
+    [DefaultValue(1.5f)]
+    [Range(0.5f, 2.5f)]
+    public float HUDClockSize { get; set; }
 
     public override void OnChanged()
     {

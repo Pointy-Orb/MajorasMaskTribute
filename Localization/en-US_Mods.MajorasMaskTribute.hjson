@@ -204,6 +204,16 @@ Configs: {
 				Enabling will bring back random eclipses.
 				'''
 		}
+
+		EatTempleKey: {
+			Label: Consumable Temple Key
+			Tooltip: Disable to make the temple key non-consumable
+		}
+
+		WOFDropsDemonConch: {
+			Label: Wall of Flesh Drops Demon Conch
+			Tooltip: Allows access to the underworld sooner after slaying the wall for the first time when enabled
+		}
 	}
 
 	ClientConfig: {
@@ -256,6 +266,11 @@ Configs: {
 				during the final day to mimic how the sky looks during the final
 				day in Majora's Mask.
 				'''
+		}
+
+		HUDClockSize: {
+			Label: Terminian Clock Scale
+			Tooltip: Affects how big the clock from the Terminian Watch appears in the HUD
 		}
 	}
 

@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.Localization;
+using Terraria.GameContent.ItemDropRules;
 using System;
 using static Mono.Cecil.Cil.OpCodes;
 using MonoMod.Cil;
@@ -78,6 +80,13 @@ public class TempleKeySystem : ModSystem
                     return NPC.downedPlantBoss;
                 }
             });
+            c.GotoPrev(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.hardMode))));
+            c.Remove();
+            c.EmitDelegate<Func<bool>>(() =>
+            {
+                return ModContent.GetInstance<ServerConfig>().NoPlanteraToSummonGolem || Main.hardMode;
+            });
+
         }
         catch
         {
@@ -106,12 +115,14 @@ public class TempleKeySystem : ModSystem
 
 public class TempleKeyCheck : GlobalItem
 {
-    public override void OnConsumeItem(Item item, Player player)
+    public override bool ConsumeItem(Item item, Player player)
     {
-        if (item.type == ItemID.TempleKey)
+        if (item.type != ItemID.TempleKey)
         {
-            TempleKeySystem.anybodyUsedTempleKey = true;
+            return true;
         }
+        TempleKeySystem.anybodyUsedTempleKey = true;
+        return ModContent.GetInstance<ServerConfig>().EatTempleKey;
     }
 }
 
@@ -125,5 +136,49 @@ public class KillOldGeezer : GlobalNPC
             npc.position = Microsoft.Xna.Framework.Vector2.Zero;
             npc.StrikeInstantKill();
         }
+    }
+}
+
+public class DropHellShell : GlobalNPC
+{
+    public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
+    {
+        if (npc.type == NPCID.WallofFlesh)
+        {
+            LeadingConditionRule rule = new(new HellShellConfigEnabledCondition());
+            rule.OnSuccess(ItemDropRule.ByCondition(new Conditions.NotExpert(), ItemID.DemonConch));
+            npcLoot.Add(rule);
+        }
+    }
+}
+
+public class DropHellShellFromBag : GlobalItem
+{
+    public override void ModifyItemLoot(Item item, ItemLoot itemLoot)
+    {
+        if (item.type == ItemID.WallOfFleshBossBag)
+        {
+            LeadingConditionRule rule = new(new HellShellConfigEnabledCondition());
+            rule.OnSuccess(ItemDropRule.Common(ItemID.DemonConch));
+            itemLoot.Add(rule);
+        }
+    }
+}
+
+public class HellShellConfigEnabledCondition : IItemDropRuleCondition
+{
+    public bool CanDrop(DropAttemptInfo info)
+    {
+        return ModContent.GetInstance<ServerConfig>().WOFDropsDemonConch;
+    }
+
+    public bool CanShowItemDropInUI()
+    {
+        return ModContent.GetInstance<ServerConfig>().WOFDropsDemonConch;
+    }
+
+    public string GetConditionDescription()
+    {
+        return "";
     }
 }

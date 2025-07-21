@@ -1,0 +1,5 @@
+Terminian Clock display now has its own config scale
+Fixed a bug where the Terminian clock would get bigger when opening a chest or shopping
+Fixed a bug in Wand of Sparking mode where armor would still appear visible after being erased.
+Added a config option that allows the Wall of Flesh to drop demon conches (thanks to Kaleina for the idea)
+Added a config option that makes the temple key non-consumable

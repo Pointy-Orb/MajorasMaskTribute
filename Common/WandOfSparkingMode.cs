@@ -99,6 +99,9 @@ public class WandOfSparkingModePlayer : ModPlayer
             if (inventory[i].type == ModContent.ItemType<OcarinaOfTime>()) continue;
             if (inventory[i].type == ItemID.GoldWatch) continue;
             if (keepVanity && inventory[i].vanity) continue;
+            inventory[i].headSlot = 0;
+            inventory[i].bodySlot = 0;
+            inventory[i].legSlot = 0;
             inventory[i].TurnToAir();
         }
     }
