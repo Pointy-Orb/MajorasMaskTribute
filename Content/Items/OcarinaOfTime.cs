@@ -282,12 +282,6 @@ public class OcarinaOfTimePlayer : ModPlayer
             item.SetDefaults(ItemID.GoldWatch);
             yield return item;
         }
-        else
-        {
-            var item = new Item();
-            item.SetDefaults(ItemID.CopperWatch);
-            yield return item;
-        }
     }
 
     private static void ResetEverything()

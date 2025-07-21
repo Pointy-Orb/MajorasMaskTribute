@@ -130,7 +130,7 @@ public class MiniatureClockTower : ModItem
         CreateRecipe()
             .AddRecipeGroup("MajorasMaskTribute:AnyWatch")
             .AddIngredient(ItemID.StoneBlock, 10)
-            .AddIngredient(ItemID.Wood, 5)
+            .AddRecipeGroup(RecipeGroupID.Wood)
             .AddTile(TileID.WorkBenches)
             .Register();
     }

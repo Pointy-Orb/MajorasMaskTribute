@@ -152,7 +152,7 @@ public class ApocalypseText : UIText
 
     public override void Update(GameTime gameTime)
     {
-        if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 25 || ApocalypseSystem.apocalypseDay < 2)
+        if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 25 || ApocalypseSystem.apocalypseDay < 2 || Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().accTerminaWatch)
         {
             SetText("");
             return;

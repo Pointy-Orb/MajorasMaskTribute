@@ -29,6 +29,7 @@ v1.1 changes:
 	- Fixed draw order of white fade while playing the Song of Time.
 	- Final Hours loops more cleanly
 	- Modded world and player data is now properly transferred through backups
+	- New 'Terminian Watch' item that displays the clock from Majora's Mask
 	- And more!
 
 Source code:

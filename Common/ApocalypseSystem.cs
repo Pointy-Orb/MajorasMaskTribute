@@ -37,12 +37,14 @@ public class ApocalypseSystem : ModSystem
 
     public static DayOfText dayOfText;
 
+    public static bool FinalHours => apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25f;
+
     public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
     {
         bool vanillaTimeRate = ModContent.GetInstance<ServerConfig>().VanillaTimeRate;
         foreach (Player player in Main.ActivePlayers)
         {
-            if (player.GetModPlayer<InvertedSongOfTimePlayer>().invertedSongEquipped)
+            if (player.GetModPlayer<InvertedSongOfTimePlayer>().invertedSongEquipped && !player.dead)
             {
                 timeRate /= vanillaTimeRate ? 1.5 : 2.0;
                 tileUpdateRate /= 1.5;
@@ -832,8 +834,6 @@ public class ApocalypseSystem : ModSystem
     {
         Main.StopRain();
         Main.moonPhase = 0;
-        Main.raining = false;
-        Main.maxRaining = 0;
         Main.windSpeedTarget = 0;
         Main.windSpeedCurrent = 0;
         Main.time = 0;
@@ -849,6 +849,7 @@ public class ApocalypseSystem : ModSystem
         Main.fastForwardTimeToDusk = false;
         TempleKeySystem.anybodyUsedTempleKey = false;
         LanternNight.NextNightIsLanternNight = false;
+        Main.StopSlimeRain(false);
         if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode == WandOfSparkingMode.On)
         {
             foreach (Player player in Main.ActivePlayers)

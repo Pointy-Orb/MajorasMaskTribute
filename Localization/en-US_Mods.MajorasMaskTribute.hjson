@@ -116,9 +116,14 @@ Items: {
 		DisplayName: Moon's Tear
 		Tooltip:
 			'''
-			Rumored to be the shiniest stone in the world.
+			Its sparkling beauty radiates rather strangely.
 			Many will pay high for this.
 			'''
+	}
+
+	TerminianWatch: {
+		DisplayName: Terminian Watch
+		Tooltip: Tells the time with a fancy display
 	}
 }
 
