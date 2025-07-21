@@ -29,6 +29,7 @@ v1.1 changes:
 	- Screen-shake strength during final day is now adjustable and can be turned off.
 	- Config option that, when turned on, removes the need to kill Plantera to summon Golem.
 	- 'Majora's Mask' item obtained post-Moonlord that allows the cycle to be disabled.
+	- New 'Terminian Watch' item that displays the clock from Majora's Mask
 	- And more!
 
 [url=https://github.com/Pointy-Orb/MajorasMaskTribute]Source code[/url]
