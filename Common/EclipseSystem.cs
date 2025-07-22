@@ -143,23 +143,21 @@ public class EclipseSpawning : GlobalNPC
                     {
                         if (chain.RuleToChain is LeadingConditionRule lConRule2)
                         {
-                            var info2 = new DropAttemptInfo();
-                            if (lConRule2.condition.CanDrop(info2) == new Conditions.DownedPlantera().CanDrop(info2))
+                            if (lConRule2.condition.GetType() == typeof(Conditions.DownedPlantera))
                             {
                                 lConRule2.condition = new PhonyDownedPlanteraCondition();
                             }
-                            if (lConRule2.condition.CanDrop(info2) == new Conditions.DownedAllMechBosses().CanDrop(info2))
+                            if (lConRule2.condition.GetType() == typeof(Conditions.DownedAllMechBosses))
                             {
                                 lConRule2.condition = new PhonyDownedAllMechsCondition();
                             }
                         }
                     }
-                    var info = new DropAttemptInfo();
-                    if (lConRule.condition.CanDrop(info) == new Conditions.DownedPlantera().CanDrop(info))
+                    if (lConRule.condition.GetType() == typeof(Conditions.DownedPlantera))
                     {
                         lConRule.condition = new PhonyDownedPlanteraCondition();
                     }
-                    if (lConRule.condition.CanDrop(info) == new Conditions.DownedAllMechBosses().CanDrop(info))
+                    if (lConRule.condition.GetType() == typeof(Conditions.DownedAllMechBosses))
                     {
                         lConRule.condition = new PhonyDownedAllMechsCondition();
                     }
