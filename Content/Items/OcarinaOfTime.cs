@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Achievements;
 using Terraria.Localization;
 using Terraria.Chat;
 using Terraria.GameContent.Events;

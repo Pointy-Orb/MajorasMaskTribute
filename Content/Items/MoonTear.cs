@@ -1,4 +1,5 @@
 using Terraria;
+using MajorasMaskTribute.Common;
 using System;
 using Terraria.Localization;
 using Terraria.GameContent.ItemDropRules;
@@ -127,7 +128,9 @@ public class MoonTearDrop : GlobalNPC
             {
                 LeadingConditionRule vanillaBloodMoonRule = new(new VanillaBloodMoonOnCondition());
                 vanillaBloodMoonRule.OnSuccess(rule);
-                var moonTearDrop = ItemDropRule.ByCondition(new VanillaBloodMoonOffCondition(), ModContent.ItemType<MoonTear>(), drop.chanceDenominator, drop.amountDroppedMinimum, drop.amountDroppedMaximum, drop.chanceNumerator);
+                var numerator = drop.chanceNumerator * 2;
+                numerator = Int32.Clamp(numerator, 1, drop.chanceDenominator);
+                var moonTearDrop = ItemDropRule.ByCondition(new VanillaBloodMoonOffCondition(), ModContent.ItemType<MoonTear>(), drop.chanceDenominator, drop.amountDroppedMinimum, drop.amountDroppedMaximum, numerator);
                 npcLoot.Remove(rule);
                 npcLoot.Add(vanillaBloodMoonRule);
                 npcLoot.Add(moonTearDrop);
@@ -136,7 +139,9 @@ public class MoonTearDrop : GlobalNPC
             {
                 LeadingConditionRule vanillaBloodMoonRule = new(new VanillaBloodMoonOnCondition());
                 vanillaBloodMoonRule.OnSuccess(rule);
-                var moonTearDrop = ItemDropRule.ByCondition(conDrop.condition, ModContent.ItemType<MoonTear>(), conDrop.chanceDenominator, conDrop.amountDroppedMinimum, conDrop.amountDroppedMaximum, conDrop.chanceNumerator);
+                var numerator = conDrop.chanceNumerator * 2;
+                numerator = Int32.Clamp(numerator, 1, conDrop.chanceDenominator);
+                var moonTearDrop = ItemDropRule.ByCondition(conDrop.condition, ModContent.ItemType<MoonTear>(), conDrop.chanceDenominator, conDrop.amountDroppedMinimum, conDrop.amountDroppedMaximum, numerator);
                 LeadingConditionRule majoraBloodMoonRule = new(new VanillaBloodMoonOffCondition());
                 majoraBloodMoonRule.OnSuccess(moonTearDrop);
                 npcLoot.Remove(rule);
@@ -147,7 +152,7 @@ public class MoonTearDrop : GlobalNPC
             {
                 LeadingConditionRule vanillaBloodMoonRule = new(new VanillaBloodMoonOnCondition());
                 vanillaBloodMoonRule.OnSuccess(rule);
-                var moonTearDrop = ItemDropRule.NormalvsExpert(ModContent.ItemType<MoonTear>(), commonNormalDrop.chanceDenominator, commonExpertDrop.chanceDenominator);
+                var moonTearDrop = ItemDropRule.NormalvsExpert(ModContent.ItemType<MoonTear>(), Int32.Clamp(commonNormalDrop.chanceDenominator / 2, 1, commonNormalDrop.chanceDenominator), Int32.Clamp(commonExpertDrop.chanceDenominator / 2, 1, commonExpertDrop.chanceDenominator));
                 LeadingConditionRule majoraBloodMoonRule = new(new VanillaBloodMoonOffCondition());
                 majoraBloodMoonRule.OnSuccess(moonTearDrop);
                 npcLoot.Remove(rule);
@@ -194,12 +199,12 @@ public class VanillaBloodMoonOnCondition : IItemDropRuleCondition
 
     public bool CanDrop(DropAttemptInfo info)
     {
-        return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic;
+        return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive;
     }
 
     public bool CanShowItemDropInUI()
     {
-        return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic;
+        return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive;
     }
 
     public string GetConditionDescription()

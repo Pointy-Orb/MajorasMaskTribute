@@ -290,7 +290,6 @@ public class ApocalypseSystem : ModSystem
             });
             c.Emit(Mul);
             c.Emit(Stloc, sunSizeIndex);
-            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
         catch
         {

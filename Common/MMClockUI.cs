@@ -255,7 +255,7 @@ public class MMClockUI : UIElement
         var origin = new Vector2(sunMoonRect.Width / 2, sunMoonRect.Height * 3.3f);
         var numOrigin = new Vector2(numberRect.Width / 2, numberRect.Height * 5.6f);
         var color = Color.White;
-        if (!Main.dayTime && Main.bloodMoon && ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic)
+        if (!Main.dayTime && Main.bloodMoon && (ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive))
         {
             color = Color.Red;
         }

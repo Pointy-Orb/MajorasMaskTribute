@@ -3,3 +3,7 @@ Fixed a bug where the Terminian clock would get bigger when opening a chest or s
 Fixed a bug in Wand of Sparking mode where armor would still appear visible after being erased.
 Added a config option that allows the Wall of Flesh to drop demon conches (thanks to Kaleina for the idea)
 Added a config option that makes the temple key non-consumable
+Eclipse spawning override now uses a GlobalNPC hook instead of IL editing (now it's safer, easier to work with, and more likely to be compatible with other mods)
+Fixed some eclipse enemies not dropping loot when an eclipse is summoned through the Eclipsing Stone
+Doubled the drop rate of moon's tears
+
