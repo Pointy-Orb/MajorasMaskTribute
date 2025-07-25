@@ -125,6 +125,11 @@ Items: {
 		DisplayName: Terminian Watch
 		Tooltip: Tells the time with a fancy display
 	}
+
+	DoomMonolith: {
+		DisplayName: Doom Monolith
+		Tooltip: "'Sustain a fraction of the apocalypse's power'"
+	}
 }
 
 Configs: {
@@ -214,6 +219,16 @@ Configs: {
 			Label: Wall of Flesh Drops Demon Conch
 			Tooltip: Allows access to the underworld sooner after slaying the wall for the first time when enabled
 		}
+
+		Headers: {
+			General: General
+			Progression: Progression
+		}
+
+		SigilSettings: {
+			Label: Sigil Settings
+			Tooltip: ""
+		}
 	}
 
 	ClientConfig: {
@@ -298,17 +313,25 @@ Configs: {
 		On.Label: On
 		Brutal.Label: Brutal
 	}
+
+	SigilSettings: {
+		Tooltip: ""
+		EarlyUse.Label: Early Use
+		Vanilla.Label: Vanilla
+		Uncraftable.Label: Uncraftable
+	}
 }
 
 DroppedMask: "{0} has dropped the {1} mask!"
 TwinsBossName: Twins
-AfterPartyOfDoomCondition: ""
-Conditions.MajorasMask: Drops when nobody already has Majora's Mask
+Empty: ""
 
 DropConditions: {
+	MajorasMask: Drops when nobody already has Majora's Mask
 	WandOfSparkingOn: Wand of Sparking Mode item
 	VanillaBloodMoonOn: Drops when Vanilla Blood Moon Logic Enabled
 	VanillaBloodMoonOff: Drops when Vanilla Blood Moon Logic Disabled
 }
 
 VanillaEclipseLogicDisabled: When Vanilla Eclipse Logic is disabled
+Tiles.DoomMonolith.MapEntry: DoomMonolith

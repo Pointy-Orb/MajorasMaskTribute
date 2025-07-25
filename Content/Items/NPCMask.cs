@@ -50,9 +50,12 @@ public abstract class NPCMask : ModItem
             if (npc.boss) continue;
             if (npc.type == targetNPC) continue;
             if (npc.isLikeATownNPC) continue;
-            if (NPCID.Sets.ProjectileNPC[npc.type]) continue; ;
-            if (NPCID.Sets.BelongsToInvasionOldOnesArmy[npc.type]) continue; ;
-            if (NPCID.Sets.ShouldBeCountedAsBoss[npc.type]) continue; ;
+            if (NPCID.Sets.ProjectileNPC[npc.type]) continue;
+            if (NPCID.Sets.BelongsToInvasionOldOnesArmy[npc.type]) continue;
+            if (NPCID.Sets.ShouldBeCountedAsBoss[npc.type]) continue;
+            if (npc.aiStyle == NPCAIStyleID.Worm || npc.aiStyle == NPCAIStyleID.WallOfFleshEye) continue;
+            if (npc.aiStyle == NPCAIStyleID.PrimeCannon || npc.aiStyle == NPCAIStyleID.PrimeLaser || npc.aiStyle == NPCAIStyleID.PrimeSaw || npc.aiStyle == NPCAIStyleID.PrimeVice) continue;
+            if (npc.aiStyle == NPCAIStyleID.SkeletronHand) continue;
             if (npc.GetGlobalNPC<HomunculusNPC>().isHomunculus) continue;
             if (Item.Hitbox.Intersects(npc.Hitbox))
             {
@@ -103,13 +106,6 @@ public class NPCMaskDrops : GlobalNPC
 
 public class AfterPartyOfDoomCondition : IItemDropRuleCondition
 {
-    private static LocalizedText Description;
-
-    public AfterPartyOfDoomCondition()
-    {
-        Description ??= Language.GetOrRegister("Mods.MajorasMaskTribute.AfterPartyOfDoomCondition");
-    }
-
     public bool CanDrop(DropAttemptInfo info)
     {
         return !Main.afterPartyOfDoom;
@@ -122,7 +118,7 @@ public class AfterPartyOfDoomCondition : IItemDropRuleCondition
 
     public string GetConditionDescription()
     {
-        return Description.Value;
+        return "";
     }
 }
 

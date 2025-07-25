@@ -28,7 +28,7 @@ public class FinalNightScreenShaderData : ScreenShaderData
 
     public override void Update(GameTime gameTime)
     {
-        if (Main.bloodMoon && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic)
+        if ((Main.bloodMoon || Main.SceneMetrics.BloodMoonMonolith || Main.LocalPlayer.bloodMoonMonolithShader) && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic)
         {
             UseColor(0f, 0, 0);
         }
@@ -59,7 +59,7 @@ public class FinalNightSky : CustomSky
 
     public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth)
     {
-        spriteBatch.Draw(white.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
+        //spriteBatch.Draw(white.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black);
     }
 
     public override void Activate(Vector2 position, params object[] args)
@@ -89,7 +89,7 @@ public class FinalNightEffect : ModSceneEffect
 
     public override void SpecialVisuals(Player player, bool isActive)
     {
-        player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", isActive && !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld));
+        player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", (isActive && !player.ZoneDirtLayerHeight && ((!player.ZoneRockLayerHeight && !player.ZoneUnderworldHeight) || Main.remixWorld)) || player.GetModPlayer<Content.Tiles.DoomMonolithPlayer>().doomMonolithActive || Content.Tiles.DoomMonolithSystem.nearDoomMonolith);
         if (!SkyManager.Instance["MajorasMaskTribute:FinalNightSky"].IsActive())
         {
             SkyManager.Instance["MajorasMaskTribute:FinalNightSky"].Activate(player.position);
@@ -100,7 +100,7 @@ public class FinalNightEffect : ModSceneEffect
         }
         if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 4.45f && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 4.5f)
         {
-            player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", isActive);
+            player.ManageSpecialBiomeVisuals("MajorasMaskTribute:FinalNightShader", isActive || player.GetModPlayer<Content.Tiles.DoomMonolithPlayer>().doomMonolithActive || Content.Tiles.DoomMonolithSystem.nearDoomMonolith);
         }
     }
 

@@ -589,7 +589,7 @@ public class ApocalypseSystem : ModSystem
         {
             backgroundColor = backgroundColor.MultiplyRGB(new Color(0.7f, 1f, 0.7f));
         }
-        if (apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic && Main.bloodMoon)
+        if (((apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25) || Main.LocalPlayer.GetModPlayer<Content.Tiles.DoomMonolithPlayer>().doomMonolithActive || Content.Tiles.DoomMonolithSystem.nearDoomMonolith) && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic && (Main.bloodMoon || Main.SceneMetrics.BloodMoonMonolith || Main.LocalPlayer.bloodMoonMonolithShader))
         {
             //Counteract blood moon brightening by doing our own darkening
             backgroundColor = Color.Black;

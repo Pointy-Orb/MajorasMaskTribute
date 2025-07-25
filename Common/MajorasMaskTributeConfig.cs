@@ -17,10 +17,18 @@ public enum WandOfSparkingMode
     Brutal
 }
 
+public enum SigilSettings
+{
+    EarlyUse,
+    Vanilla,
+    Uncraftable
+}
+
 public class ServerConfig : ModConfig
 {
     public override ConfigScope Mode => ConfigScope.ServerSide;
 
+    [Header("General")]
     [DefaultValue(WandOfSparkingMode.Off)]
     [DrawTicks]
     public WandOfSparkingMode WandOfSparkingMode { get; set; }
@@ -32,6 +40,9 @@ public class ServerConfig : ModConfig
 
     public bool VanillaEclipseLogic { get; set; }
 
+    public bool VanillaTimeRate { get; set; }
+
+    [Header("Progression")]
     public bool SaveWorldAfterHardmodeStarts { get; set; }
 
     [DefaultValue(true)]
@@ -44,7 +55,10 @@ public class ServerConfig : ModConfig
     [DefaultValue(true)]
     public bool EatTempleKey { get; set; }
 
-    public bool VanillaTimeRate { get; set; }
+    [DefaultValue(SigilSettings.Vanilla)]
+    [DrawTicks]
+    [ReloadRequired]
+    public SigilSettings SigilSettings { get; set; }
 }
 
 public class ClientConfig : ModConfig
@@ -70,20 +84,20 @@ public class ClientConfig : ModConfig
 
     public override void OnChanged()
     {
-        try
+        if (Main.gameMenu)
         {
-            ApocalypseSystem.scaryMoon = Mod.Assets.Request<Texture2D>("Assets/Moon_scary" + (ModContent.GetInstance<ClientConfig>().RealisticPhaseShading ? "_realistic" : ""));
-            if (!NoScaryTextures)
-            {
-                TextureAssets.PumpkinMoon = Mod.Assets.Request<Texture2D>("Assets/Moon_Pumpkin_scary" + (RealisticPhaseShading ? "_realistic" : ""));
-                TextureAssets.SnowMoon = Mod.Assets.Request<Texture2D>("Assets/Moon_Snow_scary" + (RealisticPhaseShading ? "_realistic" : ""));
-            }
-            else
-            {
-                TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
-                TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
-            }
+            return;
         }
-        catch { }
+        ModContent.RequestIfExists<Texture2D>("MajorasMaskTribute/Assets/Moon_scary" + (RealisticPhaseShading ? "_realistic" : ""), out ApocalypseSystem.scaryMoon);
+        if (!NoScaryTextures)
+        {
+            ModContent.RequestIfExists<Texture2D>("MajorasMaskTribute/Assets/Moon_Pumpkin_scary" + (RealisticPhaseShading ? "_realistic" : ""), out TextureAssets.PumpkinMoon);
+            ModContent.RequestIfExists<Texture2D>("MajorasMaskTribute/Assets/Moon_Snow_scary" + (RealisticPhaseShading ? "_realistic" : ""), out TextureAssets.SnowMoon);
+        }
+        else
+        {
+            TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
+            TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
+        }
     }
 }

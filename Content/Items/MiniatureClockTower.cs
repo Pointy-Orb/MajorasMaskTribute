@@ -37,7 +37,11 @@ public class MiniatureClockTower : ModItem
     public override void UpdateAccessory(Player player, bool hideVisual)
     {
         var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
-        if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.25)
+        if (NPC.MoonLordCountdown > 360 && NPC.MoonLordCountdown % 360 == 0)
+        {
+            SoundEngine.PlaySound(bellSound);
+        }
+        else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.25)
         {
             if (towerPlayer.bellsPlayed < 1)
             {
@@ -148,7 +152,7 @@ public class AnyWatchSystem : ModSystem
 public class BellRingingEffect : ModSceneEffect
 {
     //Using actual silence (Music => 0) will cut the preceding music off abruptly instead of fading it out.
-    public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
+    public override int Music => Common.DayOfText.newDay ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
 
     public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 

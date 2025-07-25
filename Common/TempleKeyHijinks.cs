@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.GameContent.Events;
 using Terraria.Localization;
 using Terraria.GameContent.ItemDropRules;
 using System;
@@ -60,6 +61,8 @@ public class TempleKeySystem : ModSystem
     public override void Load()
     {
         IL_Player.TileInteractionsUse += IL_ChangeSummonGolemCondition;
+        IL_CultistRitual.CheckRitual += IL_PrehardmodeCultists;
+        //On_CultistRitual.CheckRitual += On_CultistCheck;
     }
 
     private static void IL_ChangeSummonGolemCondition(ILContext il)
@@ -92,6 +95,34 @@ public class TempleKeySystem : ModSystem
         {
             MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
+    }
+
+    private static void IL_PrehardmodeCultists(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var skipHardLabel = il.DefineLabel();
+            c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.hardMode))));
+            c.EmitDelegate<Func<bool>>(() => ModContent.GetInstance<ServerConfig>().NoPlanteraToSummonGolem);
+            c.Emit(Brtrue_S, skipHardLabel);
+            c.GotoNext(MoveType.After, i => i.MatchBrfalse(out _));
+            c.MarkLabel(skipHardLabel);
+        }
+        catch
+        {
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+        }
+    }
+
+    private static bool On_CultistCheck(On_CultistRitual.orig_CheckRitual orig, int x, int y)
+    {
+        var statement = orig(x, y);
+        MajorasMaskTribute.mod.Logger.Info(statement);
+        MajorasMaskTribute.mod.Logger.Info(Main.hardMode);
+        MajorasMaskTribute.mod.Logger.Info(NPC.downedGolemBoss);
+        MajorasMaskTribute.mod.Logger.Info(NPC.downedBoss3);
+        return statement;
     }
 
     public override void ClearWorld()
