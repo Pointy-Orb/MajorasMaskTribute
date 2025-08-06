@@ -98,6 +98,7 @@ public class WandOfSparkingModePlayer : ModPlayer
             }
             if (inventory[i].type == ModContent.ItemType<OcarinaOfTime>()) continue;
             if (inventory[i].type == ItemID.GoldWatch) continue;
+            if (inventory[i].type == ModContent.ItemType<TerminianWatch>()) continue;
             if (keepVanity && inventory[i].vanity) continue;
             inventory[i].headSlot = 0;
             inventory[i].bodySlot = 0;
@@ -291,10 +292,16 @@ public class PurgeAccessoriesAddMaskTooltip : GlobalItem
             case ItemID.TwinMask:
             case ItemID.FleshMask:
             case ItemID.DestroyerMask:
+            case ItemID.BossMaskMoonlord:
                 useThe = true;
                 break;
         }
         string key = $"Mods.MajorasMaskTribute.Items.{(useThe ? "The" : "")}WoSMaskTooltip";
-        tooltips.Add(new TooltipLine(Mod, "WoSMask", Language.GetTextValue(key, bossName)));
+        int index = tooltips.FindIndex(0, tooltips.Count, i => Language.GetTextValue("ItemTooltip." + ItemID.Search.GetName(item.type)).Contains(i.Text)) + 1;
+        if (!tooltips.IndexInRange(index))
+        {
+            index = 0;
+        }
+        tooltips.Insert(index, new TooltipLine(Mod, "WoSMask", Language.GetTextValue(key, bossName)));
     }
 }

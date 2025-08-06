@@ -8,6 +8,7 @@ using MonoMod.Cil;
 using Terraria.ModLoader;
 using Terraria.ID;
 using Terraria.ModLoader.IO;
+using System.Collections.Generic;
 
 namespace MajorasMaskTribute.Common;
 
@@ -154,6 +155,47 @@ public class TempleKeyCheck : GlobalItem
         }
         TempleKeySystem.anybodyUsedTempleKey = true;
         return ModContent.GetInstance<ServerConfig>().EatTempleKey;
+    }
+
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+    {
+        if (ModContent.GetInstance<ServerConfig>().NoPlanteraToSummonGolem)
+        {
+            return;
+        }
+        if (item.type != ItemID.LihzahrdPowerCell)
+        {
+            return;
+        }
+        if (NPC.downedPlantBoss && Main.hardMode)
+        {
+            return;
+        }
+        foreach (TooltipLine line in tooltips)
+        {
+            if (Language.GetTextValue("ItemTooltip.LihzahrdPowerCell").Contains(line.Text))
+            {
+                line.Hide();
+            }
+            if (line.Name == "Consumable")
+            {
+                line.Hide();
+            }
+        }
+        int index = tooltips.FindIndex(0, tooltips.Count, i => i.Name == "ItemName") + 1;
+        if (!tooltips.IndexInRange(index))
+        {
+            index = 0;
+        }
+        if (!NPC.downedPlantBoss)
+        {
+            tooltips.Insert(index, new TooltipLine(Mod, "NoDownedPlantera", Language.GetTextValue("LegacyTooltip.59")));
+            return;
+        }
+        if (!Main.hardMode)
+        {
+            tooltips.Insert(index, new TooltipLine(Mod, "HardmodeNoUse", Language.GetTextValue("Mods.MajorasMaskTribute.ItemConditions.Hardmode")));
+        }
     }
 }
 

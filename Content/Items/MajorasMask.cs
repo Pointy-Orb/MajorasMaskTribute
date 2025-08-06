@@ -46,6 +46,7 @@ public class MajorasMask : ModItem
                 Main.time = 0;
                 Main.dayTime = true;
                 ApocalypseSystem.dayOfText?.BroadcastNewDay();
+                MiniatureClockTowerPlayer.wasDay = true;
             }
             ApocalypseSystem.DisableCycle();
         }

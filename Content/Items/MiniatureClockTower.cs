@@ -37,9 +37,12 @@ public class MiniatureClockTower : ModItem
     public override void UpdateAccessory(Player player, bool hideVisual)
     {
         var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
-        if (NPC.MoonLordCountdown > 360 && NPC.MoonLordCountdown % 360 == 0)
+        if (NPC.MoonLordCountdown > 0)
         {
-            SoundEngine.PlaySound(bellSound);
+            if (NPC.MoonLordCountdown % 540 == 0 && NPC.MoonLordCountdown > 540)
+            {
+                SoundEngine.PlaySound(bellSound);
+            }
         }
         else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.25)
         {
@@ -134,7 +137,7 @@ public class MiniatureClockTower : ModItem
         CreateRecipe()
             .AddRecipeGroup("MajorasMaskTribute:AnyWatch")
             .AddIngredient(ItemID.StoneBlock, 10)
-            .AddRecipeGroup(RecipeGroupID.Wood)
+            .AddRecipeGroup(RecipeGroupID.Wood,4)
             .AddTile(TileID.WorkBenches)
             .Register();
     }
@@ -190,7 +193,7 @@ public class MiniatureClockTowerPlayer : ModPlayer
     static SoundStyle dayDoodleDoo;
     static SoundStyle dayRoosterReal;
 
-    bool wasDay = true;
+    public static bool wasDay = true;
     bool started = false;
     public override void PostUpdate()
     {

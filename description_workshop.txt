@@ -8,10 +8,12 @@
 [h2]FEATURES:[/h2]
 [list]
 	[*]3 day cycle (obviously)
-	[*]Ocarina of Time (Can also play the Song of Healing!)
-	[*]Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on
+	[*]Ocarina of Time (Can also play the Song of Healing!) (Spawns with new characters, if you lose yours, you can craft one with 5 clay and 10 fallen stars)
+	[*]Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on (Any watch, 4 wood, and 10 stone)
 	[*]NPCs drop masks when they die that allow you to hold onto them in the next cycle
-	[*]You can play the Inverted Song of Time when you are in inverted gravity
+	[*]You can play the Inverted Song of Time when you are in inverted gravity (hold right-click)
+	[*]Terminian Watch item grants a Majora's Mask style clock (Take a gold-tier watch and add 4 iron bars at a table and chair)
+	[*]"Wand of Sparking" mode that forces you to only retain your first three inventory slots
 [/list]
 
 All is reset when the moon crashes into your world, including your character! (to the last time the Song of Time was played)
@@ -19,7 +21,6 @@ Playing the song of time resets the world but preserves your character.
 
 v1.1 changes:
 	- Multiplayer compatible!
-	- Wand of Sparking mode for those who want an experience similar to that challenge.
 	- Reworked blood moons to happen during the final hours (can be changed in config)
 	- Reworked solar eclipses to be triggered using a new item that can be obtained after one mech boss (can be changed in config)
 	- Music fades out when bells are ringing instead of abruptly cutting off
@@ -29,11 +30,9 @@ v1.1 changes:
 	- Screen-shake strength during final day is now adjustable and can be turned off.
 	- Config option that, when turned on, removes the need to kill Plantera to summon Golem.
 	- 'Majora's Mask' item obtained post-Moonlord that allows the cycle to be disabled.
-	- New 'Terminian Watch' item that displays the clock from Majora's Mask
 	- And more!
 
 [url=https://github.com/Pointy-Orb/MajorasMaskTribute]Source code[/url]
 
 [i]For the 2025 tModLoader Mod Jam.[/i]
-[quote=tModLoader MajorasMaskTribute]
-Developed By Pointy Orb[/quote]
+For those that want to (or need to) see the original version of the mod that was submitted, go [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3530889323]here[/url].

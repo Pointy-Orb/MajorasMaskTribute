@@ -2,6 +2,7 @@ using Terraria;
 using Terraria.Enums;
 using Terraria.ModLoader;
 using Terraria.ID;
+using System.Collections.Generic;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -35,6 +36,20 @@ public class TerminianWatch : ModItem
             .AddTile(TileID.Tables)
             .AddTile(TileID.Chairs)
             .Register();
+    }
+
+    public override void ModifyTooltips(List<TooltipLine> tooltips)
+    {
+        if (ModContent.GetInstance<Common.ServerConfig>().WandOfSparkingMode == Common.WandOfSparkingMode.Off)
+        {
+            return;
+        }
+        int tooltipIndex = tooltips.FindIndex(0, tooltips.Count, i => i.Text == Tooltip.Value);
+        if (!tooltips.IndexInRange(tooltipIndex) || !tooltips[tooltipIndex].Visible)
+        {
+            return;
+        }
+        tooltips.Insert(tooltipIndex + 1, new TooltipLine(Mod, "WoSModeNote", this.GetLocalizedValue("WoSModeNote")));
     }
 }
 

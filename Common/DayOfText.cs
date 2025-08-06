@@ -77,8 +77,12 @@ public class DayOfText : UIText
     public void BroadcastNewDay()
     {
         newDay = true;
+        defaultScale = 1.4f;
         var message = Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.NewDayMessage");
-        SetText(message, 1.5f, true);
+        hourText.SetText("");
+        Dawn.SetText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.DawnOf"), defaultDawnScale * 1.5f, true);
+        Dawn.VAlign = 0.35f - 0.03f - 0.02f;
+        SetText(message, 1.5f * defaultScale, true);
         time = 300;
     }
 
@@ -88,10 +92,12 @@ public class DayOfText : UIText
         if (newDay)
         {
             TextColor = Color.Black;
+            Dawn.TextColor = Color.Black;
         }
         else
         {
             TextColor = Color.White;
+            Dawn.TextColor = Color.White;
         }
         if (!Main.dayTime || !BlackScreen.PauseGameDuringDayTransitions)
         {

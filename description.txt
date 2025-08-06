@@ -7,10 +7,12 @@ How many resets will it take for you to beat Terraria?
 
 FEATURES:
 	3 day cycle (obviously)
-	Ocarina of Time (Can also play the Song of Healing!)
-	Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on
+	Ocarina of Time (Can also play the Song of Healing!) (Spawns with new characters, if you lose yours, you can craft one with 5 clay and 10 fallen stars)
+	Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on (Any watch, 4 wood, and 10 stone)
 	NPCs drop masks when they die that allow you to hold onto them in the next cycle
-	You can play the Inverted Song of Time when you are in inverted gravity
+	You can play the Inverted Song of Time when you are in inverted gravity (hold right-click)
+	Terminian Watch item grants a Majora's Mask style clock (Take a gold-tier watch and add 4 iron bars at a table and chair)
+	"Wand of Sparking" mode that forces you to only retain your first three inventory slots
 
 All is reset when the moon crashes into your world, including your character! (to the last time the Song of Time was played)
 Playing the song of time resets the world but preserves your character.

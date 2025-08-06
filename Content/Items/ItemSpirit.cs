@@ -8,6 +8,7 @@ using Terraria.GameContent;
 using Terraria.ModLoader;
 using Terraria.ID;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -54,6 +55,7 @@ public class ItemSpirit : ModItem
         Item.width = sourceItem.width;
         Item.height = sourceItem.height;
         Item.color = spiritColor;
+        Item.alpha = 165;
         Item.SetShopValues(ItemRarityColor.LightRed4, Item.sellPrice(silver: 75));
     }
 
@@ -65,6 +67,22 @@ public class ItemSpirit : ModItem
         Vector2 drawPosition = Item.Bottom - Main.screenPosition - new Vector2(0, drawOrigin.Y);
         spriteBatch.Draw(texture.Value, drawPosition, itemFrame, spiritColor * 0.65f, rotation, drawOrigin, scale, SpriteEffects.None, 0);
         return false;
+    }
+
+    public override void ModifyTooltips(List<TooltipLine> tooltips)
+    {
+        if (ModContent.GetInstance<Common.ServerConfig>().WandOfSparkingMode != Common.WandOfSparkingMode.Off)
+        {
+            return;
+        }
+        var tooltipNoDisclaimer = Language.GetTextValue("Mods.MajorasMaskTribute.Items.ItemSpirit.TooltipNoDisclaimer");
+        foreach (TooltipLine tooltip in tooltips)
+        {
+            if (tooltipNoDisclaimer.Contains(tooltip.Text))
+            {
+                tooltip.Hide();
+            }
+        }
     }
 }
 

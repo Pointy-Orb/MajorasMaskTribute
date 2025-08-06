@@ -88,7 +88,7 @@ public class MMClockUI : UIElement
         get
         {
             int size = 52;
-            int xPos = 142;
+            int xPos = ApocalypseSystem.cycleActive ? 142 : 244;
             switch (ApocalypseSystem.apocalypseDay)
             {
                 case 0:
@@ -97,6 +97,8 @@ public class MMClockUI : UIElement
                     return new Rectangle(xPos, 162, size, size);
                 case 2:
                     return new Rectangle(xPos, 216, size, size);
+                case -1:
+                    return new Rectangle(xPos, 0, size, size);
                 default:
                     return new Rectangle(0, 0, 1, 1);
             }
@@ -238,7 +240,12 @@ public class MMClockUI : UIElement
 
     private void DrawDay(SpriteBatch spriteBatch, float scale)
     {
-        spriteBatch.Draw(texture.Value, diamondPosition, dayRect, Color.White, 0, new Vector2(dayRect.Width / 2, dayRect.Height / 2), scale, SpriteEffects.None, 0f);
+        float alpha = 1f;
+        if (!ApocalypseSystem.cycleActive)
+        {
+            alpha = 0.7f;
+        }
+        spriteBatch.Draw(texture.Value, diamondPosition, dayRect, Color.White * alpha, 0, new Vector2(dayRect.Width / 2, dayRect.Height / 2), scale, SpriteEffects.None, 0f);
     }
 
     private void DrawMiniSun(SpriteBatch spriteBatch, float scale)
@@ -257,7 +264,7 @@ public class MMClockUI : UIElement
         var color = Color.White;
         if (!Main.dayTime && Main.bloodMoon && (ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive))
         {
-            color = Color.Red;
+            color = Color.PaleVioletRed;
         }
         spriteBatch.Draw(texture.Value, position, sunMoonRect, color, rotation, origin, scale, SpriteEffects.None, 0f);
         spriteBatch.Draw(texture.Value, position, numberRect, Color.White, rotation, numOrigin, scale, SpriteEffects.None, 0f);

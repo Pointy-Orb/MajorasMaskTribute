@@ -3,6 +3,7 @@ using MajorasMaskTribute.Content.Tiles;
 using Terraria.Enums;
 using Terraria.ModLoader;
 using Terraria.ID;
+using System.Collections.Generic;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -15,15 +16,16 @@ public class DoomMonolith : ModItem
         Item.height = 36;
         Item.vanity = true;
         Item.accessory = true;
-        Item.SetShopValues(ItemRarityColor.Orange3, Item.sellPrice(gold: 5));
+        Item.SetShopValues(ItemRarityColor.Cyan9, Item.sellPrice(2, 60));
     }
 
     public override void AddRecipes()
     {
         CreateRecipe()
-            .AddIngredient(ItemID.BloodMoonMonolith)
             .AddIngredient(ModContent.ItemType<MoonTear>())
-            .AddTile(TileID.WorkBenches)
+            .AddIngredient(ModContent.ItemType<MajorasMask>())
+            .AddTile(TileID.MythrilAnvil)
+            .DisableDecraft()
             .Register();
     }
 

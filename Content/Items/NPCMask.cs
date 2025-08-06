@@ -53,9 +53,11 @@ public abstract class NPCMask : ModItem
             if (NPCID.Sets.ProjectileNPC[npc.type]) continue;
             if (NPCID.Sets.BelongsToInvasionOldOnesArmy[npc.type]) continue;
             if (NPCID.Sets.ShouldBeCountedAsBoss[npc.type]) continue;
-            if (npc.aiStyle == NPCAIStyleID.Worm || npc.aiStyle == NPCAIStyleID.WallOfFleshEye) continue;
-            if (npc.aiStyle == NPCAIStyleID.PrimeCannon || npc.aiStyle == NPCAIStyleID.PrimeLaser || npc.aiStyle == NPCAIStyleID.PrimeSaw || npc.aiStyle == NPCAIStyleID.PrimeVice) continue;
-            if (npc.aiStyle == NPCAIStyleID.SkeletronHand) continue;
+            if (npc.aiStyle == NPCAIStyleID.MartianSaucer) continue;
+            if (npc.DoesntDespawnToInactivity()) continue;
+            if (npc.aiStyle == NPCAIStyleID.Worm) continue;
+            //if (npc.aiStyle == NPCAIStyleID.PrimeCannon || npc.aiStyle == NPCAIStyleID.PrimeLaser || npc.aiStyle == NPCAIStyleID.PrimeSaw || npc.aiStyle == NPCAIStyleID.PrimeVice) continue;
+            //if (npc.aiStyle == NPCAIStyleID.SkeletronHand) continue;
             if (npc.GetGlobalNPC<HomunculusNPC>().isHomunculus) continue;
             if (Item.Hitbox.Intersects(npc.Hitbox))
             {

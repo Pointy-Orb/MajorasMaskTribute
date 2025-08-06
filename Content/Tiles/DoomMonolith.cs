@@ -33,8 +33,7 @@ public class DoomMonolith : ModTile
         DustType = DustID.Iron;
 
         AddMapEntry(
-            Color.DimGray,
-            Language.GetOrRegister("Mods.MajorasMaskTribute.Tiles.DoomMonolith.MapEntry")
+            Color.DimGray
         );
 
         glowTexture = ModContent.Request<Texture2D>(Texture + "_Glow");

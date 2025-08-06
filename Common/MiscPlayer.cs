@@ -12,6 +12,10 @@ public class MiscPlayer : ModPlayer
         {
             return true;
         }
+        if (!ApocalypseSystem.cycleActive)
+        {
+            return true;
+        }
         return ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic;
     }
 }

@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Localization;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.ModLoader;
 using Terraria.ID;
@@ -186,6 +187,7 @@ public class PhonyDownedPlanteraCondition : IItemDropRuleCondition
         return "";
     }
 }
+
 public class PhonyDownedAllMechsCondition : IItemDropRuleCondition
 {
     public bool CanDrop(DropAttemptInfo info)
@@ -201,5 +203,37 @@ public class PhonyDownedAllMechsCondition : IItemDropRuleCondition
     public string GetConditionDescription()
     {
         return "";
+    }
+}
+
+public class TabletTooltip : GlobalItem
+{
+    public override void ModifyTooltips(Item item, List<TooltipLine> tooltips)
+    {
+        if (Main.hardMode)
+        {
+            return;
+        }
+        if (item.type != ItemID.SolarTablet)
+        {
+            return;
+        }
+        foreach (TooltipLine line in tooltips)
+        {
+            if (Language.GetTextValue("ItemTooltip.SolarTablet").Contains(line.Text))
+            {
+                line.Hide();
+            }
+            if (line.Name == "Consumable")
+            {
+                line.Hide();
+            }
+        }
+        int index = tooltips.FindIndex(0, tooltips.Count, i => i.Name == "ItemName") + 1;
+        if (!tooltips.IndexInRange(index))
+        {
+            index = 0;
+        }
+        tooltips.Insert(index, new TooltipLine(Mod, "NoUse", Language.GetTextValue("Mods.MajorasMaskTribute.ItemConditions.Hardmode")));
     }
 }

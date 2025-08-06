@@ -9,11 +9,7 @@ MultiplayerResetMessage: {
 
 Announcements: {
 	HoursRemaining: -{0} hours remain-
-	NewDayMessage:
-		'''
-		 Dawn of
-		A New Day
-		'''
+	NewDayMessage: A New Day
 	Day0: The First Day
 	Day1: The Second Day
 	Day2: The Final Day
@@ -75,6 +71,7 @@ Items: {
 		Tooltip:
 			'''
 			Can be used to toggle the 3-day cycle on and off
+			Can craft Moon Globes without being consumed
 			'Will you play...with me?'
 			'''
 	}
@@ -83,12 +80,18 @@ Items: {
 		DisplayName: "{0} Spirit"
 		Tooltip:
 			'''
+			{$Mods.MajorasMaskTribute.Items.ItemSpirit.TooltipNoDisclaimer}
+			{$Mods.MajorasMaskTribute.Items.ItemSpirit.WoSModeDisclaimer}
+			'''
+		# Used for find-and-replace
+		Mask: " Mask"
+		WoSModeDisclaimer: Wand of Sparking Mode content
+		TooltipNoDisclaimer:
+			'''
 			When placed in one of your first three inventory slots, 
 			this spirit will be converted into the appropriate mask 
 			on the next cycle.
 			'''
-		# Used for find-and-replace
-		Mask: " Mask"
 	}
 
 	WoSMaskTooltip:
@@ -96,11 +99,7 @@ Items: {
 		{0} will count as defeated for all future cycles 
 		where this is in your inventory.
 		'''
-	TheWoSMaskTooltip:
-		'''
-		The {0} will count as defeated for all future cycles 
-		where this is in your inventory.
-		'''
+	TheWoSMaskTooltip: The {$Mods.MajorasMaskTribute.Items.WoSMaskTooltip}
 
 	EclipseDisc: {
 		DisplayName: Eclipsing Stone
@@ -124,11 +123,16 @@ Items: {
 	TerminianWatch: {
 		DisplayName: Terminian Watch
 		Tooltip: Tells the time with a fancy display
+		WoSModeNote: Will persist between cycles without needing to be in the first three slots
 	}
 
 	DoomMonolith: {
 		DisplayName: Doom Monolith
-		Tooltip: "'Sustain a fraction of the apocalypse's power'"
+		Tooltip:
+			'''
+			Cannot be shimmered
+			'Sustain a fraction of Majora's power'
+			'''
 	}
 }
 
@@ -226,8 +230,8 @@ Configs: {
 		}
 
 		SigilSettings: {
-			Label: Sigil Settings
-			Tooltip: ""
+			Label: Celestial Sigil Usability
+			Tooltip: In vanilla, the Celestial Sigil only works in Hardmode worlds where Golem has been defeated
 		}
 	}
 
@@ -316,9 +320,9 @@ Configs: {
 
 	SigilSettings: {
 		Tooltip: ""
-		EarlyUse.Label: Early Use
+		EarlyUse.Label: Anytime
 		Vanilla.Label: Vanilla
-		Uncraftable.Label: Uncraftable
+		Uncraftable.Label: Removed
 	}
 }
 
@@ -335,3 +339,8 @@ DropConditions: {
 
 VanillaEclipseLogicDisabled: When Vanilla Eclipse Logic is disabled
 Tiles.DoomMonolith.MapEntry: DoomMonolith
+
+ItemConditions: {
+	Hardmode: The ancient spirits of light and dark confine its power.
+	Golem: Its power is countered by the jungle temple of sun.
+}

@@ -28,6 +28,8 @@ public class FinalNightScreenShaderData : ScreenShaderData
 
     public override void Update(GameTime gameTime)
     {
+        UseColor(1, 0, 0.5f);
+        /*
         if ((Main.bloodMoon || Main.SceneMetrics.BloodMoonMonolith || Main.LocalPlayer.bloodMoonMonolithShader) && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic)
         {
             UseColor(0f, 0, 0);
@@ -36,6 +38,7 @@ public class FinalNightScreenShaderData : ScreenShaderData
         {
             UseColor(1, 0, 0.5f);
         }
+		*/
     }
 }
 

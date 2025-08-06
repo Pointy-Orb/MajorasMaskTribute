@@ -18,6 +18,7 @@ public class InvertedSongOfTime : ModItem
     {
         Item.width = 26;
         Item.height = 22;
+        Item.alpha = 77;
         Item.rare = ItemRarityID.Green;
         Item.accessory = true;
     }

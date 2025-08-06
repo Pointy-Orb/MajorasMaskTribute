@@ -174,11 +174,15 @@ public class VanillaBloodMoonOffCondition : IItemDropRuleCondition
 
     public bool CanDrop(DropAttemptInfo info)
     {
-        return !ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic;
+        return CanShowItemDropInUI();
     }
 
     public bool CanShowItemDropInUI()
     {
+        if (!ApocalypseSystem.cycleActive)
+        {
+            return false;
+        }
         return !ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic;
     }
 
@@ -199,11 +203,15 @@ public class VanillaBloodMoonOnCondition : IItemDropRuleCondition
 
     public bool CanDrop(DropAttemptInfo info)
     {
-        return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive;
+        return CanShowItemDropInUI();
     }
 
     public bool CanShowItemDropInUI()
     {
+        if (!ApocalypseSystem.cycleActive)
+        {
+            return true;
+        }
         return ModContent.GetInstance<Common.ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive;
     }
 

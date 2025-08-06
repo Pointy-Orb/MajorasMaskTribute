@@ -362,7 +362,7 @@ public class ApocalypseSystem : ModSystem
 
     public override void PostUpdateTime()
     {
-        if (!Main.dayTime && wasDay && startChat)
+        if (!Main.dayTime && wasDay && startChat && cycleActive)
         {
             if (Main.dedServ)
             {
@@ -603,6 +603,10 @@ public class ApocalypseSystem : ModSystem
         {
             cycleNeverDisabled = false;
             return;
+        }
+        if (!Main.gameMenu)
+        {
+            Main.moonType = 0;
         }
         ManageWeather();
         if (apocalypseDay >= 2)
