@@ -9,6 +9,11 @@ namespace MajorasMaskTribute.Content.Items;
 
 public class DoomMonolith : ModItem
 {
+    public override void SetStaticDefaults()
+    {
+        ItemID.Sets.CanGetPrefixes[Type] = false;
+    }
+
     public override void SetDefaults()
     {
         Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.DoomMonolith>());

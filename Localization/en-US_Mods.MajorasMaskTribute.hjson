@@ -134,6 +134,11 @@ Items: {
 			'Sustain a fraction of Majora's power'
 			'''
 	}
+
+	FinalHoursMusicBox: {
+		DisplayName: Music Box (Final Hours)
+		Tooltip: ""
+	}
 }
 
 Configs: {

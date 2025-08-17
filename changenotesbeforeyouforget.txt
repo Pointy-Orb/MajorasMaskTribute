@@ -1,11 +1,1 @@
- - Enemy parts (WoF eye, Skeletron hands, etc.) that are attached to a different NPC can no longer be transformed by masks
- - NPCs with Worm AI can no longer be transformed by masks
- - Enabling the config option that allows fighting Golem without killing Plantera first now also allows cultists to spawn in pre-Hardmode
- - Added a new config option that allows the Celestial Sigil to be used without starting Hardmode or having killed Golem, keep vanilla behavior, or to just remove it entirely
- - Bells will ring during the Impending Doom if the Miniature Clock Tower is equipped
- - Added a Doom Monolith which recreates the shader seen during the final night
- - 'Dawn of a New Day' screen now properly formatted to fit with the others in its style
- - Majora's Mask can now be used to craft Moon Globes
- - A world with the cycle disabled displays a sillouete of a tree on the Terminian Clock instead of nothing at all.
- - "Wand of Sparking" mode exclusive items now say so in their tooltips
- - Tooltips that were changed from vanilla items are now done in a way that is more robust.
+ - Added a Final Hours Music Box. If the Miniature Clock Tower is equipped, this will also play the bell while the music box is equipped/player is in music box's vicinity

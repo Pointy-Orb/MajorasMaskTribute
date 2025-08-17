@@ -44,6 +44,13 @@ public class MiniatureClockTower : ModItem
                 SoundEngine.PlaySound(bellSound);
             }
         }
+        else if (Main.curMusic == MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours") && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
+        {
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() % (5f / 60f) < 0.001f)
+            {
+                SoundEngine.PlaySound(bellSound);
+            }
+        }
         else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.25)
         {
             if (towerPlayer.bellsPlayed < 1)
@@ -137,7 +144,7 @@ public class MiniatureClockTower : ModItem
         CreateRecipe()
             .AddRecipeGroup("MajorasMaskTribute:AnyWatch")
             .AddIngredient(ItemID.StoneBlock, 10)
-            .AddRecipeGroup(RecipeGroupID.Wood,4)
+            .AddRecipeGroup(RecipeGroupID.Wood, 4)
             .AddTile(TileID.WorkBenches)
             .Register();
     }
@@ -158,6 +165,11 @@ public class BellRingingEffect : ModSceneEffect
     public override int Music => Common.DayOfText.newDay ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
 
     public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
+
+    public override float GetWeight(Player player)
+    {
+        return 1f;
+    }
 
     public override bool IsSceneEffectActive(Player player)
     {

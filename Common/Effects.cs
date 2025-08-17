@@ -124,3 +124,17 @@ public class FinalNightEffect : ModSceneEffect
         return true;
     }
 }
+
+/*
+public class FinalNightMusicBoxEffect : ModSceneEffect
+{
+    public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours");
+
+    public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
+
+    public override bool IsSceneEffectActive(Player player)
+    {
+        return player.GetModPlayer<Content.Tiles.FinalHoursMusicBoxPlayer>().finalHoursMusicBoxActive || Content.Tiles.FinalHoursMusicBoxSystem.nearFinalHoursMusicBox;
+    }
+}
+*/

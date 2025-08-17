@@ -143,6 +143,11 @@ public class ShutUpImPlayingTheHealingSong : ModSceneEffect
 
     public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/songofhealing");
 
+    public override float GetWeight(Player player)
+    {
+        return 1f;
+    }
+
     public override bool IsSceneEffectActive(Player player)
     {
         foreach (Player activePlayer in Main.ActivePlayers)
@@ -166,6 +171,11 @@ public class ShutUpImPlayingTheOcarina : ModSceneEffect
 
     public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/zelda-song-of-time");
 
+    public override float GetWeight(Player player)
+    {
+        return 1f;
+    }
+
     public override bool IsSceneEffectActive(Player player)
     {
         foreach (Player activePlayer in Main.ActivePlayers)
@@ -184,6 +194,11 @@ public class ShutUpImPlayingTheOcarinaBackwards : ModSceneEffect
     public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
 
     public override int Music => MusicLoader.GetMusicSlot(Mod, "Assets/Music/invertedsongoftime");
+
+    public override float GetWeight(Player player)
+    {
+        return 1f;
+    }
 
     public override bool IsSceneEffectActive(Player player)
     {

@@ -1,19 +1,21 @@
 using Terraria;
-using Terraria.Audio;
-using System.Collections.Generic;
-using Microsoft.Xna.Framework.Graphics;
+using Terraria.DataStructures;
 using Terraria.Localization;
-using Microsoft.Xna.Framework;
-using ReLogic.Content;
-using Terraria.ModLoader;
+using System.Collections.Generic;
 using Terraria.GameContent.Drawing;
-using Terraria.ID;
+using Terraria.Audio;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using Terraria.GameContent;
 using Terraria.ObjectData;
+using Terraria.ModLoader;
+using Terraria.ID;
 using Terraria.GameContent.ObjectInteractions;
 
 namespace MajorasMaskTribute.Content.Tiles;
 
-public class DoomMonolith : ModTile
+public class FinalHoursMusicBox : ModTile
 {
     private Asset<Texture2D> glowTexture;
 
@@ -22,18 +24,20 @@ public class DoomMonolith : ModTile
         Main.tileFrameImportant[Type] = true;
         Main.tileNoAttach[Type] = true;
         TileID.Sets.HasOutlines[Type] = true;
+        TileID.Sets.DisableSmartCursor[Type] = true;
 
-        TileObjectData.newTile.CopyFrom(TileObjectData.Style2xX);
+        TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
+        TileObjectData.newTile.Origin = new Point16(0, 1);
+        TileObjectData.newTile.LavaDeath = false;
         TileObjectData.newTile.StyleHorizontal = true;
-        TileObjectData.newTile.Height = 3;
         TileObjectData.newTile.DrawYOffset = 2;
         TileObjectData.newTile.CoordinateHeights = [16, 16, 16, 16];
         TileObjectData.addTile(Type);
 
-        DustType = DustID.Iron;
+        DustType = DustID.Stone;
 
         AddMapEntry(
-            Color.DimGray
+            Color.Gray, Language.GetText("ItemName.MusicBox")
         );
 
         glowTexture = ModContent.Request<Texture2D>(Texture + "_Glow");
@@ -44,29 +48,7 @@ public class DoomMonolith : ModTile
         return true;
     }
 
-    public override void SetDrawPositions(int i, int j, ref int width, ref int offsetY, ref int height, ref short tileFrameX, ref short tileFrameY)
-    {
-        if (Main.tile[i, j].TileFrameX < 36)
-        {
-            return;
-        }
-        tileFrameX = (short)((Main.tileFrame[Type] * 36) + 36);
-        if (Main.tile[i, j].TileFrameX > 48)
-        {
-            tileFrameX += 18;
-        }
-    }
-
-    public override void AnimateTile(ref int frame, ref int frameCounter)
-    {
-        frameCounter++;
-        if (frameCounter >= 15)
-        {
-            frameCounter = 0;
-        }
-        frame = frameCounter / 5;
-    }
-
+    /*
     public override bool RightClick(int i, int j)
     {
         SoundEngine.PlaySound(SoundID.Mech, new Vector2(i * 16, j * 16));
@@ -81,12 +63,12 @@ public class DoomMonolith : ModTile
 
     private void Toggle(int i, int j)
     {
-        int leftX = i - (Main.tile[i, j].TileFrameX - (IsMonolithActive(i, j) ? 36 : 0)) / 18;
+        int leftX = i - (Main.tile[i, j].TileFrameX - (IsMusicBoxActive(i, j) ? 36 : 0)) / 18;
         int topY = j - Main.tile[i, j].TileFrameY / 18;
-        short frameAdjust = (short)(IsMonolithActive(i, j) ? -36 : 36);
+        short frameAdjust = (short)(IsMusicBoxActive(i, j) ? -36 : 36);
         for (int k = 0; k < 2; k++)
         {
-            for (int l = 0; l < 3; l++)
+            for (int l = 0; l < 2; l++)
             {
                 Tile tile = Main.tile[leftX + k, topY + l];
                 tile.TileFrameX += frameAdjust;
@@ -101,25 +83,28 @@ public class DoomMonolith : ModTile
             NetMessage.SendTileSquare(-1, leftX, topY, 2, 4, TileChangeType.None);
         }
     }
+	*/
 
     public override void MouseOver(int i, int j)
     {
         Player player = Main.LocalPlayer;
         player.cursorItemIconEnabled = true;
-        player.noThrow = 2;
 
-        player.cursorItemIconID = ModContent.ItemType<Items.DoomMonolith>();
+        player.cursorItemIconID = ModContent.ItemType<Items.FinalHoursMusicBox>();
+        player.noThrow = 2;
     }
 
+    /*
     public override IEnumerable<Item> GetItemDrops(int i, int j)
     {
-        yield return new Item(ModContent.ItemType<Content.Items.DoomMonolith>());
+        yield return new Item(ModContent.ItemType<Content.Items.FinalHoursMusicBox>());
     }
 
-    public static bool IsMonolithActive(int i, int j)
+    public static bool IsMusicBoxActive(int i, int j)
     {
         return Main.tile[i, j].TileFrameX >= 36;
     }
+	*/
 
     public override void PostDraw(int i, int j, SpriteBatch spriteBatch)
     {
@@ -157,35 +142,30 @@ public class DoomMonolith : ModTile
         );
     }
 
-    public override void NearbyEffects(int i, int j, bool closer)
+    public override void EmitParticles(int i, int j, Tile tileCache, short tileFrameX, short tileFrameY, Color tileLight, bool visible)
     {
-        if (!closer)
+        Tile tile = Main.tile[i, j];
+
+        if (!visible || tile.TileFrameX != 36 || tile.TileFrameY % 36 != 0 || (int)Main.timeForVisualEffects % 7 != 0 || !Main.rand.NextBool(3))
         {
             return;
         }
-        if (IsMonolithActive(i, j))
+
+        int MusicNote = Main.rand.Next(570, 573);
+        Vector2 SpawnPosition = new Vector2(i * 16 + 8, j * 16 - 8);
+        Vector2 NoteMovement = new Vector2(Main.WindForVisuals * 2f, -0.5f);
+        NoteMovement.X *= Main.rand.NextFloat(0.5f, 1.5f);
+        NoteMovement.Y *= Main.rand.NextFloat(0.5f, 1.5f);
+        switch (MusicNote)
         {
-            DoomMonolithSystem.nearDoomMonolith = true;
+            case 572:
+                SpawnPosition.X -= 8f;
+                break;
+            case 571:
+                SpawnPosition.X -= 4f;
+                break;
         }
-    }
-}
 
-public class DoomMonolithPlayer : ModPlayer
-{
-    public bool doomMonolithActive = false;
-
-    public override void ResetEffects()
-    {
-        doomMonolithActive = false;
-    }
-}
-
-public class DoomMonolithSystem : ModSystem
-{
-    public static bool nearDoomMonolith = false;
-
-    public override void ResetNearbyTileEffects()
-    {
-        nearDoomMonolith = false;
+        Gore.NewGore(new EntitySource_TileUpdate(i, j), SpawnPosition, NoteMovement, MusicNote, 0.8f);
     }
 }
