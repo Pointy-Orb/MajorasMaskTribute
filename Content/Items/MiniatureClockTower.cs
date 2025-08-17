@@ -1,4 +1,5 @@
 using Terraria;
+using System;
 using System.Collections.Generic;
 using Terraria.Localization;
 using Microsoft.Xna.Framework;
@@ -15,11 +16,14 @@ public class MiniatureClockTower : ModItem
     public override void Load()
     {
         bellSound = new SoundStyle("MajorasMaskTribute/Assets/bell");
+        defaultVolume = bellSound.Volume;
     }
 
     public override void SetDefaults()
     {
         bellSound = new SoundStyle("MajorasMaskTribute/Assets/bell");
+        Item.DefaultToPlaceableTile(ModContent.TileType<Tiles.MiniatureClockTowerTile>());
+        Item.maxStack = 1;
         Item.width = 26;
         Item.height = 22;
         Item.rare = ItemRarityID.Green;
@@ -27,84 +31,96 @@ public class MiniatureClockTower : ModItem
         Item.vanity = true;
     }
 
-    SoundStyle bellSound;
+    static SoundStyle bellSound;
+    private static float defaultVolume;
 
     public override void UpdateVanity(Player player)
     {
         UpdateAccessory(player, false);
     }
 
-    public override void UpdateAccessory(Player player, bool hideVisual)
+    public static void TryPlayBells(ref int bellsPlayed, Vector2? position = null, float? volume = null, Action onRing = null)
     {
-        var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
         if (NPC.MoonLordCountdown > 0)
         {
             if (NPC.MoonLordCountdown % 540 == 0 && NPC.MoonLordCountdown > 540)
             {
-                SoundEngine.PlaySound(bellSound);
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
             }
         }
-        else if (Main.curMusic == MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours") && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
+        else if (Main.curMusic == MusicLoader.GetMusicSlot(MajorasMaskTribute.mod, "Assets/Music/finalhours") && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
         {
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() % (5f / 60f) < 0.001f)
             {
-                SoundEngine.PlaySound(bellSound);
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
             }
         }
         else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.25)
         {
-            if (towerPlayer.bellsPlayed < 1)
+            if (bellsPlayed < 1)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.3 && towerPlayer.bellsPlayed < 2)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.3 && bellsPlayed < 2)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.35 && towerPlayer.bellsPlayed < 3)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.35 && bellsPlayed < 3)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.4 && towerPlayer.bellsPlayed < 4)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.4 && bellsPlayed < 4)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.45 && towerPlayer.bellsPlayed < 5)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.45 && bellsPlayed < 5)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
         }
         else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.25 && (Common.ApocalypseSystem.apocalypseDay < 2 && !Main.dayTime))
         {
-            if (towerPlayer.bellsPlayed < 1)
+            if (bellsPlayed < 1)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.3 && towerPlayer.bellsPlayed < 2)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.3 && bellsPlayed < 2)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.35 && towerPlayer.bellsPlayed < 3)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.35 && bellsPlayed < 3)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.4 && towerPlayer.bellsPlayed < 4)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.4 && bellsPlayed < 4)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
-            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.45 && towerPlayer.bellsPlayed < 5)
+            if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.45 && bellsPlayed < 5)
             {
-                SoundEngine.PlaySound(bellSound);
-                towerPlayer.bellsPlayed++;
+                SoundEngine.PlaySound(bellSound, position);
+                onRing?.Invoke();
+                bellsPlayed++;
             }
         }
         else if (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime))
@@ -124,18 +140,25 @@ public class MiniatureClockTower : ModItem
             }
             for (int i = 0; i < bellTimes.Count; i++)
             {
-                if (towerPlayer.bellsPlayed > i) continue;
+                if (bellsPlayed > i) continue;
                 if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > bellTimes[i])
                 {
-                    SoundEngine.PlaySound(bellSound);
-                    towerPlayer.bellsPlayed++;
+                    onRing?.Invoke();
+                    SoundEngine.PlaySound(bellSound, position);
+                    bellsPlayed++;
                 }
             }
         }
         else
         {
-            towerPlayer.bellsPlayed = 0;
+            bellsPlayed = 0;
         }
+    }
+
+    public override void UpdateAccessory(Player player, bool hideVisual)
+    {
+        var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
+        TryPlayBells(ref towerPlayer.bellsPlayed);
         towerPlayer.miniClockEquipped = true;
     }
 
@@ -179,7 +202,7 @@ public class BellRingingEffect : ModSceneEffect
             return false;
         if (Main.dayTime && Common.ApocalypseSystem.dayOfText.time > 0)
             return true;
-        return player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
+        return (player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped || Tiles.TowerTileSystem.nearClockTower) && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
     }
 }
 

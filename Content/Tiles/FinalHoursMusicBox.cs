@@ -142,6 +142,11 @@ public class FinalHoursMusicBox : ModTile
         );
     }
 
+    public override IEnumerable<Item> GetItemDrops(int i, int j)
+    {
+        yield return new Item(ModContent.ItemType<Items.FinalHoursMusicBox>());
+    }
+
     public override void EmitParticles(int i, int j, Tile tileCache, short tileFrameX, short tileFrameY, Color tileLight, bool visible)
     {
         Tile tile = Main.tile[i, j];

@@ -9,6 +9,8 @@ public class FinalHoursMusicBox : ModItem
     public override void SetStaticDefaults()
     {
         MusicLoader.AddMusicBox(Mod, MusicLoader.GetMusicSlot(Mod, "Assets/Music/finalhours"), ModContent.ItemType<FinalHoursMusicBox>(), ModContent.TileType<Tiles.FinalHoursMusicBox>());
+        ItemID.Sets.CanGetPrefixes[Type] = false;
+        ItemID.Sets.ShimmerTransformToItem[Type] = ItemID.MusicBox;
     }
 
     public override void SetDefaults()
@@ -21,7 +23,7 @@ public class FinalHoursMusicBox : ModItem
     public override void AddRecipes()
     {
         CreateRecipe()
-            .AddIngredient(ItemID.MusicBox)
+            .AddIngredient(ItemID.MusicBoxEerie)
             .AddIngredient(ModContent.ItemType<MajorasMask>())
             .AddConsumeIngredientCallback((Recipe recipe, int type, ref int amount, bool isDecrafting) =>
             {

@@ -343,6 +343,7 @@ DropConditions: {
 }
 
 VanillaEclipseLogicDisabled: When Vanilla Eclipse Logic is disabled
+NPCIsHappyEnough: When NPC is happy enough
 Tiles.DoomMonolith.MapEntry: DoomMonolith
 
 ItemConditions: {

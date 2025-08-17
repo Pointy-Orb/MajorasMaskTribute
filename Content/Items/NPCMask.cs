@@ -1,4 +1,6 @@
 using Terraria;
+using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.Chat;
 using Terraria.Localization;
 using Terraria.ModLoader.IO;
@@ -40,6 +42,11 @@ public abstract class NPCMask : ModItem
         Item.rare = ItemRarityID.Orange;
         Item.width = 28;
         Item.height = 28;
+        Item.value = Item.buyPrice(gold: 10);
+        if (targetNPC == NPCID.Nurse)
+        {
+            Item.value = 0;
+        }
     }
 
     public override void Update(ref float gravity, ref float maxFallSpeed)
@@ -438,5 +445,77 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         homunculusNPC.isHomunculus = bitReader.ReadBit();
         homunculusNPC.originalType = binaryReader.ReadInt16();
+    }
+
+    public override void ModifyShop(NPCShop shop)
+    {
+        foreach (int type in NPCMaskDrops.maskNPCs.Keys)
+        {
+            if (shop.NpcType != type)
+            {
+                continue;
+            }
+            shop.Add(NPCMaskDrops.maskNPCs[type].Type, new Condition(Language.GetText("Mods.MajorasMaskTribute.NPCIsHappyEnough"), () => Main.LocalPlayer.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421));
+        }
+    }
+}
+
+public class AnglerMaskPlayer : ModPlayer
+{
+    public override void AnglerQuestReward(float rareMultiplier, List<Item> rewardItems)
+    {
+        if (Player.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421 && !Player.HasItemInAnyInventory(ModContent.ItemType<AnglerMask>()))
+        {
+            rewardItems.Add(new Item(ModContent.ItemType<AnglerMask>()));
+        }
+    }
+
+    private bool gotTodaysNurseMask = false;
+    private bool gotTodaysGuideMask = false;
+    private bool gotTodaysScroogeMask = false;
+    private bool wasDay = true;
+    private bool firstFrame = true;
+
+    public override void PostUpdate()
+    {
+        if (Player.talkNPC > 0 && Main.npc[Player.talkNPC].type == NPCID.Nurse && Player.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421 && !Player.HasItemInAnyInventory(ModContent.ItemType<NurseMask>()) && Main.npcChatText == Player.currentShoppingSettings.HappinessReport && !gotTodaysNurseMask)
+        {
+            var mask = new Item(ModContent.ItemType<NurseMask>());
+            Item.NewItem(new EntitySource_Gift(Main.npc[Player.talkNPC]), Player.Center, Vector2.Zero, mask);
+            gotTodaysNurseMask = true;
+        }
+        if (Player.talkNPC > 0 && Main.npc[Player.talkNPC].type == NPCID.Guide && Player.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421 && !Player.HasItemInAnyInventory(ModContent.ItemType<GuideMask>()) && Main.npcChatText == Player.currentShoppingSettings.HappinessReport && !gotTodaysGuideMask)
+        {
+            var mask = new Item(ModContent.ItemType<GuideMask>());
+            Item.NewItem(new EntitySource_Gift(Main.npc[Player.talkNPC]), Player.Center, Vector2.Zero, mask);
+            gotTodaysGuideMask = true;
+        }
+        if (Player.talkNPC > 0 && Main.npc[Player.talkNPC].type == NPCID.TaxCollector && Player.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421 && !Player.HasItemInAnyInventory(ModContent.ItemType<TaxCollectorMask>()) && Main.npcChatText == Player.currentShoppingSettings.HappinessReport && !gotTodaysScroogeMask)
+        {
+            var mask = new Item(ModContent.ItemType<TaxCollectorMask>());
+            Item.NewItem(new EntitySource_Gift(Main.npc[Player.talkNPC]), Player.Center, Vector2.Zero, mask);
+            gotTodaysScroogeMask = true;
+        }
+        if (!wasDay && Main.dayTime && !firstFrame)
+        {
+            gotTodaysNurseMask = false;
+            gotTodaysGuideMask = false;
+            gotTodaysScroogeMask = false;
+        }
+        wasDay = Main.dayTime;
+    }
+
+    private static void DropNurseMask(On_Player.orig_SetTalkNPC orig, Player self, int npcIndex, bool fromNet = false)
+    {
+        orig(self, npcIndex, fromNet);
+        if (!Main.npc.IndexInRange(npcIndex))
+        {
+            return;
+        }
+        if (Main.npc[npcIndex].type == NPCID.Nurse && self.currentShoppingSettings.PriceAdjustment <= 0.8999999761581421 && !self.HasItemInAnyInventory(ModContent.ItemType<NurseMask>()))
+        {
+            var mask = new Item(ModContent.ItemType<NurseMask>());
+            Item.NewItem(new EntitySource_Gift(Main.npc[npcIndex]), self.Center, Vector2.Zero, mask);
+        }
     }
 }
