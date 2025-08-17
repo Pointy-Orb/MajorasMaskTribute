@@ -43,7 +43,7 @@ public abstract class NPCMask : ModItem
         Item.width = 28;
         Item.height = 28;
         Item.value = Item.buyPrice(gold: 10);
-        if (targetNPC == NPCID.Nurse)
+        if (targetNPC == NPCID.Nurse || targetNPC == NPCID.Guide || targetNPC == NPCID.TaxCollector)
         {
             Item.value = 0;
         }
