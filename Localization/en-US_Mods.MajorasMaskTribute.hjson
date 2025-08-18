@@ -19,6 +19,7 @@ Announcements: {
 	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
 	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
 	EndIsNear: The end is near...
+	LivesInMask: "{0}'s spirit has been sealed in the mask..."
 }
 
 DeathMessages: {
@@ -35,7 +36,8 @@ Items: {
 		Tooltip:
 			'''
 			Rewinds time to the dawn of the first day when played.
-			Can also play the song of healing to remove transformation masks from those wearing them.
+			Can also play the Song of Healing to remove transformation masks from those wearing them.
+			Playing the Song of Healing while near town residents who are happy enough will transform them into masks
 			'The Goddess of Time is protecting you.'
 			'''
 	}
@@ -237,6 +239,15 @@ Configs: {
 		SigilSettings: {
 			Label: Celestial Sigil Usability
 			Tooltip: In vanilla, the Celestial Sigil only works in Hardmode worlds where Golem has been defeated
+		}
+
+		MurderForMasks: {
+			Label: NPCs Drop Masks on Death
+			Tooltip:
+				'''
+				This used to be the only way it worked in previous updates, but has since been replaced by a newer method.
+				If you want to keep using the old method, enable this option.
+				'''
 		}
 	}
 

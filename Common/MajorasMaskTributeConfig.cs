@@ -42,6 +42,8 @@ public class ServerConfig : ModConfig
 
     public bool VanillaTimeRate { get; set; }
 
+    public bool MurderForMasks { get; set; }
+
     [Header("Progression")]
     public bool SaveWorldAfterHardmodeStarts { get; set; }
 

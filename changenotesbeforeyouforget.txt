@@ -1,3 +1,3 @@
  - Added a Final Hours Music Box. If the Miniature Clock Tower is equipped, this will also play the bell while the music box is equipped/player is in music box's vicinity
- - Don't want to kill your NPCs for masks? Well fret no longer! Now NPCs will also sell their masks when they are happy enough.
+ - NPC masks are no longer obtained through murder. Instead, you must play the Song of Healing when near them and while they are happy enough (same happiness to sell a pylon). The old method can be restored as a config option if desired.
  - The Miniature Clock Tower can now be placed, as well as toggled on and off.

@@ -269,15 +269,47 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
         if (animationTimer >= 300 && songPlaying == SongPlaying.SongOfHealing)
         {
+            List<int> npcsToMask = new();
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
-                if (!homunculusNPC.isHomunculus) continue;
-                if (Player.position.Distance(npc.position) < 1600)
+                if (!homunculusNPC.isHomunculus)
+                {
+                    if (HomunculusNPC.CanBecomeMask(Player, npc))
+                    {
+                        npcsToMask.Add(npc.whoAmI);
+                    }
+                    continue;
+                }
+                if (Player.position.Distance(npc.position) < SongOfHealingDistance)
                 {
                     //Some healing you got there.
                     npc.StrikeInstantKill();
                 }
+            }
+            foreach (int npcIndex in npcsToMask)
+            {
+                var npc = Main.npc[npcIndex];
+                if (!NPCMaskDrops.maskNPCs.ContainsKey(npc.type))
+                {
+                    continue;
+                }
+                Item.NewItem(npc.GetSource_FromThis(), npc.position, Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
+                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
+                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
+                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
+                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
+                if (Main.dedServ)
+                {
+                    ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), new Color(50, 125, byte.MaxValue));
+                }
+                else
+                {
+                    Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), 50, 125, byte.MaxValue);
+                }
+                npc.active = false;
+                npc.type = NPCID.Bunny;
+                npc.StrikeInstantKill();
             }
             animationTimer = 0;
         }
@@ -286,6 +318,8 @@ public class OcarinaOfTimePlayer : ModPlayer
             animationTimer--;
         }
     }
+
+    public const int SongOfHealingDistance = 1600;
 
     public override IEnumerable<Item> AddStartingItems(bool mediumCoreDeath)
     {
