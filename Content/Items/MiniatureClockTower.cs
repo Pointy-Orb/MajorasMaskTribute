@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.GameContent.Drawing;
 using System;
 using System.Collections.Generic;
 using Terraria.Localization;
@@ -39,12 +40,18 @@ public class MiniatureClockTower : ModItem
         UpdateAccessory(player, false);
     }
 
-    public static void TryPlayBells(ref int bellsPlayed, Vector2? position = null, float? volume = null, Action onRing = null)
+    public static void TryPlayBells(ref int bellsPlayed, Vector2? position = null, float? volume = null, Action onRing = null, bool broadcast = false)
     {
+        bellSound.Volume = volume ?? 1;
         if (NPC.MoonLordCountdown > 0)
         {
             if (NPC.MoonLordCountdown % 540 == 0 && NPC.MoonLordCountdown > 540)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
             }
@@ -53,6 +60,11 @@ public class MiniatureClockTower : ModItem
         {
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() % (5f / 60f) < 0.001f)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
             }
@@ -61,30 +73,55 @@ public class MiniatureClockTower : ModItem
         {
             if (bellsPlayed < 1)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.3 && bellsPlayed < 2)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.35 && bellsPlayed < 3)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.4 && bellsPlayed < 4)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.45 && bellsPlayed < 5)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
@@ -94,30 +131,55 @@ public class MiniatureClockTower : ModItem
         {
             if (bellsPlayed < 1)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.3 && bellsPlayed < 2)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.35 && bellsPlayed < 3)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.4 && bellsPlayed < 4)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
             }
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.45 && bellsPlayed < 5)
             {
+                if (broadcast && Main.dedServ)
+                {
+                    var pos = position ?? Vector2.Zero;
+                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
                 bellsPlayed++;
@@ -144,7 +206,15 @@ public class MiniatureClockTower : ModItem
                 if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > bellTimes[i])
                 {
                     onRing?.Invoke();
-                    SoundEngine.PlaySound(bellSound, position);
+                    if (broadcast && Main.dedServ)
+                    {
+                        var pos = position ?? Vector2.Zero;
+                        MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
+                    }
+                    else
+                    {
+                        SoundEngine.PlaySound(bellSound, position);
+                    }
                     bellsPlayed++;
                 }
             }
@@ -158,7 +228,7 @@ public class MiniatureClockTower : ModItem
     public override void UpdateAccessory(Player player, bool hideVisual)
     {
         var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
-        TryPlayBells(ref towerPlayer.bellsPlayed);
+        TryPlayBells(ref towerPlayer.bellsPlayed, volume: 0.5f);
         towerPlayer.miniClockEquipped = true;
     }
 

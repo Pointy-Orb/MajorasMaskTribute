@@ -819,7 +819,9 @@ public class ApocalypseSystem : ModSystem
             var npc = Main.npc[i];
             if (!npc.HasGivenName && (npc.type != NPCID.OldMan || sparedOldMan))
             {
-                npc.Transform(NPCID.Bunny);
+                npc.active = false;
+                npc.Transform(NPCID.Worm);
+                npc.SpawnedFromStatue = true;
                 npc.position = Vector2.Zero;
                 npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
                 npc.StrikeInstantKill();
@@ -828,7 +830,10 @@ public class ApocalypseSystem : ModSystem
             {
                 sparedOldMan = true;
             }
-            npc.netUpdate = true;
+            if (Main.dedServ)
+            {
+                NetMessage.SendData(MessageID.SyncNPC, number: i);
+            }
         }
         ResetApocalypseVariables();
     }

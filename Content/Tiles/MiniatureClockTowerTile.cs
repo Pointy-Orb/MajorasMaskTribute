@@ -140,7 +140,7 @@ public class MiniatureClockTowerTileEntity : ModTileEntity
             Vector2 SpawnPosition = new Vector2(Position.X + 0.1f, Position.Y - 0.1f) * 16;
             Vector2 WaveMovement = new Vector2(0, -10f);
             var wave = Gore.NewGorePerfect(new EntitySource_TileUpdate(Position.X, Position.Y), SpawnPosition, WaveMovement, ModContent.GoreType<ClockTowerWave>(), 1f);
-        });
+        }, true);
     }
 }
 

@@ -19,7 +19,7 @@ Announcements: {
 	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
 	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
 	EndIsNear: The end is near...
-	LivesInMask: "{0}'s spirit has been sealed in the mask..."
+	LivesInMask: The spirit of {0} has been sealed in the mask...
 }
 
 DeathMessages: {

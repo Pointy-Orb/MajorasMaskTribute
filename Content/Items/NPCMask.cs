@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.Chat;
@@ -422,6 +423,37 @@ public class HomunculusNPC : GlobalNPC
         return true;
     }
 
+    public static void NPCToMaskInner(NPC npc)
+    {
+        var itemIndex = Item.NewItem(npc.GetSource_FromThis(), new Vector2(npc.Right.X, npc.Right.Y - 12), Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
+        Main.item[itemIndex].velocity = Vector2.Zero;
+        Main.item[itemIndex].shimmered = true;
+        Main.item[itemIndex].GetGlobalItem<DeShimmerNewMask>().shimmerTimer = true;
+        if (Main.dedServ)
+        {
+            NetMessage.SendData(MessageID.SyncItem, number: itemIndex);
+        }
+        if (Main.dedServ)
+        {
+            ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), new Color(50, 125, byte.MaxValue));
+        }
+        else
+        {
+            Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), 50, 125, byte.MaxValue);
+        }
+        npc.active = false;
+        npc.Transform(NPCID.Worm);
+        npc.position = Vector2.Zero;
+        if (Main.dedServ)
+        {
+            NetMessage.SendData(MessageID.SyncNPC, number: npc.whoAmI);
+        }
+        if (!Main.dedServ)
+        {
+            SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
+        }
+    }
+
     public override void SaveData(NPC npc, TagCompound tag)
     {
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
@@ -451,5 +483,43 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         homunculusNPC.isHomunculus = bitReader.ReadBit();
         homunculusNPC.originalType = binaryReader.ReadInt16();
+    }
+}
+
+public class DeShimmerNewMask : GlobalItem
+{
+    public override bool InstancePerEntity => true;
+
+    private const int shimmerTime = 300;
+
+    public bool shimmerTimer = false;
+
+    public int curShimmerTime { get; private set; } = 0;
+
+    public override void Update(Item item, ref float gravity, ref float maxFallSpeed)
+    {
+        var shimmerItem = item.GetGlobalItem<DeShimmerNewMask>();
+        if (!shimmerItem.shimmerTimer)
+        {
+            return;
+        }
+        if (shimmerItem.curShimmerTime < shimmerTime)
+        {
+            shimmerItem.curShimmerTime++;
+        }
+        else
+        {
+            item.shimmered = false;
+        }
+    }
+
+    public override void NetSend(Item item, BinaryWriter writer)
+    {
+        writer.Write(item.GetGlobalItem<DeShimmerNewMask>().shimmerTimer);
+    }
+
+    public override void NetReceive(Item item, BinaryReader reader)
+    {
+        item.GetGlobalItem<DeShimmerNewMask>().shimmerTimer = reader.ReadBoolean();
     }
 }

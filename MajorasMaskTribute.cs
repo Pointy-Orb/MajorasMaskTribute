@@ -1,4 +1,7 @@
 using System;
+using Terraria.Chat;
+using Terraria.DataStructures;
+using Microsoft.Xna.Framework;
 using Terraria.Localization;
 using Terraria.Utilities;
 using Terraria.Audio;
@@ -31,7 +34,10 @@ namespace MajorasMaskTribute
             ResetPlayers,
             SavePlayerBackups,
             StartEclipse,
-            RemoveEclipseDisc
+            RemoveEclipseDisc,
+            PlayBell,
+            DisintegrateNPC,
+            DisintegrateNPCEffects
         }
 
         public override void Load()
@@ -110,6 +116,60 @@ namespace MajorasMaskTribute
                         discItem.TurnToAir();
                     }
                     break;
+                case MessageType.PlayBell:
+                    Vector2 position = reader.ReadVector2();
+                    bool waveGore = reader.ReadBoolean();
+                    SoundEngine.PlaySound(new SoundStyle("MajorasMaskTribute/Assets/bell"), position * 16);
+                    if (!waveGore)
+                    {
+                        break;
+                    }
+                    Vector2 SpawnPosition = new Vector2(position.X + 0.1f, position.Y - 0.1f) * 16;
+                    Vector2 WaveMovement = new Vector2(0, -10f);
+                    var wave = Gore.NewGorePerfect(new EntitySource_TileUpdate((int)position.X, (int)position.Y), SpawnPosition, WaveMovement, ModContent.GoreType<Content.Tiles.ClockTowerWave>(), 1f);
+                    break;
+                case MessageType.DisintegrateNPC:
+                    List<int> victims = new();
+                    byte victim = 0;
+                    var effectPacket = this.GetPacket();
+                    effectPacket.Write((byte)MessageType.DisintegrateNPCEffects);
+                    while ((victim = reader.ReadByte()) < byte.MaxValue)
+                    {
+                        victims.Add(victim);
+                        effectPacket.Write(victim);
+                    }
+                    effectPacket.Write(byte.MaxValue);
+                    effectPacket.Send();
+                    foreach (int npcIndex in victims)
+                    {
+                        var npc = Main.npc[npcIndex];
+                        if (!NPCMaskDrops.maskNPCs.ContainsKey(npc.type))
+                        {
+                            continue;
+                        }
+                        if (Main.dedServ)
+                        {
+                            HomunculusNPC.NPCToMaskInner(npc);
+                        }
+                    }
+                    break;
+                case MessageType.DisintegrateNPCEffects:
+                    List<int> effectVictims = new();
+                    byte effectVictim = 0;
+                    while ((effectVictim = reader.ReadByte()) < byte.MaxValue)
+                    {
+                        effectVictims.Add(effectVictim);
+                    }
+                    foreach (int effectVictimIndex in effectVictims)
+                    {
+                        var npc = Main.npc[effectVictimIndex];
+                        Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
+                        Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
+                        Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
+                        Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
+                        SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
+                    }
+                    break;
             }
         }
 
@@ -166,6 +226,27 @@ namespace MajorasMaskTribute
                 rmPacket.Write((byte)MajorasMaskTribute.MessageType.RemoveEclipseDisc);
                 rmPacket.Write(player);
                 rmPacket.Send();
+            }
+
+            public static void PlayBell(Vector2 position, bool doWave)
+            {
+                var bellPacket = MajorasMaskTribute.mod.GetPacket();
+                bellPacket.Write((byte)MessageType.PlayBell);
+                bellPacket.WriteVector2(position);
+                bellPacket.Write(doWave);
+                bellPacket.Send();
+            }
+
+            public static void DisintegrateNPC(IEnumerable<byte> victims)
+            {
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.DisintegrateNPC);
+                foreach (byte victim in victims)
+                {
+                    packet.Write(victim);
+                }
+                packet.Write(byte.MaxValue);
+                packet.Send();
             }
         }
     }

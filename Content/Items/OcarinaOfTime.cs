@@ -287,29 +287,38 @@ public class OcarinaOfTimePlayer : ModPlayer
                     npc.StrikeInstantKill();
                 }
             }
-            foreach (int npcIndex in npcsToMask)
+            if (Main.netMode == NetmodeID.SinglePlayer)
             {
-                var npc = Main.npc[npcIndex];
-                if (!NPCMaskDrops.maskNPCs.ContainsKey(npc.type))
+                foreach (int npcIndex in npcsToMask)
                 {
-                    continue;
+                    var npc = Main.npc[npcIndex];
+                    if (!NPCMaskDrops.maskNPCs.ContainsKey(npc.type))
+                    {
+                        continue;
+                    }
+                    HomunculusNPC.NPCToMaskInner(npc);
+                    /*
+                    var itemIndex = Item.NewItem(npc.GetSource_FromThis(), new Vector2(npc.Right.X - 6, npc.Right.Y - 12), Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
+                    Main.item[itemIndex].velocity = Vector2.Zero;
+                    Main.item[itemIndex].shimmered = true;
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
+                    SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
+                    npc.active = false;
+                    npc.type = NPCID.Bunny;
+					*/
                 }
-                Item.NewItem(npc.GetSource_FromThis(), npc.position, Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
-                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
-                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
-                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
-                Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
-                if (Main.dedServ)
+            }
+            else
+            {
+                var npcBytes = new List<byte>();
+                foreach (int npc in npcsToMask)
                 {
-                    ChatHelper.BroadcastChatMessage(NetworkText.FromKey("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), new Color(50, 125, byte.MaxValue));
+                    npcBytes.Add((byte)npc);
                 }
-                else
-                {
-                    Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), 50, 125, byte.MaxValue);
-                }
-                npc.active = false;
-                npc.type = NPCID.Bunny;
-                npc.StrikeInstantKill();
+                MajorasMaskTribute.NetData.DisintegrateNPC(npcBytes);
             }
             animationTimer = 0;
         }
