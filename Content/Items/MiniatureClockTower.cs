@@ -56,15 +56,10 @@ public class MiniatureClockTower : ModItem
                 onRing?.Invoke();
             }
         }
-        else if (Main.curMusic == MusicLoader.GetMusicSlot(MajorasMaskTribute.mod, "Assets/Music/finalhours") && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
+        else if (Main.curMusic == MusicLoader.GetMusicSlot(MajorasMaskTribute.mod, "Assets/Music/finalhours") && !broadcast && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
         {
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() % (5f / 60f) < 0.001f)
             {
-                if (broadcast && Main.dedServ)
-                {
-                    var pos = position ?? Vector2.Zero;
-                    MajorasMaskTribute.NetData.PlayBell(pos, TileDrawing.IsVisible(Main.tile[(int)(pos.X / 16), (int)(pos.Y / 16)]));
-                }
                 SoundEngine.PlaySound(bellSound, position);
                 onRing?.Invoke();
             }
@@ -228,7 +223,7 @@ public class MiniatureClockTower : ModItem
     public override void UpdateAccessory(Player player, bool hideVisual)
     {
         var towerPlayer = player.GetModPlayer<MiniatureClockTowerPlayer>();
-        TryPlayBells(ref towerPlayer.bellsPlayed, volume: 0.5f);
+        TryPlayBells(ref towerPlayer.bellsPlayed, volume: 0.4f);
         towerPlayer.miniClockEquipped = true;
     }
 

@@ -119,12 +119,12 @@ namespace MajorasMaskTribute
                 case MessageType.PlayBell:
                     Vector2 position = reader.ReadVector2();
                     bool waveGore = reader.ReadBoolean();
-                    SoundEngine.PlaySound(new SoundStyle("MajorasMaskTribute/Assets/bell"), position * 16);
+                    SoundEngine.PlaySound(new SoundStyle("MajorasMaskTribute/Assets/bell"), position);
                     if (!waveGore)
                     {
                         break;
                     }
-                    Vector2 SpawnPosition = new Vector2(position.X + 0.1f, position.Y - 0.1f) * 16;
+                    Vector2 SpawnPosition = new Vector2(position.X + 0.016f, position.Y - 0.16f);
                     Vector2 WaveMovement = new Vector2(0, -10f);
                     var wave = Gore.NewGorePerfect(new EntitySource_TileUpdate((int)position.X, (int)position.Y), SpawnPosition, WaveMovement, ModContent.GoreType<Content.Tiles.ClockTowerWave>(), 1f);
                     break;

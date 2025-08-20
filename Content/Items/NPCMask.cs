@@ -425,7 +425,7 @@ public class HomunculusNPC : GlobalNPC
 
     public static void NPCToMaskInner(NPC npc)
     {
-        var itemIndex = Item.NewItem(npc.GetSource_FromThis(), new Vector2(npc.Right.X, npc.Right.Y - 12), Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
+        var itemIndex = Item.NewItem(npc.GetSource_FromThis(), new Vector2(npc.Right.X + 3 * npc.direction, npc.Right.Y - 12), Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
         Main.item[itemIndex].velocity = Vector2.Zero;
         Main.item[itemIndex].shimmered = true;
         Main.item[itemIndex].GetGlobalItem<DeShimmerNewMask>().shimmerTimer = true;
@@ -442,14 +442,17 @@ public class HomunculusNPC : GlobalNPC
             Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.LivesInMask", npc.FullName), 50, 125, byte.MaxValue);
         }
         npc.active = false;
-        npc.Transform(NPCID.Worm);
-        npc.position = Vector2.Zero;
+        //npc.position = Vector2.Zero;
         if (Main.dedServ)
         {
             NetMessage.SendData(MessageID.SyncNPC, number: npc.whoAmI);
         }
         if (!Main.dedServ)
         {
+            Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
+            Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
+            Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
+            Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
             SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
         }
     }

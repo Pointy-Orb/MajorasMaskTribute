@@ -297,6 +297,11 @@ public class OcarinaOfTimePlayer : ModPlayer
                         continue;
                     }
                     HomunculusNPC.NPCToMaskInner(npc);
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, 0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, 0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(0.5f, -0.7f), Main.rand.Next(11, 14));
+                    Gore.NewGorePerfect(npc.GetSource_FromThis(), npc.position, new Vector2(-0.5f, -0.7f), Main.rand.Next(11, 14));
+                    SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
                     /*
                     var itemIndex = Item.NewItem(npc.GetSource_FromThis(), new Vector2(npc.Right.X - 6, npc.Right.Y - 12), Vector2.Zero, NPCMaskDrops.maskNPCs[npc.type].Type);
                     Main.item[itemIndex].velocity = Vector2.Zero;
