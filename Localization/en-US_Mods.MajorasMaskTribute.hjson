@@ -141,6 +141,16 @@ Items: {
 		DisplayName: Music Box (Final Hours)
 		Tooltip: ""
 	}
+
+	BurntGuideMask: {
+		DisplayName: Guide Mask
+		Tooltip:
+			'''
+			A mask that formerly embodied the spirit of the Guide.
+			Has no use in this state.
+			{$ItemTooltip.GuideVoodooDoll}
+			'''
+	}
 }
 
 Configs: {

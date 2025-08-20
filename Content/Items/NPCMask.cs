@@ -131,6 +131,27 @@ public class GuideMask : NPCMask
 {
     public override bool male => true;
     public override int targetNPC => NPCID.Guide;
+
+    public override void Update(ref float gravity, ref float maxFallSpeed)
+    {
+        base.Update(ref gravity, ref maxFallSpeed);
+        if (Item.lavaWet)
+        {
+            Item.shimmered = true;
+            Item.shimmerWet = true;
+        }
+    }
+
+    public override void AddRecipes()
+    {
+        Recipe.Create(ItemID.GuideVoodooDoll)
+            .AddIngredient(this)
+            .AddIngredient(ItemID.SoulofLight)
+            .AddIngredient(ItemID.SoulofNight)
+            .AddIngredient(ItemID.Hay, 20)
+            .AddTile(TileID.DemonAltar)
+            .Register();
+    }
 }
 
 public class MerchantMask : NPCMask
@@ -367,8 +388,14 @@ public class HomunculusNPC : GlobalNPC
 {
     public override bool InstancePerEntity => true;
     public bool isHomunculus { get; set; } = false;
+    private bool isAboutToGetGot = false;
     public int originalType { get; private set; }
     public static int maskCooldown = 0;
+
+    public override void Load()
+    {
+        On_NPC.NPCLoot += DontDropTheStuffIfTheGuideDied;
+    }
 
     public static void TransformByMask(NPC target, int maskNPCType)
     {
@@ -397,17 +424,38 @@ public class HomunculusNPC : GlobalNPC
             maskCooldown--;
     }
 
+    private static bool WoFJustSpawned = false;
+
+    public bool dontRewardBurningTheGuide = false;
+
+    public override void HitEffect(NPC npc, NPC.HitInfo hit)
+    {
+        if (npc.type == NPCID.Guide && (hit.Damage == 9999 || hit.InstantKill) && npc.GetGlobalNPC<HomunculusNPC>().isHomunculus)
+        {
+            npc.GetGlobalNPC<HomunculusNPC>().isAboutToGetGot = true;
+        }
+    }
+
     public override bool CheckDead(NPC npc)
     {
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         if (homunculusNPC.isHomunculus)
         {
+            var sacrifice = homunculusNPC.isAboutToGetGot;
+            homunculusNPC.isAboutToGetGot = false;
             maskCooldown = 2000;
-            Item.NewItem(npc.GetSource_DropAsItem(), npc.Top, Vector2.One, NPCMaskDrops.maskNPCs[npc.type].Type);
+            Item.NewItem(npc.GetSource_DropAsItem(), npc.Top, Vector2.One, sacrifice ? ModContent.ItemType<BurntGuideMask>() : NPCMaskDrops.maskNPCs[npc.type].Type);
             string oldForm = npc.TypeName;
             string newForm = npc.GivenName;
             npc.Transform(homunculusNPC.originalType);
+            //Get gore to generate for the NPC's original type
             npc.velocity = Vector2.Zero;
+            if (sacrifice)
+            {
+                npc.life = 0;
+                npc.HitEffect(0, 9999, true);
+                npc.GetGlobalNPC<HomunculusNPC>().dontRewardBurningTheGuide = true;
+            }
             homunculusNPC.isHomunculus = false;
             npc.netUpdate = true;
             if (Main.dedServ)
@@ -418,7 +466,7 @@ public class HomunculusNPC : GlobalNPC
             {
                 Main.NewText(Language.GetTextValue("Mods.MajorasMaskTribute.DroppedMask", newForm, oldForm), byte.MaxValue, 25, 25);
             }
-            return false;
+            return sacrifice;
         }
         return true;
     }
@@ -486,6 +534,14 @@ public class HomunculusNPC : GlobalNPC
         var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
         homunculusNPC.isHomunculus = bitReader.ReadBit();
         homunculusNPC.originalType = binaryReader.ReadInt16();
+    }
+
+    private static void DontDropTheStuffIfTheGuideDied(On_NPC.orig_NPCLoot orig, NPC self)
+    {
+        if (!self.GetGlobalNPC<HomunculusNPC>().dontRewardBurningTheGuide)
+        {
+            orig(self);
+        }
     }
 }
 
