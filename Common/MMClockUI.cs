@@ -393,11 +393,11 @@ public class ClockSystem : ModSystem
         {
             clockDisplay.clock.started = false;
         }
-        if (Main.LocalPlayer.GetModPlayer<MMTimePlayer>().accTerminaWatch && !clockDisplay.clock.active)
+        if (Main.LocalPlayer.GetModPlayer<MMTimePlayer>().terminaWatch == MMTimePlayer.TerminaWatch.Classic && !clockDisplay.clock.active)
         {
             clockDisplay.Activate();
         }
-        if (!Main.LocalPlayer.GetModPlayer<MMTimePlayer>().accTerminaWatch && clockDisplay.clock.active)
+        if (Main.LocalPlayer.GetModPlayer<MMTimePlayer>().terminaWatch != MMTimePlayer.TerminaWatch.Classic && clockDisplay.clock.active)
         {
             clockDisplay.Deactivate();
         }

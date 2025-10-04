@@ -151,6 +151,16 @@ Items: {
 			{$ItemTooltip.GuideVoodooDoll}
 			'''
 	}
+
+	TerminianWatchThreeD: {
+		Tooltip: ""
+		DisplayName: Terminian Watch Three D
+	}
+
+	TerminianWatch3D: {
+		Tooltip: ""
+		DisplayName: Terminian Watch3 D
+	}
 }
 
 Configs: {
