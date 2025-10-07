@@ -204,6 +204,17 @@ public class BlackScreen : UIElement
                 {
                     return false;
                 }
+                if (npc.type == NPCID.EaterofWorldsHead)
+                {
+                    return false;
+                }
+            }
+            foreach (Player player in Main.ActivePlayers)
+            {
+                if (player.happyFunTorchTime)
+                {
+                    return false;
+                }
             }
             return ModContent.GetInstance<ServerConfig>().PauseGameDuringDayTransitions;
         }

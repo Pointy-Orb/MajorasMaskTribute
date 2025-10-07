@@ -123,8 +123,12 @@ Items: {
 	}
 
 	TerminianWatch: {
-		DisplayName: Terminian Watch
-		Tooltip: Tells the time with a fancy display
+		DisplayName: Terminian Watch (64)
+		Tooltip:
+			'''
+			Tells the time with a fancy display
+			Can be freely converted into the 3D equivalent
+			'''
 		WoSModeNote: Will persist between cycles without needing to be in the first three slots
 	}
 
@@ -152,14 +156,14 @@ Items: {
 			'''
 	}
 
-	TerminianWatchThreeD: {
-		Tooltip: ""
-		DisplayName: Terminian Watch Three D
-	}
-
 	TerminianWatch3D: {
-		Tooltip: ""
-		DisplayName: Terminian Watch3 D
+		DisplayName: Terminian Watch (3D)
+		Tooltip:
+			'''
+			Tells the time with a fancy digital display
+			Can be freely converted into the 64 equivalent
+			'''
+		WoSModeNote: Will persist between cycles without needing to be in the first three slots
 	}
 }
 

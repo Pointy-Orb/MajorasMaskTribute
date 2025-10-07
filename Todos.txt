@@ -1,4 +1,4 @@
 Make NPCs say stuff about Eclipsing Stones and Phase Discs
 Look into doing custom cycle lengths
 Fix hardmode worldgen bug with Calamity/Remnants
-Finish the MM3D clock
+Make the version of the 3D clock for a saved world where the moon isn't falling

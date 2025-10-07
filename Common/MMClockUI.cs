@@ -282,7 +282,10 @@ public class MMClockUI : UIElement
         var timeLeft = 28.5 - Utils.GetDayTimeAs24FloatStartingFromMidnight();
         var hoursLeft = (int)Math.Truncate(timeLeft);
         double minutesLeft = (timeLeft - hoursLeft) * 60;
-        var timeString = $"{hoursLeft.ToString("D1")}{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString("F2")}";
+        double secondsLeft = minutesLeft - Math.Truncate(minutesLeft);
+        minutesLeft = Math.Truncate(minutesLeft);
+        secondsLeft *= 60;
+        var timeString = $"{hoursLeft.ToString("D1")}{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString()}{(secondsLeft < 10 ? "0" : "")}{Math.Truncate(secondsLeft).ToString()}";
         foreach (char digit in timeString)
         {
             if (Int32.TryParse(digit.ToString(), out var number))

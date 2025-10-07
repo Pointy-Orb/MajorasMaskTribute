@@ -47,7 +47,7 @@ public class MMClockUIThreeD : UIElement
         }
     }
 
-    public Vector2 markerPosition(float scale)
+    public Vector2 MarkerPosition(float scale)
     {
         var time = Main.time;
         if (!Main.dayTime)
@@ -60,6 +60,14 @@ public class MMClockUIThreeD : UIElement
         pos.Y = position.Y - 8 * scale;
         return pos;
     }
+
+    public Vector2 ApocalypseTextPosition(float scale)
+    {
+        return new Vector2(position.X, position.Y - (34 + 36 * apocalypseAnimProgress) * scale);
+    }
+
+    private float apocalypseAnimProgress = 0f;
+    private bool apocalypseTextActive = false;
 
     internal Rectangle markerRect => new Rectangle(144, 0, 70, 34);
     internal Rectangle clockBackRect => new Rectangle(72, 0, 70, 34);
@@ -99,6 +107,17 @@ public class MMClockUIThreeD : UIElement
         }
     }
 
+    internal Rectangle colonRect
+    {
+        get
+        {
+            var srect = sunMoonRect;
+            srect.X = 432;
+            srect.Y = 70;
+            return srect;
+        }
+    }
+
     private double DoubleLerp(double value1, double value2, double amount)
     {
         return value1 + (value2 - value1) * amount;
@@ -129,10 +148,10 @@ public class MMClockUIThreeD : UIElement
 
     public static Rectangle ApocalypseNumberRectFromNumber(int num)
     {
-        int width = 12;
-        int height = 20;
-        int yPos = 14;
-        int xOffset = 250;
+        int width = 16;
+        int height = 26;
+        int yPos = 0;
+        int xOffset = 330;
         int frame = Int32.Clamp(num, 0, 9);
         return new Rectangle(xOffset + ((width + 2) * frame), yPos, width, height);
     }
@@ -158,23 +177,153 @@ public class MMClockUIThreeD : UIElement
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        if (!active || !started)
+        if (!active || !started || ApocalypseSystem.apocalypseDay > 2)
         {
             return;
         }
         DrawFrame(spriteBatch, scale);
-        if (!ApocalypseSystem.FinalHours && ApocalypseSystem.apocalypseDay < 3)
+        if (!ApocalypseSystem.FinalHours)
         {
             DrawClock(spriteBatch, scale);
+            apocalypseTextActive = false;
+        }
+        else
+        {
+            if (!apocalypseTextActive)
+            {
+                apocalypseAnimProgress = 1f;
+            }
+            apocalypseTextActive = true;
+            DrawApocalypseUI(spriteBatch, scale);
         }
         DrawMarker(spriteBatch, scale);
+        if (apocalypseAnimProgress > 0)
+        {
+            apocalypseAnimProgress = Single.Clamp(apocalypseAnimProgress - Single.Clamp(0.1f * apocalypseAnimProgress, 0, 0.015f), 0, apocalypseAnimProgress);
+        }
+    }
+
+    private void DrawApocalypseUI(SpriteBatch spriteBatch, float scale)
+    {
+        var color = Color.Lerp(new Color(255, 255, 0), new Color(190, 0, 0), Utils.GetLerpValue(25f, 28.5f, Utils.GetDayTimeAs24FloatStartingFromMidnight(), true));
+        if (ApocalypseSystem.apocalypseDay > 2)
+        {
+            color = new Color(190, 0, 0);
+        }
+        var fadein = Utils.Remap(apocalypseAnimProgress, 0.8f, 1f, 1f, 0f);
+        color *= fadein;
+        var textOrigin = new Vector2(-1, ApocalypseNumberRectFromNumber(0).Height);
+        for (int i = 0; i < deathDigits.Count; i++)
+        {
+            var numFrame = ApocalypseNumberRectFromNumber(deathDigits[i]);
+            var colonFrame = new Rectangle(510, 0, 8, 26);
+            var adjustedOrigin = textOrigin;
+            var xModifier = 0f;
+            int posMultiplier = i - deathDigits.Count / 2;
+            posMultiplier *= -1;
+            xModifier = (numFrame.Width + 2) * posMultiplier;
+            if (i < 2)
+            {
+                xModifier += 10;
+            }
+            if (i > 3)
+            {
+                xModifier -= 10;
+            }
+            adjustedOrigin.X += xModifier;
+            spriteBatch.Draw(texture.Value, ApocalypseTextPosition(scale), numFrame, color, 0f, adjustedOrigin, scale, SpriteEffects.None, 0f);
+            var colonOrigin = textOrigin;
+            xModifier = (numFrame.Width + 2) * 1;
+            xModifier += 10;
+            colonOrigin.X += xModifier;
+            spriteBatch.Draw(texture.Value, ApocalypseTextPosition(scale), colonFrame, color, 0f, colonOrigin, scale, SpriteEffects.None, 0f);
+            colonOrigin = textOrigin;
+            colonOrigin.X -= 18;
+            spriteBatch.Draw(texture.Value, ApocalypseTextPosition(scale), colonFrame, color, 0f, colonOrigin, scale, SpriteEffects.None, 0f);
+        }
+        var moonPos = ApocalypseTextPosition(scale);
+        if (apocalypseAnimProgress > keyStart)
+        {
+            moonPos.X += Main.rand.Next(-4, 5);
+        }
+        moonPos.Y -= 52 * scale;
+        float moonScale = 1f;
+        var moonColor = Color.Lerp(new Color(255, 255, 0), new Color(190, 0, 0), Utils.GetLerpValue(25f, 27.5f, Utils.GetDayTimeAs24FloatStartingFromMidnight(), true));
+        if (apocalypseAnimProgress >= keyMiddle && apocalypseAnimProgress <= keyStart)
+        {
+            moonColor = Color.Lerp(Color.White, new Color(190, 0, 0), Utils.GetLerpValue(keyStart, keyMiddle, apocalypseAnimProgress, true));
+            moonScale = Utils.Remap(apocalypseAnimProgress, keyStart, keyMiddle, 1f, 1.5f);
+        }
+        if (apocalypseAnimProgress < keyMiddle)
+        {
+            moonColor = Color.Lerp(new Color(190, 0, 0), moonColor, Utils.GetLerpValue(keyMiddle, 0f, apocalypseAnimProgress, true));
+            moonScale = Utils.Remap(apocalypseAnimProgress, keyMiddle, 0f, 1.5f, 1f);
+        }
+        moonColor *= fadein;
+        spriteBatch.Draw(texture.Value, moonPos, moonRect, moonColor, 0f, new Vector2(moonRect.Width / 2, moonRect.Height / 2), moonScale * scale, SpriteEffects.None, 0f);
+    }
+
+    const float keyStart = 0.7f;
+    const float keyMiddle = 0.35f;
+
+    internal Rectangle moonRect
+    {
+        get
+        {
+            int width = 40;
+            int height = 40;
+            int y = 28;
+            int x = 432;
+            int frame = 0;
+            if (apocalypseAnimProgress < (keyStart + keyMiddle) / 2f && apocalypseAnimProgress > keyMiddle / 2f)
+            {
+                frame = 1;
+            }
+            return new Rectangle(x + (width + 2) * frame, y, width, height);
+        }
     }
 
     private void DrawClock(SpriteBatch spriteBatch, float scale)
     {
         Vector2 origin = new(markerRect.Width / 2, markerRect.Height);
-        spriteBatch.Draw(texture.Value, markerPosition(scale), clockBackRect, Color.White * 0.6f, 0f, origin, scale, SpriteEffects.None, 0f);
-        spriteBatch.Draw(texture.Value, markerPosition(scale), sunMoonRect, Color.White, 0f, origin, scale, SpriteEffects.None, 0f);
+        float alpha = 0.6f;
+        if (invertedSongActive)
+        {
+            var time = Main.GlobalTimeWrappedHourly;
+            var pulseRateSeconds = 3f;
+            time %= pulseRateSeconds;
+            if (time > pulseRateSeconds / 2f)
+            {
+                alpha = Utils.Remap(time, pulseRateSeconds / 2f, pulseRateSeconds, 0.9f, 0.2f);
+            }
+            else
+            {
+                alpha = Utils.Remap(time, 0, pulseRateSeconds / 2f, 0.2f, 0.9f);
+            }
+        }
+        spriteBatch.Draw(texture.Value, MarkerPosition(scale), clockBackRect, Color.White * alpha, 0f, origin, scale, SpriteEffects.None, 0f);
+        var color = Color.White;
+        var bloodMoon = !Main.dayTime && Main.bloodMoon && (ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive);
+        if (bloodMoon)
+        {
+            color = Color.PaleVioletRed;
+        }
+        spriteBatch.Draw(texture.Value, MarkerPosition(scale), sunMoonRect, color, 0f, origin, scale, SpriteEffects.None, 0f);
+        if (bloodMoon)
+        {
+            spriteBatch.Draw(texture.Value, MarkerPosition(scale), colonRect, Color.White, 0f, origin, scale, SpriteEffects.None, 0f);
+        }
+        if (invertedSongActive)
+        {
+            var outline = clockBackRect;
+            outline.X = 0;
+            spriteBatch.Draw(texture.Value, MarkerPosition(scale), outline, Color.White * alpha, 0f, origin, scale, SpriteEffects.None, 0f);
+            var arrow = new Rectangle(216, 0, 32, 20);
+            var arrowOrigin = new Vector2(origin.X, origin.Y);
+            arrowOrigin.X -= outline.Width - 2;
+            arrowOrigin.Y -= 4;
+            spriteBatch.Draw(texture.Value, MarkerPosition(scale), arrow, Color.White * alpha, 0f, arrowOrigin, scale, SpriteEffects.None, 0f);
+        }
         for (int i = 0; i < normalDigits.Count; i++)
         {
             if (normalDigits[i] == 0 && i == 0)
@@ -188,14 +337,34 @@ public class MMClockUIThreeD : UIElement
                 adjustedOrigin.X -= 8;
             }
             adjustedOrigin.Y -= 8;
-            spriteBatch.Draw(texture.Value, markerPosition(scale), NormalNumberRectFromNumber(normalDigits[i]), Color.White, 0f, adjustedOrigin, scale, SpriteEffects.None, 0f);
+            spriteBatch.Draw(texture.Value, MarkerPosition(scale), NormalNumberRectFromNumber(normalDigits[i]), Color.White, 0f, adjustedOrigin, scale, SpriteEffects.None, 0f);
         }
     }
 
     private void DrawMarker(SpriteBatch spriteBatch, float scale)
     {
         Vector2 origin = new(markerRect.Width / 2, markerRect.Height);
-        spriteBatch.Draw(texture.Value, markerPosition(scale), markerRect, Color.White, 0f, origin, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture.Value, MarkerPosition(scale), markerRect, Color.White, 0f, origin, scale, SpriteEffects.None, 0f);
+        if (invertedSongActive && ApocalypseSystem.FinalHours)
+        {
+            float alpha = 0.6f;
+            var time = Main.GlobalTimeWrappedHourly;
+            var pulseRateSeconds = 3f;
+            time %= pulseRateSeconds;
+            if (time > pulseRateSeconds / 2f)
+            {
+                alpha = Utils.Remap(time, pulseRateSeconds / 2f, pulseRateSeconds, 0.9f, 0.2f);
+            }
+            else
+            {
+                alpha = Utils.Remap(time, 0, pulseRateSeconds / 2f, 0.2f, 0.9f);
+            }
+            var arrow = new Rectangle(216, 0, 32, 20);
+            var arrowOrigin = new Vector2(origin.X, origin.Y);
+            arrowOrigin.X -= arrow.Width / 2 + 6;
+            arrowOrigin.Y -= 4;
+            spriteBatch.Draw(texture.Value, MarkerPosition(scale), arrow, Color.White * alpha, 0f, arrowOrigin, scale, SpriteEffects.None, 0f);
+        }
     }
 
     private void DrawFrame(SpriteBatch spriteBatch, float scale)
@@ -223,7 +392,11 @@ public class MMClockUIThreeD : UIElement
         var timeLeft = 28.5 - Utils.GetDayTimeAs24FloatStartingFromMidnight();
         var hoursLeft = (int)Math.Truncate(timeLeft);
         double minutesLeft = (timeLeft - hoursLeft) * 60;
-        var timeString = $"{hoursLeft.ToString("D1")}{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString("F2")}";
+        double secondsLeft = minutesLeft - Math.Truncate(minutesLeft);
+        minutesLeft = Math.Truncate(minutesLeft);
+        secondsLeft *= 60;
+        var timeString = $"{hoursLeft.ToString("D1")}{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString()}{(secondsLeft < 10 ? "0" : "")}{Math.Truncate(secondsLeft).ToString()}";
+        deathDigits.Add(0);
         foreach (char digit in timeString)
         {
             if (Int32.TryParse(digit.ToString(), out var number))
