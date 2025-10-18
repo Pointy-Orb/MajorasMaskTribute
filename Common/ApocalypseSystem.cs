@@ -1,4 +1,5 @@
 using Terraria;
+using System.Threading;
 using System.IO;
 using Terraria.Social;
 using ReLogic.OS;
@@ -389,6 +390,7 @@ public class ApocalypseSystem : ModSystem
         }
     }
 
+
     public override void PostWorldGen()
     {
         Main.time = 0;
@@ -715,22 +717,47 @@ public class ApocalypseSystem : ModSystem
             if (!ModContent.GetInstance<ServerConfig>().SaveWorldAfterHardmodeStarts)
                 return;
             WorldGen.IsGeneratingHardMode = false;
-            apocalypseDay = 0;
-            Main.time = 0;
-            Main.dayTime = true;
-            WorldFile.SaveWorld();
-            if (FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
-            {
-                FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
-            }
-            LocalizedText hardTimeReset = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.HardmodeReset");
-            SendChatMessage(hardTimeReset);
+            SaveBackup(false);
         }
     }
 
     public override void ModifyHardmodeTasks(List<GenPass> list)
     {
         list.Add(new SaveDayOnePass("Save New Day One", 800f));
+    }
+
+    //Intended to be used to make the backup after the Moon Lord has been defeated and all relevant worldgen tasks have finished
+    public static int backupWhenReady = -1;
+
+    public override void PostUpdateEverything()
+    {
+        if (backupWhenReady == 0 && ThreadPool.PendingWorkItemCount <= 0)
+        {
+            ThreadPool.QueueUserWorkItem(SaveBackup);
+            backupWhenReady = -1;
+        }
+        else if (backupWhenReady > 0)
+        {
+            backupWhenReady--;
+        }
+    }
+
+    public static void SaveBackup(object threadContext)
+    {
+        ResetCounter();
+        Main.time = 0;
+        Main.dayTime = true;
+        WorldFile.SaveWorld();
+        if (FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
+        {
+            FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
+        }
+        if (FileUtilities.Exists(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave))
+        {
+            FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
+        }
+        LocalizedText hardTimeReset = Language.GetOrRegister("Mods.MajorasMaskTribute.Announcements.HardmodeReset");
+        SendChatMessage(hardTimeReset);
     }
 
     private void DestroyEverything()

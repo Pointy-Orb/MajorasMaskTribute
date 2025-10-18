@@ -78,14 +78,7 @@ public class MoonlordStuff : GlobalNPC
         if (npc.type != NPCID.MoonLordCore)
             return;
 
-        ApocalypseSystem.ResetCounter();
-        Main.time = 0;
-        Main.dayTime = true;
-        WorldFile.SaveWorld();
-        if (FileUtilities.Exists(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave))
-        {
-            FileUtilities.Copy(Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave);
-        }
+        ApocalypseSystem.backupWhenReady = 60;
     }
 
     public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
