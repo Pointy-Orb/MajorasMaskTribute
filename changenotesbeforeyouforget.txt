@@ -1,3 +1,5 @@
  - Added a new variant of the Terminian Watch that replicates the clock seen in the 3DS remake of Majora's Mask
  - Seconds part of Terminian Clock final hours timer now counts out of 60 instead of out of 100
  - "Day of" card no longer interrupts gameplay during the Eater of Worlds fight or the Torch God event
+ - Fixed a bug where modded tiles generated after Hardmode would disappear after a reset if the Hardmode checkpoint was enabled.
+ - Moonlord checkpoint is overall far less janky now

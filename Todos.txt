@@ -1,4 +1,4 @@
 Make NPCs say stuff about Eclipsing Stones and Phase Discs
 Look into doing custom cycle lengths
-Fix hardmode worldgen bug with Calamity/Remnants
 Make the version of the 3D clock for a saved world where the moon isn't falling
+Add an indicator for when an NPC is eligible to become a mask (idea: just have an icon appear in the happiness page, have that icon be an unobtainable item with a tooltip giving a direct indicator)
