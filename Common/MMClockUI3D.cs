@@ -57,6 +57,10 @@ public class MMClockUIThreeD : UIElement
         time += (Main.dayLength * ApocalypseSystem.apocalypseDay * 2);
         var pos = new Vector2();
         pos.X = position.X + Utils.Remap((float)time, 0, (float)Main.dayLength * 6, 36, frameRect.Width - 36) * scale - (frameRect.Width / 2) * scale;
+        if (!ApocalypseSystem.cycleActive)
+        {
+            pos.X = position.X;
+        }
         pos.Y = position.Y - 8 * scale;
         return pos;
     }
@@ -127,6 +131,10 @@ public class MMClockUIThreeD : UIElement
     {
         get
         {
+            if (!ApocalypseSystem.cycleActive)
+            {
+                return new Rectangle(150, 96, 118, 16);
+            }
             return new Rectangle(0, 82, 418, 30);
         }
     }
@@ -172,6 +180,10 @@ public class MMClockUIThreeD : UIElement
     {
         int day = Int32.Clamp(tDay, 0, 2);
         int width = 114;
+        if (tDay < 0)
+        {
+            return new Rectangle(420, 106, width, 8);
+        }
         return new Rectangle((width + 2) * day, 72, width, 8);
     }
 
@@ -181,6 +193,18 @@ public class MMClockUIThreeD : UIElement
         {
             return;
         }
+        if (ApocalypseSystem.cycleActive)
+        {
+            DrawWhenCycleActive(spriteBatch);
+        }
+        else
+        {
+            DrawWhenCycleInactive(spriteBatch);
+        }
+    }
+
+    private void DrawWhenCycleActive(SpriteBatch spriteBatch)
+    {
         DrawFrame(spriteBatch, scale);
         if (!ApocalypseSystem.FinalHours)
         {
@@ -201,6 +225,13 @@ public class MMClockUIThreeD : UIElement
         {
             apocalypseAnimProgress = Single.Clamp(apocalypseAnimProgress - Single.Clamp(0.1f * apocalypseAnimProgress, 0, 0.015f), 0, apocalypseAnimProgress);
         }
+    }
+
+    private void DrawWhenCycleInactive(SpriteBatch spriteBatch)
+    {
+        DrawPeacefulFrame(spriteBatch, scale);
+        DrawClock(spriteBatch, scale);
+        DrawMarker(spriteBatch, scale);
     }
 
     private void DrawApocalypseUI(SpriteBatch spriteBatch, float scale)
@@ -365,6 +396,31 @@ public class MMClockUIThreeD : UIElement
             arrowOrigin.Y -= 4;
             spriteBatch.Draw(texture.Value, MarkerPosition(scale), arrow, Color.White * alpha, 0f, arrowOrigin, scale, SpriteEffects.None, 0f);
         }
+    }
+
+    private void DrawPeacefulFrame(SpriteBatch spriteBatch, float scale)
+    {
+        var time = Main.time;
+        if (!Main.dayTime)
+        {
+            time = DoubleLerp(0, Main.dayLength, Utils.GetLerpValue(0, Main.nightLength, time)) + Main.dayLength;
+        }
+        Vector2 origin = new(0, frameRect.Height);
+        origin.X += Utils.Remap((float)time, 0, (float)Main.dayLength * 2, 0, frameRect.Width - 2);
+        Vector2 prevOrigin = origin;
+        prevOrigin.X -= frameRect.Width - 2;
+        Vector2 forwardOrigin = origin;
+        forwardOrigin.X += frameRect.Width - 2;
+
+        Vector2 fillOffset = new(-2, -4);
+        spriteBatch.Draw(texture.Value, position, GetDayFrame(-1), Color.White, 0, origin + fillOffset, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture.Value, position, frameRect, Color.White, 0, origin, scale, SpriteEffects.None, 0f);
+
+        spriteBatch.Draw(texture.Value, position, GetDayFrame(-1), Color.White * Utils.Remap((float)time, 0, (float)Main.dayLength * 2, 0, 1) * 0.4f, 0, prevOrigin + fillOffset, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture.Value, position, frameRect, Color.White * Utils.Remap((float)time, 0, (float)Main.dayLength * 2, 0, 1), 0, prevOrigin, scale, SpriteEffects.None, 0f);
+
+        spriteBatch.Draw(texture.Value, position, GetDayFrame(-1), Color.White * Utils.Remap((float)time, 0, (float)Main.dayLength * 2, 1, 0) * 0.4f, 0, forwardOrigin + fillOffset, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture.Value, position, frameRect, Color.White * Utils.Remap((float)time, 0, (float)Main.dayLength * 2, 1, 0), 0, forwardOrigin, scale, SpriteEffects.None, 0f);
     }
 
     private void DrawFrame(SpriteBatch spriteBatch, float scale)
