@@ -9,7 +9,7 @@ FEATURES:
 	3 day cycle (obviously)
 	Ocarina of Time (Can also play the Song of Healing!) (Spawns with new characters, if you lose yours, you can craft one with 5 clay and 10 fallen stars)
 	Miniature clock tower you can equip on vanity to hear the iconic bells at time marches on (Any watch, 4 wood, and 10 stone)
-	Playing the Song of Healing near NPCs while they are happy enough transforms them into masks, allowing you to bring them with you to the next cycle
+	Playing the Song of Healing near NPCs while they are happy enough transforms them into masks, allowing you to bring them with you to the next cycle (an indicator can be seen at the end of their happiness text showing such)
 	You can play the Inverted Song of Time when you are in inverted gravity (hold right-click)
 	Terminian Watch item grants a Majora's Mask style clock (Take a gold-tier watch and add 4 iron bars at a table and chair)
 	"Wand of Sparking" mode that forces you to only retain your first three inventory slots
