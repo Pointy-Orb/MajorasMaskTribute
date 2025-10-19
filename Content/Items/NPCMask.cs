@@ -424,13 +424,13 @@ public class HomunculusNPC : GlobalNPC
             maskCooldown--;
     }
 
-    private static bool WoFJustSpawned = false;
+    public static bool droppingMaskViaHealing = false;
 
     public bool dontRewardBurningTheGuide = false;
 
     public override void HitEffect(NPC npc, NPC.HitInfo hit)
     {
-        if (npc.type == NPCID.Guide && (hit.Damage == 9999 || hit.InstantKill) && npc.GetGlobalNPC<HomunculusNPC>().isHomunculus)
+        if (npc.type == NPCID.Guide && hit.InstantKill && !droppingMaskViaHealing && npc.GetGlobalNPC<HomunculusNPC>().isHomunculus)
         {
             npc.GetGlobalNPC<HomunculusNPC>().isAboutToGetGot = true;
         }

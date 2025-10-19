@@ -150,7 +150,7 @@ public class DayOfText : UIText
 
 public class ApocalypseText : UIText
 {
-    public ApocalypseText(float textScale = 1.3f, bool large = true) : base("", textScale, large)
+    public ApocalypseText(float textScale = 1.7f, bool large = true) : base("", textScale, large)
     {
         HAlign = 0.5f;
         VAlign = 0.9f;
@@ -166,7 +166,13 @@ public class ApocalypseText : UIText
         var timeLeft = 28.5 - Utils.GetDayTimeAs24FloatStartingFromMidnight();
         var hoursLeft = (int)Math.Truncate(timeLeft);
         double minutesLeft = (timeLeft - hoursLeft) * 60;
-        SetText($"{hoursLeft.ToString("D1")}:{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString("F2")}");
+        double secondsLeft = minutesLeft - Math.Truncate(minutesLeft);
+        minutesLeft = Math.Truncate(minutesLeft);
+        secondsLeft *= 60;
+        var timeString = $"{hoursLeft.ToString("D1")}:{(minutesLeft < 10 ? "0" : "")}{minutesLeft.ToString()}:{(secondsLeft < 10 ? "0" : "")}{Math.Truncate(secondsLeft).ToString()}";
+        base.TextColor = Color.Lerp(Color.White, Color.IndianRed, Utils.GetLerpValue(25f, 28.5f, Utils.GetDayTimeAs24FloatStartingFromMidnight(), true));
+        base.ShadowColor = Color.Lerp(Color.IndianRed, Color.DarkRed, Utils.GetLerpValue(25f, 28.5f, Utils.GetDayTimeAs24FloatStartingFromMidnight(), true));
+        SetText(timeString);
     }
 }
 

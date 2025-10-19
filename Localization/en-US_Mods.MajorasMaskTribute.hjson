@@ -123,7 +123,7 @@ Items: {
 	}
 
 	TerminianWatch: {
-		DisplayName: Terminian Watch (64)
+		DisplayName: Terminian Watch (Original)
 		Tooltip:
 			'''
 			Tells the time with a fancy display
@@ -164,6 +164,11 @@ Items: {
 			Can be freely converted into the 64 equivalent
 			'''
 		WoSModeNote: Will persist between cycles without needing to be in the first three slots
+	}
+
+	MaskIndicator: {
+		DisplayName: This NPC can become a mask
+		Tooltip: ""
 	}
 }
 

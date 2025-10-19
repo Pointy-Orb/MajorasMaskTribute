@@ -250,7 +250,7 @@ public class AnyWatchSystem : ModSystem
 public class BellRingingEffect : ModSceneEffect
 {
     //Using actual silence (Music => 0) will cut the preceding music off abruptly instead of fading it out.
-    public override int Music => Common.DayOfText.newDay ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
+    public override int Music => Common.DayOfText.newDay || Common.ApocalypseSystem.dayOfText.time > 0 ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
 
     public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 

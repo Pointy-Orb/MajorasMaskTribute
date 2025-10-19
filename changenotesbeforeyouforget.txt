@@ -3,3 +3,7 @@
  - "Day of" card no longer interrupts gameplay during the Eater of Worlds fight or the Torch God event
  - Fixed a bug where modded tiles generated after Hardmode would disappear after a reset if the Hardmode checkpoint was enabled.
  - Moonlord checkpoint is overall far less janky now
+ - Added an indicator that shows up when an NPC is eligible to become a mask, visible in the Happiness toggle.
+ - Fixed a bug where the Guide Mask would become unusable after playing the Song of Healing, this has been corrected to only occur when the Guide is sacrificed to the Wall of Flesh.
+ - If the "Day Of" card appears before the music has had a chance to fade out (i.e. when opening a new world), it will now simply cut off.
+ - The final hours timer for when no Terminian Watch is held has been revamped to be slightly more intimidating and more in line with the other timers

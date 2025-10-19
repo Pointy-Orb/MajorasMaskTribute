@@ -270,6 +270,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         if (animationTimer >= 300 && songPlaying == SongPlaying.SongOfHealing)
         {
             List<int> npcsToMask = new();
+            HomunculusNPC.droppingMaskViaHealing = true;
             foreach (NPC npc in Main.ActiveNPCs)
             {
                 var homunculusNPC = npc.GetGlobalNPC<HomunculusNPC>();
@@ -287,6 +288,7 @@ public class OcarinaOfTimePlayer : ModPlayer
                     npc.StrikeInstantKill();
                 }
             }
+            HomunculusNPC.droppingMaskViaHealing = false;
             if (Main.netMode == NetmodeID.SinglePlayer)
             {
                 foreach (int npcIndex in npcsToMask)
