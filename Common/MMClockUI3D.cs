@@ -97,6 +97,7 @@ public class MMClockUIThreeD : UIElement
             }
             else
             {
+                frame = 3;
                 if (Main.snowMoon)
                 {
                     frame = 4;
@@ -105,7 +106,6 @@ public class MMClockUIThreeD : UIElement
                 {
                     frame = 5;
                 }
-                frame = 3;
             }
             return new Rectangle((width + 2) * frame, y, width, height);
         }
