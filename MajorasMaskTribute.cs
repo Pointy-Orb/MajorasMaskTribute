@@ -37,7 +37,8 @@ namespace MajorasMaskTribute
             RemoveEclipseDisc,
             PlayBell,
             DisintegrateNPC,
-            DisintegrateNPCEffects
+            DisintegrateNPCEffects,
+            GetCycleCount
         }
 
         public override void Load()
@@ -170,6 +171,11 @@ namespace MajorasMaskTribute
                         SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
                     }
                     break;
+                case MessageType.GetCycleCount:
+                    var message = ShowCycles.ResetXTimesMessage.WithFormatArgs(CycleCounter.cycles);
+                    byte messageTarget = reader.ReadByte();
+                    ChatHelper.SendChatMessageToClient(message.ToNetworkText(), Color.White, messageTarget);
+                    break;
             }
         }
 
@@ -235,6 +241,14 @@ namespace MajorasMaskTribute
                 bellPacket.WriteVector2(position);
                 bellPacket.Write(doWave);
                 bellPacket.Send();
+            }
+
+            public static void SendCycleCount(byte targetPlayer)
+            {
+                var countPacket = MajorasMaskTribute.mod.GetPacket();
+                countPacket.Write((byte)MessageType.GetCycleCount);
+                countPacket.Write(targetPlayer);
+                countPacket.Send();
             }
 
             public static void DisintegrateNPC(IEnumerable<byte> victims)

@@ -18,6 +18,11 @@ public class EditWatch : GlobalInfoDisplay
         {
             return;
         }
+        //Displaying the day with watches would be redundant
+        if (DayHUD.Displaying)
+        {
+            return;
+        }
         displayValue = Language.GetText("Mods.MajorasMaskTribute.WatchDisplay").WithFormatArgs(ApocalypseSystem.apocalypseDay + 1, displayValue).Value;
     }
 }

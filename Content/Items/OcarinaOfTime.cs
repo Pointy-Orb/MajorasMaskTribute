@@ -342,9 +342,9 @@ public class OcarinaOfTimePlayer : ModPlayer
         var ocarina = new Item();
         ocarina.SetDefaults(ModContent.ItemType<OcarinaOfTime>());
         yield return ocarina;
+        var item = new Item();
         if (ModContent.GetInstance<ServerConfig>().WandOfSparkingMode != WandOfSparkingMode.Off)
         {
-            var item = new Item();
             item.SetDefaults(ItemID.GoldWatch);
             yield return item;
         }

@@ -176,6 +176,38 @@ public class ApocalypseText : UIText
     }
 }
 
+public class DayHUD : UIText
+{
+    public DayHUD(float textScale = 0.7f, bool large = true) : base("", textScale, large)
+    {
+        HAlign = 0.95f;
+        VAlign = 0.9f;
+    }
+
+    public static bool Displaying { get; private set; } = false;
+
+    public override void Update(GameTime gameTime)
+    {
+        if ((Utils.GetDayTimeAs24FloatStartingFromMidnight() >= 25 && ApocalypseSystem.apocalypseDay >= 2) ||
+                Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().terminaWatch == Content.Items.MMTimePlayer.TerminaWatch.Classic ||
+                ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.Off ||
+                (ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.accWatch != 0) ||
+                (ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().terminaWatch != Content.Items.MMTimePlayer.TerminaWatch.Off) ||
+                !ApocalypseSystem.cycleActive)
+        {
+            Displaying = false;
+            SetText("");
+            return;
+        }
+        Displaying = true;
+        SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.HUDDayDisplay.{(Main.dayTime ? "Day" : "Night")}", ApocalypseSystem.apocalypseDay + 1));
+        if (ApocalypseSystem.apocalypseDay > 1)
+        {
+            SetText(Language.GetTextValue($"Mods.MajorasMaskTribute.HUDDayDisplay.Last{(Main.dayTime ? "Day" : "Night")}"));
+        }
+    }
+}
+
 public class BlackScreen : UIElement
 {
     public bool display = false;
@@ -222,7 +254,18 @@ public class BlackScreen : UIElement
                     return false;
                 }
             }
-            return ModContent.GetInstance<ServerConfig>().PauseGameDuringDayTransitions;
+            if (ModContent.GetInstance<ServerConfig>().PauseGameDuringDayTransitions == PauseDuringTransition.OnlyWithMiniClock)
+            {
+                foreach (Player player in Main.ActivePlayers)
+                {
+                    if (!player.GetModPlayer<Content.Items.MiniatureClockTowerPlayer>().miniClockEquipped)
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return ModContent.GetInstance<ServerConfig>().PauseGameDuringDayTransitions == PauseDuringTransition.On;
         }
     }
 
@@ -230,7 +273,7 @@ public class BlackScreen : UIElement
     {
         if (display && PauseGameDuringDayTransitions)
         {
-            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight + 1), newDay ? Color.White : Color.Black);
+            spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth + 1, Main.screenHeight + 1), newDay ? Color.White : Color.Black);
             pausedForEffect = true;
         }
         else
@@ -416,6 +459,7 @@ public class WhiteScreen : UIElement
 public class DayDisplay : UIState
 {
     public DayOfText dayOfText;
+    public DayHUD dayHUD;
     public ApocalypseText apocalypseText;
     public WhiteScreen whiteScreen;
     public BlackScreen blackScreen;
@@ -426,11 +470,13 @@ public class DayDisplay : UIState
         blackScreen = new();
         apocalypseText = new();
         whiteScreen = new();
+        dayHUD = new();
 
         dayOfText.blackScreen = blackScreen;
         ApocalypseSystem.dayOfText = dayOfText;
         Content.Items.OcarinaOfTime.whiteScreen = whiteScreen;
 
+        Append(dayHUD);
         Append(blackScreen);
         Append(dayOfText);
         Append(dayOfText.Dawn);

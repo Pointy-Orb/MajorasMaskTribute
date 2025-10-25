@@ -1,9 +1,3 @@
- - Added a new variant of the Terminian Watch that replicates the clock seen in the 3DS remake of Majora's Mask. Its item can be converted to and from the old clock with no extra materials!
- - Seconds part of Terminian Clock final hours timer now counts out of 60 instead of out of 100
- - "Day of" card no longer interrupts gameplay during the Eater of Worlds fight or the Torch God event
- - Fixed a bug where modded tiles generated after Hardmode would disappear after a reset if the Hardmode checkpoint was enabled.
- - Moonlord checkpoint is overall far less janky now
- - Added an indicator that shows up when an NPC is eligible to become a mask, visible in the Happiness toggle.
- - Fixed a bug where the Guide Mask would become unusable after playing the Song of Healing, this has been corrected to only occur when the Guide is sacrificed to the Wall of Flesh.
- - If the "Day Of" card appears before the music has had a chance to fade out (i.e. when opening a new world), it will now simply cut off.
- - The final hours timer for when no Terminian Watch is held has been revamped to be slightly more intimidating and more in line with the other timers
+ - Added an optional UI element that shows you what day it is when you don't have a watch of any kind (can be forced on or turned off as desired)
+ - Added a new command (/cycles) that shows you how many times the world has been reset. This counter only counts resets that have happened after this update has released.
+ - A config option has been added that allows the black title cards to only appear when the Miniature Clock Tower is equipped. It is not the default.

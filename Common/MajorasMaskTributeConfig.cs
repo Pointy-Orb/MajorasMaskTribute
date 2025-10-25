@@ -10,6 +10,13 @@ using Terraria.ModLoader.Config;
 
 namespace MajorasMaskTribute.Common;
 
+public enum PauseDuringTransition
+{
+    Off,
+    OnlyWithMiniClock,
+    On
+}
+
 public enum WandOfSparkingMode
 {
     Off,
@@ -33,8 +40,9 @@ public class ServerConfig : ModConfig
     [DrawTicks]
     public WandOfSparkingMode WandOfSparkingMode { get; set; }
 
-    [DefaultValue(true)]
-    public bool PauseGameDuringDayTransitions { get; set; }
+    [DefaultValue(PauseDuringTransition.On)]
+    [DrawTicks]
+    public PauseDuringTransition PauseGameDuringDayTransitions { get; set; }
 
     public bool VanillaBloodMoonLogic { get; set; }
 
@@ -63,6 +71,13 @@ public class ServerConfig : ModConfig
     public SigilSettings SigilSettings { get; set; }
 }
 
+public enum CurrentDayDisplay
+{
+    Off,
+    LastResort,
+    On
+}
+
 public class ClientConfig : ModConfig
 {
     public override ConfigScope Mode => ConfigScope.ClientSide;
@@ -79,6 +94,10 @@ public class ClientConfig : ModConfig
 
     public bool SupersizedMoon { get; set; }
     public bool SupersizedMoon2 { get; set; }
+
+    [DefaultValue(CurrentDayDisplay.LastResort)]
+    [DrawTicks]
+    public CurrentDayDisplay DisplayCurrentDay { get; set; }
 
     [DefaultValue(1.5f)]
     [Range(0.5f, 2.5f)]

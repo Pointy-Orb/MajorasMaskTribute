@@ -1,5 +1,13 @@
 AnyWatchGroup: Any Watch
 WatchDisplay: Day {0}: {1}
+
+HUDDayDisplay: {
+	Day: Day {0}
+	Night: Night {0}
+	LastDay: Final Day
+	LastNight: Final Night
+}
+
 ResetXTimes: This world has been reset {0} {^0:time;times}.
 
 MultiplayerResetMessage: {
@@ -8,7 +16,7 @@ MultiplayerResetMessage: {
 }
 
 Announcements: {
-	HoursRemaining: -{0} hours remain-
+	HoursRemaining: -{0} {^0:hour;hours} {^0:remains;remain}-
 	NewDayMessage: A New Day
 	Day0: The First Day
 	Day1: The Second Day
@@ -194,6 +202,11 @@ Configs: {
 
 				Even when enabled, the game will not be paused if the sunrise happens during an 
 				invasion or most boss fights (the ones that don't end at night)
+
+				Setting to "Clock Tower Only" will make it so that
+				the full card displays only when every player has a miniature clock tower in 
+				an accessory slot or a vanity slot. This is good to prevent the card from 
+				catching you by surprise.
 				'''
 		}
 
@@ -336,6 +349,16 @@ Configs: {
 			Label: Terminian Clock Scale
 			Tooltip: Affects how big the clock from the Terminian Watch appears in the HUD
 		}
+
+		DisplayCurrentDay: {
+			Label: Display Current Day
+			Tooltip:
+				'''
+				Displays which of the three days it is in the bottom right corner when enabled.
+				Setting to Last Resort will only show the label when no other option of timekeeping 
+				(any kind of watch, both fancy and regular) is available.
+				'''
+		}
 	}
 
 	WandOfSparkingMode: {
@@ -368,6 +391,20 @@ Configs: {
 		EarlyUse.Label: Anytime
 		Vanilla.Label: Vanilla
 		Uncraftable.Label: Removed
+	}
+
+	PauseDuringTransition: {
+		Tooltip: ""
+		Off.Label: Off
+		OnlyWithMiniClock.Label: Clock Tower Only
+		On.Label: On
+	}
+
+	CurrentDayDisplay: {
+		Tooltip: ""
+		Off.Label: Off
+		LastResort.Label: Last Resort
+		On.Label: On
 	}
 }
 

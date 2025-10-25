@@ -790,11 +790,13 @@ public class ApocalypseSystem : ModSystem
 
     public static void ResetWorldInner()
     {
+        int temp = CycleCounter.cycles;
         Rain.ClearRain();
         WorldGen.clearWorld();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
+        CycleCounter.cycles = temp + 1;
         startChat = true;
         for (int i = 0; i < Main.maxTilesX; i++)
         {
