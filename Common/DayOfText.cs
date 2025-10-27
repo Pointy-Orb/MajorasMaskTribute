@@ -105,6 +105,10 @@ public class DayOfText : UIText
         }
         ShadowColor = defaultShadow;
         Dawn.ShadowColor = defaultShadow;
+        if (!ApocalypseSystem.FinishedResetting && time < 10)
+        {
+            time = 10;
+        }
         if (time > 0)
         {
             time--;
@@ -225,6 +229,10 @@ public class BlackScreen : UIElement
         get
         {
             if (newDay)
+            {
+                return true;
+            }
+            if (ApocalypseSystem.apocalypseDay == 0)
             {
                 return true;
             }
@@ -477,12 +485,12 @@ public class DayDisplay : UIState
         Content.Items.OcarinaOfTime.whiteScreen = whiteScreen;
 
         Append(dayHUD);
+        Append(whiteScreen);
         Append(blackScreen);
         Append(dayOfText);
         Append(dayOfText.Dawn);
         Append(dayOfText.hourText);
         Append(apocalypseText);
-        Append(whiteScreen);
     }
 }
 

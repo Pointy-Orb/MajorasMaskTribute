@@ -38,7 +38,9 @@ namespace MajorasMaskTribute
             PlayBell,
             DisintegrateNPC,
             DisintegrateNPCEffects,
-            GetCycleCount
+            GetCycleCount,
+            TellEveryoneToWait,
+            DoneWaitingNow
         }
 
         public override void Load()
@@ -176,6 +178,14 @@ namespace MajorasMaskTribute
                     byte messageTarget = reader.ReadByte();
                     ChatHelper.SendChatMessageToClient(message.ToNetworkText(), Color.White, messageTarget);
                     break;
+                case MessageType.TellEveryoneToWait:
+                    ApocalypseSystem.FinishedResetting = false;
+                    ApocalypseSystem.dayOfText?.DisplayDayOf(dayOverride: 0);
+                    MiniatureClockTowerPlayer.PlayRooster();
+                    break;
+                case MessageType.DoneWaitingNow:
+                    ApocalypseSystem.FinishedResetting = true;
+                    break;
             }
         }
 
@@ -260,6 +270,28 @@ namespace MajorasMaskTribute
                     packet.Write(victim);
                 }
                 packet.Write(byte.MaxValue);
+                packet.Send();
+            }
+
+            public static void TellEveryoneToWait()
+            {
+                if (!Main.dedServ)
+                {
+                    return;
+                }
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.TellEveryoneToWait);
+                packet.Send();
+            }
+
+            public static void DoneWaitingNow()
+            {
+                if (!Main.dedServ)
+                {
+                    return;
+                }
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.DoneWaitingNow);
                 packet.Send();
             }
         }

@@ -1,4 +1,5 @@
 using Terraria;
+using System.Threading;
 using Terraria.Achievements;
 using Terraria.Localization;
 using Terraria.Chat;
@@ -235,16 +236,21 @@ public class OcarinaOfTimePlayer : ModPlayer
         return true;
     }
 
+    public static void SinglePlayerSave(object threadContext)
+    {
+        Player.SavePlayer(Main.ActivePlayerFileData);
+        FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+        if (FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave))
+            FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+    }
+
     public override void PostUpdate()
     {
         if (animationTimer >= 660 && songPlaying == SongPlaying.SongOfTime)
         {
             if (Main.netMode == NetmodeID.SinglePlayer)
             {
-                Player.SavePlayer(Main.ActivePlayerFileData);
-                FileUtilities.Copy(Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
-                if (FileUtilities.Exists(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Main.ActivePlayerFileData.IsCloudSave))
-                    FileUtilities.Copy(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"), Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr") + ".dayone", Main.ActivePlayerFileData.IsCloudSave);
+                ThreadPool.QueueUserWorkItem(SinglePlayerSave);
             }
             if (Main.netMode != NetmodeID.MultiplayerClient)
             {
@@ -365,7 +371,12 @@ public class OcarinaOfTimePlayer : ModPlayer
             npc.active = false;
             npc.netUpdate = true;
         }
-        ApocalypseSystem.ResetWorldInner();
+        if (Main.netMode == NetmodeID.SinglePlayer)
+        {
+            ApocalypseSystem.dayOfText?.DisplayDayOf();
+            MiniatureClockTowerPlayer.PlayRooster();
+        }
+        ThreadPool.QueueUserWorkItem(ApocalypseSystem.ResetWorldInner);
         foreach (Player player in Main.ActivePlayers)
         {
             var spawnPos = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height);

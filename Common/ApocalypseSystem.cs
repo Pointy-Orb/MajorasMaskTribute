@@ -679,7 +679,11 @@ public class ApocalypseSystem : ModSystem
         if (!startChat)
         {
             startChat = true;
-            BroadcastCurrentDay();
+            if (Main.time <= 1 && Main.dayTime && apocalypseDay == 0)
+            {
+                dayOfText?.DisplayDayOf();
+                MiniatureClockTowerPlayer.PlayRooster();
+            }
         }
     }
 
@@ -784,12 +788,15 @@ public class ApocalypseSystem : ModSystem
                 if (npc.boss) npc.Transform(NPCID.Bunny);
                 npc.StrikeInstantKill();
             }
-            ResetWorldInner();
+            ResetWorldInner(true);
         }
     }
 
-    public static void ResetWorldInner()
+    public static bool FinishedResetting = true;
+    public static void ResetWorldInner(object threadContext)
     {
+        FinishedResetting = false;
+        MajorasMaskTribute.NetData.TellEveryoneToWait();
         int temp = CycleCounter.cycles;
         Rain.ClearRain();
         WorldGen.clearWorld();
@@ -865,6 +872,8 @@ public class ApocalypseSystem : ModSystem
             }
         }
         ResetApocalypseVariables();
+        FinishedResetting = true;
+        MajorasMaskTribute.NetData.DoneWaitingNow();
     }
 
     public static void ResetApocalypseVariables()
