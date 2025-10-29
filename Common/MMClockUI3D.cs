@@ -174,7 +174,7 @@ public class MMClockUIThreeD : UIElement
         return new Rectangle(xOffset + ((width + 2) * frame), yPos, width, height);
     }
 
-    float scale => ModContent.GetInstance<ClientConfig>().HUDClockSize;
+    float scale => ModContent.GetInstance<UIConfig>().HUDClockSize;
 
     private Rectangle GetDayFrame(int tDay)
     {

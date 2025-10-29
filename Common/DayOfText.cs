@@ -197,9 +197,9 @@ public class DayHUD : UIText
     {
         if ((Utils.GetDayTimeAs24FloatStartingFromMidnight() >= 25 && ApocalypseSystem.apocalypseDay >= 2) ||
                 Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().terminaWatch == Content.Items.MMTimePlayer.TerminaWatch.Classic ||
-                ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.Off ||
-                (ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.accWatch != 0) ||
-                (ModContent.GetInstance<ClientConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().terminaWatch != Content.Items.MMTimePlayer.TerminaWatch.Off) ||
+                ModContent.GetInstance<UIConfig>().DisplayCurrentDay == CurrentDayDisplay.Off ||
+                (ModContent.GetInstance<UIConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.accWatch != 0) ||
+                (ModContent.GetInstance<UIConfig>().DisplayCurrentDay == CurrentDayDisplay.LastResort && Main.LocalPlayer.GetModPlayer<Content.Items.MMTimePlayer>().terminaWatch != Content.Items.MMTimePlayer.TerminaWatch.Off) ||
                 !ApocalypseSystem.cycleActive)
         {
             Displaying = false;

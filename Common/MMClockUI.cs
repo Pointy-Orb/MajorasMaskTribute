@@ -185,7 +185,7 @@ public class MMClockUI : UIElement
         return new Rectangle(xOffset + ((width + 2) * frame), yPos, width, height);
     }
 
-    float scale => ModContent.GetInstance<ClientConfig>().HUDClockSize;
+    float scale => ModContent.GetInstance<UIConfig>().HUDClockSize;
 
     public override void Draw(SpriteBatch spriteBatch)
     {

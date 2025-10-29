@@ -1,4 +1,5 @@
 using System;
+using Terraria.Map;
 using Terraria.Chat;
 using Terraria.DataStructures;
 using Microsoft.Xna.Framework;
@@ -32,6 +33,7 @@ namespace MajorasMaskTribute
             BlowUpClient,
             TurnOffBlowUpShader,
             ResetPlayers,
+            UpdateDeathPositions,
             SavePlayerBackups,
             StartEclipse,
             RemoveEclipseDisc,
@@ -90,6 +92,9 @@ namespace MajorasMaskTribute
                     break;
                 case MessageType.ResetPlayers:
                     ApocalypseSystem.ResetLocalPlayer();
+                    break;
+                case MessageType.UpdateDeathPositions:
+                    Main.LocalPlayer.lastDeathPostion = ApocalypseSystem.crushSpot;
                     break;
                 case MessageType.SavePlayerBackups:
                     Player.SavePlayer(Main.ActivePlayerFileData);
@@ -189,6 +194,16 @@ namespace MajorasMaskTribute
                     ApocalypseSystem.FinishedResetting = true;
                     Main.dayTime = true;
                     ApocalypseSystem.wasDay = true;
+                    if (!ModContent.GetInstance<UIConfig>().PreserveMapBetweenResets)
+                    {
+                        MapHelper.ResetMapData();
+                        Main.Map.Clear();
+                        Main.clearMap = true;
+                        Main.mapTime = 0;
+                        Main.updateMap = false;
+                        Main.mapReady = false;
+                        Main.refreshMap = false;
+                    }
                     break;
                 case MessageType.OcarinaReset:
                     ApocalypseSystem.ResetCounter();
@@ -316,6 +331,13 @@ namespace MajorasMaskTribute
                 var packet = MajorasMaskTribute.mod.GetPacket();
                 packet.Write((byte)MajorasMaskTribute.MessageType.OcarinaReset);
                 packet.Send();
+            }
+
+            public static void UpdateDeathPosition(int target)
+            {
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.UpdateDeathPositions);
+                packet.Send(target);
             }
         }
     }

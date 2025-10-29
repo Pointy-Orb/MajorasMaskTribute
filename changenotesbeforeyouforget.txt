@@ -1,3 +1,5 @@
  - Added an optional UI element that shows you what day it is when you don't have a watch of any kind (can be forced on or turned off as desired)
  - Added a new command (/cycles) that shows you how many times the world has been reset. This counter only counts resets that have happened after this update has released.
  - A config option has been added that allows the black title cards to only appear when the Miniature Clock Tower is equipped. It is not the default.
+ - Using the Song of Time during multiplayer is now much more stable and much less odd-looking
+ - The map used to persist between resets in multiplayer and not do so in singleplayer. Now it persists in both, and the option to have it not persist in singleplayer or multiplayer is available via a config option

@@ -95,14 +95,6 @@ public class ClientConfig : ModConfig
     public bool SupersizedMoon { get; set; }
     public bool SupersizedMoon2 { get; set; }
 
-    [DefaultValue(CurrentDayDisplay.LastResort)]
-    [DrawTicks]
-    public CurrentDayDisplay DisplayCurrentDay { get; set; }
-
-    [DefaultValue(1.5f)]
-    [Range(0.5f, 2.5f)]
-    public float HUDClockSize { get; set; }
-
     public override void OnChanged()
     {
         if (Main.gameMenu)
@@ -121,4 +113,20 @@ public class ClientConfig : ModConfig
             TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
         }
     }
+}
+
+public class UIConfig : ModConfig
+{
+    public override ConfigScope Mode => ConfigScope.ClientSide;
+
+    [DefaultValue(true)]
+    public bool PreserveMapBetweenResets { get; set; }
+
+    [DefaultValue(CurrentDayDisplay.LastResort)]
+    [DrawTicks]
+    public CurrentDayDisplay DisplayCurrentDay { get; set; }
+
+    [DefaultValue(1.5f)]
+    [Range(0.5f, 2.5f)]
+    public float HUDClockSize { get; set; }
 }

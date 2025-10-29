@@ -345,21 +345,6 @@ Configs: {
 				day in Majora's Mask.
 				'''
 		}
-
-		HUDClockSize: {
-			Label: Terminian Clock Scale
-			Tooltip: Affects how big the clock from the Terminian Watch appears in the HUD
-		}
-
-		DisplayCurrentDay: {
-			Label: Display Current Day
-			Tooltip:
-				'''
-				Displays which of the three days it is in the bottom right corner when enabled.
-				Setting to Last Resort will only show the label when no other option of timekeeping 
-				(any kind of watch, both fancy and regular) is available.
-				'''
-		}
 	}
 
 	WandOfSparkingMode: {
@@ -406,6 +391,30 @@ Configs: {
 		Off.Label: Off
 		LastResort.Label: Last Resort
 		On.Label: On
+	}
+
+	UIConfig: {
+		DisplayName: UI Config
+
+		PreserveMapBetweenResets: {
+			Label: Preserve Map Between Resets
+			Tooltip: ""
+		}
+
+		DisplayCurrentDay: {
+			Label: Display Current Day
+			Tooltip:
+				'''
+				Displays which of the three days it is in the bottom right corner when enabled.
+				Setting to Last Resort will only show the label when no other option of timekeeping 
+				(any kind of watch, both fancy and regular) is available.
+				'''
+		}
+
+		HUDClockSize: {
+			Label: Terminian Clock Scale
+			Tooltip: Affects how big the clock from the Terminian Watch appears in the HUD
+		}
 	}
 }
 

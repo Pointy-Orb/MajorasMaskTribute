@@ -471,8 +471,11 @@ public class ApocalypseSystem : ModSystem
         ResetLocalPlayer();
     }
 
+    public static Vector2 crushSpot = Vector2.Zero;
+
     public static void ResetLocalPlayer()
     {
+        crushSpot = Main.LocalPlayer.Center;
         if (!FileUtilities.Exists(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.IsCloudSave))
             return;
         FileUtilities.Copy(Main.ActivePlayerFileData.Path + ".dayone", Main.ActivePlayerFileData.Path, Main.ActivePlayerFileData.IsCloudSave);
@@ -781,10 +784,16 @@ public class ApocalypseSystem : ModSystem
                 {
                     player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
                 }
+                player.creativeGodMode = false;
                 player.KillMe(deathReason, 99999, 0);
+                if (!Main.dedServ)
+                {
+                    player.lastDeathPostion = crushSpot;
+                }
                 if (Main.dedServ)
                 {
                     NetMessage.SendPlayerDeath(player.whoAmI, deathReason, 99999, 0, false);
+                    MajorasMaskTribute.NetData.UpdateDeathPosition(player.whoAmI);
                 }
             }
             foreach (NPC npc in Main.ActiveNPCs)
@@ -806,6 +815,10 @@ public class ApocalypseSystem : ModSystem
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
+        if (!Main.dedServ && ModContent.GetInstance<UIConfig>().PreserveMapBetweenResets)
+        {
+            Main.Map.Load();
+        }
         CycleCounter.cycles = temp + 1;
         startChat = true;
         for (int i = 0; i < Main.maxTilesX; i++)
@@ -928,5 +941,20 @@ public class ApocalypseSystem : ModSystem
         apocalypseDay = reader.ReadInt32();
         apocalypseTimer = reader.ReadInt32();
         doApocalypseTimer = reader.ReadBoolean();
+    }
+}
+
+public class KeepPlayerDead : ModPlayer
+{
+    public override void UpdateDead()
+    {
+        if (ApocalypseSystem.FinishedResetting)
+        {
+            return;
+        }
+        if (Player.respawnTimer < 61)
+        {
+            Player.respawnTimer = 61;
+        }
     }
 }
