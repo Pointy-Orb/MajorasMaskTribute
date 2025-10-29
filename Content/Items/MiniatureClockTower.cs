@@ -267,6 +267,8 @@ public class BellRingingEffect : ModSceneEffect
             return false;
         if (Main.dayTime && Common.ApocalypseSystem.dayOfText.time > 0)
             return true;
+        if (!Common.ApocalypseSystem.FinishedResetting)
+            return true;
         return (player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped || Tiles.TowerTileSystem.nearClockTower) && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
     }
 }
@@ -313,7 +315,7 @@ public class MiniatureClockTowerPlayer : ModPlayer
         {
             if (Common.ApocalypseSystem.cycleActive)
             {
-                SoundEngine.PlaySound(dayDoodleDoo);
+                //SoundEngine.PlaySound(dayDoodleDoo);
             }
             else
             {

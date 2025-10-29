@@ -1,5 +1,6 @@
 AnyWatchGroup: Any Watch
 WatchDisplay: Day {0}: {1}
+Loading: Loading...
 
 HUDDayDisplay: {
 	Day: Day {0}

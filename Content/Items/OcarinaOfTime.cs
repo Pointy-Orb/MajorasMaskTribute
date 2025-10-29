@@ -54,7 +54,7 @@ public class OcarinaOfTime : ModItem
     //Prevent those with bad connections from having the song of time trigger again due to lag
     public override bool CanUseItem(Player player)
     {
-        if (Main.netMode != NetmodeID.SinglePlayer && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 5)
+        if (Main.netMode != NetmodeID.SinglePlayer && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 5 && ApocalypseSystem.apocalypseDay == 0)
         {
             player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer = 0;
             return false;
@@ -65,6 +65,11 @@ public class OcarinaOfTime : ModItem
     public override bool? UseItem(Player player)
     {
         var desiredSongPlaying = player.GetModPlayer<OcarinaOfTimePlayer>().songPlaying;
+        if (desiredSongPlaying == SongPlaying.SongOfTime && player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer >= 659)
+        {
+            player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer += 2;
+            return true;
+        }
         if (player.altFunctionUse == 2)
         {
             if (player.gravDir < 0)
@@ -246,27 +251,29 @@ public class OcarinaOfTimePlayer : ModPlayer
 
     public override void PostUpdate()
     {
-        if (animationTimer >= 660 && songPlaying == SongPlaying.SongOfTime)
+        if (animationTimer >= 659 && songPlaying == SongPlaying.SongOfTime)
+        {
+            MiniatureClockTowerPlayer.PlayRooster();
+            ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
+            OcarinaOfTime.whiteScreen.forceDisplayFrames = 2;
+        }
+        if (animationTimer >= 660 && songPlaying == SongPlaying.SongOfTime && !Main.dedServ)
         {
             if (Main.netMode == NetmodeID.SinglePlayer)
             {
                 ThreadPool.QueueUserWorkItem(SinglePlayerSave);
-            }
-            if (Main.netMode != NetmodeID.MultiplayerClient)
-            {
                 ResetEverything();
             }
-            if (Main.dedServ)
+            else if (Player.whoAmI == Main.myPlayer)
             {
-                MajorasMaskTribute.NetData.SavePlayerBackups();
+                MajorasMaskTribute.NetData.OcarinaReset();
             }
-            ApocalypseSystem.ResetCounter();
+            //ApocalypseSystem.ResetCounter();
             animationTimer = 0;
             songPlaying = SongPlaying.None;
-            Main.time = 0;
-            Main.dayTime = true;
-            ApocalypseSystem.dayOfText?.DisplayDayOf();
-            MiniatureClockTowerPlayer.PlayRooster();
+            //Main.time = 0;
+            //Main.dayTime = true;
+            OcarinaOfTime.whiteScreen.forceDisplayFrames = 2;
         }
         if (animationTimer >= 300 && songPlaying == SongPlaying.InvertedSongOfTime)
         {
@@ -356,7 +363,7 @@ public class OcarinaOfTimePlayer : ModPlayer
         }
     }
 
-    private static void ResetEverything()
+    public static void ResetEverything()
     {
         if (!FileUtilities.Exists(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.IsCloudSave))
         {
@@ -365,16 +372,20 @@ public class OcarinaOfTimePlayer : ModPlayer
         Main.CheckForMoonEventsScoreDisplay();
         foreach (NPC npc in Main.ActiveNPCs)
         {
-            npc.Transform(NPCID.Bunny);
+            npc.Transform(NPCID.Worm);
+            npc.SpawnedFromStatue = true;
             npc.position = Vector2.Zero;
             npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
             npc.active = false;
-            npc.netUpdate = true;
+            if (Main.dedServ)
+            {
+                NetMessage.SendData(MessageID.SyncNPC, number: npc.whoAmI);
+            }
         }
         if (Main.netMode == NetmodeID.SinglePlayer)
         {
-            ApocalypseSystem.dayOfText?.DisplayDayOf();
             MiniatureClockTowerPlayer.PlayRooster();
+            ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
         }
         ThreadPool.QueueUserWorkItem(ApocalypseSystem.ResetWorldInner);
         foreach (Player player in Main.ActivePlayers)
@@ -410,8 +421,8 @@ public class OcarinaOfTimePlayer : ModPlayer
                 break;
             }
         }
-        Main.time = 0;
-        Main.dayTime = true;
+        //Main.time = 0;
+        //Main.dayTime = true;
     }
 
     public override void Kill(double damage, int hitDirection, bool pvp, PlayerDeathReason damageSource)

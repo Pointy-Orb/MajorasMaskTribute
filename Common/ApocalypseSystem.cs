@@ -75,7 +75,7 @@ public class ApocalypseSystem : ModSystem
         }
     }
 
-    static bool wasDay = true;
+    public static bool wasDay = true;
 
     public static Asset<Texture2D> scaryMoon;
 
@@ -363,6 +363,10 @@ public class ApocalypseSystem : ModSystem
 
     public override void PostUpdateTime()
     {
+        if (!FinishedResetting)
+        {
+            wasDay = Main.dayTime;
+        }
         if (!Main.dayTime && wasDay && startChat && cycleActive)
         {
             if (Main.dedServ)
@@ -425,8 +429,8 @@ public class ApocalypseSystem : ModSystem
     {
         if (Utils.GetDayTimeAs24FloatStartingFromMidnight() >= 4.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() < 5 && Main.dayTime)
         {
-            dayOfText?.DisplayDayOf();
             MiniatureClockTowerPlayer.PlayRooster();
+            dayOfText?.DisplayDayOf();
         }
         else
         {
@@ -639,6 +643,7 @@ public class ApocalypseSystem : ModSystem
             apocalypseDay++;
             if (apocalypseDay < 3)
             {
+                MiniatureClockTowerPlayer.PlayRooster();
                 if (Main.dedServ)
                 {
                     MajorasMaskTribute.NetData.NetDisplayDayOf(false, (byte)apocalypseDay);
@@ -649,7 +654,6 @@ public class ApocalypseSystem : ModSystem
                 }
                 //MoonPhase.Empty
                 Main.moonPhase = 4;
-                MiniatureClockTowerPlayer.PlayRooster();
             }
             else
             {
@@ -679,10 +683,10 @@ public class ApocalypseSystem : ModSystem
         if (!startChat)
         {
             startChat = true;
-            if (Main.time <= 1 && Main.dayTime && apocalypseDay == 0)
+            if (Main.time <= 1 && Main.dayTime && apocalypseDay == 0 && !dayOfText.visible)
             {
-                dayOfText?.DisplayDayOf();
                 MiniatureClockTowerPlayer.PlayRooster();
+                dayOfText?.DisplayDayOf();
             }
         }
     }
@@ -796,7 +800,6 @@ public class ApocalypseSystem : ModSystem
     public static void ResetWorldInner(object threadContext)
     {
         FinishedResetting = false;
-        MajorasMaskTribute.NetData.TellEveryoneToWait();
         int temp = CycleCounter.cycles;
         Rain.ClearRain();
         WorldGen.clearWorld();
@@ -855,12 +858,15 @@ public class ApocalypseSystem : ModSystem
             var npc = Main.npc[i];
             if (!npc.HasGivenName && (npc.type != NPCID.OldMan || sparedOldMan))
             {
-                npc.active = false;
                 npc.Transform(NPCID.Worm);
                 npc.SpawnedFromStatue = true;
-                npc.position = Vector2.Zero;
+                npc.active = false;
                 npc.GetGlobalNPC<HomunculusNPC>().isHomunculus = false;
-                npc.StrikeInstantKill();
+                if (Main.dedServ)
+                {
+                    npc.netSkip = -1;
+                    npc.life = 0;
+                }
             }
             else if (npc.type == NPCID.OldMan)
             {

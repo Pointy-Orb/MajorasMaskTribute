@@ -40,7 +40,8 @@ namespace MajorasMaskTribute
             DisintegrateNPCEffects,
             GetCycleCount,
             TellEveryoneToWait,
-            DoneWaitingNow
+            DoneWaitingNow,
+            OcarinaReset
         }
 
         public override void Load()
@@ -71,11 +72,11 @@ namespace MajorasMaskTribute
                 case MessageType.DisplayDayOf:
                     bool overridePause = reader.ReadBoolean();
                     byte day = reader.ReadByte();
-                    ApocalypseSystem.dayOfText.DisplayDayOf(overridePause, day);
                     if (Main.dayTime)
                     {
                         MiniatureClockTowerPlayer.PlayRooster();
                     }
+                    ApocalypseSystem.dayOfText.DisplayDayOf(overridePause, day);
                     break;
                 case MessageType.BlowUpClient:
                     string name = reader.ReadString();
@@ -180,11 +181,22 @@ namespace MajorasMaskTribute
                     break;
                 case MessageType.TellEveryoneToWait:
                     ApocalypseSystem.FinishedResetting = false;
-                    ApocalypseSystem.dayOfText?.DisplayDayOf(dayOverride: 0);
+                    ApocalypseSystem.ResetCounter();
                     MiniatureClockTowerPlayer.PlayRooster();
+                    ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
                     break;
                 case MessageType.DoneWaitingNow:
                     ApocalypseSystem.FinishedResetting = true;
+                    Main.dayTime = true;
+                    ApocalypseSystem.wasDay = true;
+                    break;
+                case MessageType.OcarinaReset:
+                    ApocalypseSystem.ResetCounter();
+                    Main.time = 0;
+                    Main.dayTime = true;
+                    NetData.TellEveryoneToWait();
+                    OcarinaOfTimePlayer.ResetEverything();
+                    NetData.SavePlayerBackups();
                     break;
             }
         }
@@ -292,6 +304,17 @@ namespace MajorasMaskTribute
                 }
                 var packet = MajorasMaskTribute.mod.GetPacket();
                 packet.Write((byte)MajorasMaskTribute.MessageType.DoneWaitingNow);
+                packet.Send();
+            }
+
+            public static void OcarinaReset()
+            {
+                if (Main.dedServ)
+                {
+                    return;
+                }
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.OcarinaReset);
                 packet.Send();
             }
         }

@@ -15,7 +15,7 @@ namespace MajorasMaskTribute.Common;
 public class DayOfText : UIText
 {
     public int time { get; private set; } = 0;
-    public bool visible = true;
+    public bool visible => time > 0;
     public HourText hourText;
     public UIText Dawn;
     public BlackScreen blackScreen;
@@ -25,6 +25,7 @@ public class DayOfText : UIText
     private float defaultHourScale => defaultScale * hourScaleRelative;
     private float defaultDawnScale => defaultScale * 0.7f;
     private float hourScaleRelative = 0.5f;
+    private bool unbold = false;
     public static bool newDay { get; private set; } = false;
 
     public DayOfText(float textScale = 1f, float hourScaleRelative = 0.5f) : base("", textScale, true)
@@ -40,12 +41,13 @@ public class DayOfText : UIText
         hourText = new HourText(defaultHourScale);
     }
 
-    public void DisplayDayOf(bool overridePause = false, int? dayOverride = null)
+    public void DisplayDayOf(bool overridePause = false, int? dayOverride = null, int? hourOverride = null)
     {
         BlackScreen.overridePauseForEffect = overridePause;
         int day = dayOverride ?? ApocalypseSystem.apocalypseDay;
+        unbold = overridePause;
 
-        if (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime)
+        if (BlackScreen.PauseGameDuringDayTransitions && (Main.dayTime || overridePause))
         {
             defaultScale = 1.4f;
         }
@@ -54,16 +56,16 @@ public class DayOfText : UIText
             defaultScale = 1;
         }
 
-        var message = (BlackScreen.PauseGameDuringDayTransitions && Main.dayTime ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{day}");
-        SetText(message, Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
+        var message = (BlackScreen.PauseGameDuringDayTransitions && (Main.dayTime || overridePause) ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{day}");
+        SetText(message, Main.dayTime || overridePause ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
 
-        int hours = 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - day) * 24);
+        int hours = hourOverride ?? 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - day) * 24);
         var hourMessage = Language.GetTextValue("Mods.MajorasMaskTribute.Announcements.HoursRemaining", hours);
         hourText?.SetText(hourMessage,
-                Main.dayTime ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
+                Main.dayTime || overridePause ? (BlackScreen.PauseGameDuringDayTransitions ? defaultHourScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultHourScale) : defaultHourScale, true);
         time = 300;
 
-        if (!BlackScreen.PauseGameDuringDayTransitions || !Main.dayTime)
+        if (!BlackScreen.PauseGameDuringDayTransitions || !(Main.dayTime || overridePause))
         {
             hourText.VAlign = HourText.defaultVAlign;
             return;
@@ -99,7 +101,7 @@ public class DayOfText : UIText
             TextColor = Color.White;
             Dawn.TextColor = Color.White;
         }
-        if (!Main.dayTime || !BlackScreen.PauseGameDuringDayTransitions)
+        if ((!Main.dayTime || !BlackScreen.PauseGameDuringDayTransitions) && !BlackScreen.overridePauseForEffect)
         {
             Dawn.SetText("");
         }
@@ -112,11 +114,11 @@ public class DayOfText : UIText
         if (time > 0)
         {
             time--;
-            blackScreen.display = (Main.dayTime && !BlackScreen.overridePauseForEffect) || newDay;
+            blackScreen.display = (Main.dayTime || BlackScreen.overridePauseForEffect) || newDay;
             if (blackScreen.display && BlackScreen.PauseGameDuringDayTransitions)
             {
                 hourText.TextColor *= Utils.Remap(time, 100, 200, 1, 0);
-                if (ApocalypseSystem.apocalypseDay >= 2)
+                if (ApocalypseSystem.apocalypseDay >= 2 && !unbold)
                 {
                     ShadowColor = Color.White;
                     Dawn.ShadowColor = Color.White;
@@ -136,6 +138,7 @@ public class DayOfText : UIText
             blackScreen.display = false;
             BlackScreen.overridePauseForEffect = false;
             newDay = false;
+            unbold = false;
         }
         BlackScreen.newDay = newDay;
     }
@@ -232,13 +235,9 @@ public class BlackScreen : UIElement
             {
                 return true;
             }
-            if (ApocalypseSystem.apocalypseDay == 0)
-            {
-                return true;
-            }
             if (overridePauseForEffect)
             {
-                return false;
+                return true;
             }
             if (Main.invasionType != 0)
             {
@@ -458,9 +457,19 @@ public class WhiteScreen : UIElement
 {
     public int ocarinaTimer;
 
+    public int forceDisplayFrames = 0;
+
     public override void Draw(SpriteBatch spriteBatch)
     {
-        spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.White * Utils.Remap(ocarinaTimer, 660, 470, 1, 0));
+        var opacity = Utils.Remap(ocarinaTimer, 660, 470, 1, 0);
+        var color = Color.White;
+        if (forceDisplayFrames > 0)
+        {
+            forceDisplayFrames--;
+            opacity = 1;
+            color = Color.Black;
+        }
+        spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth + 1, Main.screenHeight + 1), color * opacity);
     }
 }
 
