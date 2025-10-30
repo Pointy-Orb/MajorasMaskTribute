@@ -1,6 +1,8 @@
 AnyWatchGroup: Any Watch
 WatchDisplay: Day {0}: {1}
 Loading: Loading...
+PylonCutoff: when
+ProperPylonMessage: Teleport to another pylon
 
 HUDDayDisplay: {
 	Day: Day {0}
@@ -394,7 +396,7 @@ Configs: {
 	}
 
 	UIConfig: {
-		DisplayName: UI Config
+		DisplayName: UI Settings
 
 		PreserveMapBetweenResets: {
 			Label: Preserve Map Between Resets

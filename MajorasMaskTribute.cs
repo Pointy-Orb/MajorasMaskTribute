@@ -34,6 +34,7 @@ namespace MajorasMaskTribute
             TurnOffBlowUpShader,
             ResetPlayers,
             UpdateDeathPositions,
+            ReciprocateDeathPositions,
             SavePlayerBackups,
             StartEclipse,
             RemoveEclipseDisc,
@@ -95,6 +96,29 @@ namespace MajorasMaskTribute
                     break;
                 case MessageType.UpdateDeathPositions:
                     Main.LocalPlayer.lastDeathPostion = ApocalypseSystem.crushSpot;
+                    var pack = GetPacket();
+                    pack.Write((byte)MessageType.ReciprocateDeathPositions);
+                    pack.Write((byte)Main.myPlayer);
+                    pack.WriteVector2(ApocalypseSystem.crushSpot);
+                    pack.Send();
+                    break;
+                case MessageType.ReciprocateDeathPositions:
+                    if (Main.dedServ)
+                    {
+                        var playerNo = reader.ReadByte();
+                        var playerCrushSpot = reader.ReadVector2();
+                        var returnPack = GetPacket();
+                        returnPack.Write((byte)MessageType.ReciprocateDeathPositions);
+                        returnPack.Write(playerNo);
+                        returnPack.WriteVector2(playerCrushSpot);
+                        returnPack.Send(ignoreClient: playerNo);
+                    }
+                    else
+                    {
+                        var playerNo = reader.ReadByte();
+                        var playerCrushSpot = reader.ReadVector2();
+                        Main.player[playerNo].lastDeathPostion = playerCrushSpot;
+                    }
                     break;
                 case MessageType.SavePlayerBackups:
                     Player.SavePlayer(Main.ActivePlayerFileData);
@@ -200,7 +224,6 @@ namespace MajorasMaskTribute
                         Main.Map.Clear();
                         Main.clearMap = true;
                         Main.mapTime = 0;
-                        Main.updateMap = false;
                         Main.mapReady = false;
                         Main.refreshMap = false;
                     }

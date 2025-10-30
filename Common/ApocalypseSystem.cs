@@ -810,11 +810,14 @@ public class ApocalypseSystem : ModSystem
     {
         FinishedResetting = false;
         int temp = CycleCounter.cycles;
+        var pylons = PreservePylons.GetPylons();
         Rain.ClearRain();
         WorldGen.clearWorld();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
         WorldFile.LoadWorld(Main.ActiveWorldFileData.IsCloudSave);
+        Main.PylonSystem.Reset();
+        PreservePylons.ReplacePylons(pylons);
         if (!Main.dedServ && ModContent.GetInstance<UIConfig>().PreserveMapBetweenResets)
         {
             Main.Map.Load();
