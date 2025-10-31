@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.Enums;
 using Terraria.Localization;
 using Terraria.GameContent;
 using Terraria.GameContent.Tile_Entities;
@@ -74,6 +75,10 @@ public class PreservePylons : ModSystem
         {
             int x = pylon.location.X;
             int y = pylon.location.Y;
+            int cornerX = pylon.location.X - pylon.origin.X;
+            int cornerY = pylon.location.Y - pylon.origin.Y;
+            var pylonData = TileObjectData.GetTileData(pylon.type, pylon.style);
+            FormatAnchors(pylonData, pylon, cornerX, cornerY);
             for (int i = x - pylon.origin.X; i < x - pylon.origin.X + pylon.width; i++)
             {
                 for (int j = y - pylon.origin.Y; j < y - pylon.origin.Y + pylon.height; j++)
@@ -89,6 +94,99 @@ public class PreservePylons : ModSystem
                 continue;
             }
             TileObjectData.CallPostPlacementPlayerHook(x, y, pylon.type, pylon.style, -1, 0, pylonObject);
+        }
+    }
+
+    private static void FormatAnchors(TileObjectData pylonData, Pylon pylon, int cornerX, int cornerY)
+    {
+        List<AnchorData> anchors = new();
+        anchors.Add(pylonData.AnchorTop);
+        anchors.Add(pylonData.AnchorBottom);
+        anchors.Add(pylonData.AnchorLeft);
+        anchors.Add(pylonData.AnchorRight);
+        for (int i = 0; i < anchors.Count; i++)
+        {
+            var anchor = anchors[i];
+            int? requiredTile = null;
+            int xMod = 0;
+            int yMod = 0;
+            switch (i)
+            {
+                case 0:
+                    yMod = -1;
+                    break;
+                case 1:
+                    yMod = pylon.height;
+                    break;
+                case 2:
+                    xMod = -1;
+                    break;
+                case 3:
+                    xMod = pylon.width;
+                    break;
+            }
+            if (anchor.type == AnchorType.AlternateTile)
+            {
+                requiredTile = pylonData.AnchorAlternateTiles[0];
+            }
+            FormatAnchorsInner(anchor, cornerX + xMod, cornerY + yMod, false, requiredTile);
+        }
+    }
+
+    private static void FormatAnchorsInner(AnchorData anchor, int x, int y, bool vertical, int? rawTile = null)
+    {
+        if (anchor.type == AnchorType.None)
+        {
+            return;
+        }
+        bool strong = rawTile != null;
+        int tile = rawTile ?? TileID.WoodBlock;
+        bool platformAnchor = anchor.type == AnchorType.Table || anchor.type == AnchorType.PlatformNonHammered || anchor.type == AnchorType.Platform;
+        if (platformAnchor)
+        {
+            tile = TileID.Platforms;
+        }
+        if (vertical)
+        {
+            for (int j = y + anchor.checkStart; j < y + anchor.checkStart + anchor.tileCount; j++)
+            {
+                if (anchor.type == AnchorType.EmptyTile || strong || !Main.tileSolid[Main.tile[x, j].TileType] || platformAnchor)
+                {
+                    WorldGen.KillTile(x, j, noItem: true);
+                    if (anchor.type == AnchorType.EmptyTile)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    Tile anchorTile = Main.tile[x, j];
+                    anchorTile.Slope = SlopeType.Solid;
+                    anchorTile.IsHalfBlock = false;
+                }
+                WorldGen.PlaceTile(x, j, tile, true);
+            }
+        }
+        else
+        {
+            for (int i = x + anchor.checkStart; i < x + anchor.checkStart + anchor.tileCount; i++)
+            {
+                if (anchor.type == AnchorType.EmptyTile || strong || !Main.tileSolid[Main.tile[i, y].TileType] || platformAnchor)
+                {
+                    WorldGen.KillTile(i, y, noItem: true);
+                    if (anchor.type == AnchorType.EmptyTile)
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    Tile anchorTile = Main.tile[i, y];
+                    anchorTile.Slope = SlopeType.Solid;
+                    anchorTile.IsHalfBlock = false;
+                }
+                WorldGen.PlaceTile(i, y, tile, true);
+            }
         }
     }
 }
