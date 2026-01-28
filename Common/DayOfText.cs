@@ -57,6 +57,7 @@ public class DayOfText : UIText
         }
 
         var message = (BlackScreen.PauseGameDuringDayTransitions && (Main.dayTime || overridePause) ? "" : Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DawnOf" : "NightOf")}")) + Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.Day{day}");
+        message += Language.GetTextValue($"Mods.MajorasMaskTribute.Announcements.{(Main.dayTime ? "DaySuffix" : "NightSuffix")}");
         SetText(message, Main.dayTime || overridePause ? (BlackScreen.PauseGameDuringDayTransitions ? defaultScale * (Utils.Remap(day, 0, 2, 1, 1.5f)) : defaultScale) : defaultScale, true);
 
         int hours = hourOverride ?? 28 - (int)Utils.GetDayTimeAs24FloatStartingFromMidnight() + ((2 - day) * 24);
@@ -114,8 +115,8 @@ public class DayOfText : UIText
         if (time > 0)
         {
             time--;
-            blackScreen.display = (Main.dayTime || BlackScreen.overridePauseForEffect) || newDay;
-            if (blackScreen.display && BlackScreen.PauseGameDuringDayTransitions)
+            blackScreen.Displaying = (Main.dayTime || BlackScreen.overridePauseForEffect) || newDay;
+            if (blackScreen.Displaying && BlackScreen.PauseGameDuringDayTransitions)
             {
                 hourText.TextColor *= Utils.Remap(time, 100, 200, 1, 0);
                 if (ApocalypseSystem.apocalypseDay >= 2 && !unbold)
@@ -135,12 +136,17 @@ public class DayOfText : UIText
             SetText("");
             hourText.SetText("");
             Dawn.SetText("");
-            blackScreen.display = false;
+            blackScreen.Displaying = false;
             BlackScreen.overridePauseForEffect = false;
             newDay = false;
             unbold = false;
         }
         BlackScreen.newDay = newDay;
+        if (ApocalypseSystem.apocalypseDay > 2)
+        {
+            time = 0;
+            return;
+        }
     }
 
     public class HourText : UIText
@@ -217,11 +223,26 @@ public class DayHUD : UIText
 
 public class BlackScreen : UIElement
 {
-    public bool display = false;
+    public bool Displaying
+    {
+        get
+        {
+            return _displaying;
+        }
+        set
+        {
+            _displaying = value;
+            PauseGame.pauseCue = value;
+            if (Main.netMode == NetmodeID.MultiplayerClient)
+            {
+                MajorasMaskTribute.NetData.UpdatePause(value);
+            }
+        }
+    }
+
+    private bool _displaying = false;
 
     public static bool newDay = false;
-
-    public static bool pausedForEffect { get; private set; } = false;
 
     public static bool overridePauseForEffect = false;
 
@@ -240,6 +261,10 @@ public class BlackScreen : UIElement
                 return true;
             }
             if (Main.invasionType != 0)
+            {
+                return false;
+            }
+            if (ApocalypseSystem.apocalypseDay > 2)
             {
                 return false;
             }
@@ -278,23 +303,22 @@ public class BlackScreen : UIElement
 
     public override void Draw(SpriteBatch spriteBatch)
     {
-        if (display && PauseGameDuringDayTransitions)
+        if (Displaying && PauseGameDuringDayTransitions)
         {
             spriteBatch.Draw(TextureAssets.BlackTile.Value, new Rectangle(0, 0, Main.screenWidth + 1, Main.screenHeight + 1), newDay ? Color.White : Color.Black);
-            pausedForEffect = true;
-        }
-        else
-        {
-            pausedForEffect = false;
         }
     }
 }
 
 public class PauseGame : ModSystem
 {
+    public static bool pausedForEffect { get; private set; } = false;
+
+    public static bool pauseCue = false;
+
     public override void ModifyTimeRate(ref double timeRate, ref double tileUpdateRate, ref double eventUpdateRate)
     {
-        if (!BlackScreen.pausedForEffect)
+        if (!pausedForEffect)
         {
             return;
         }
@@ -311,9 +335,14 @@ public class PauseGame : ModSystem
     Dictionary<int, Vector2> itemVelocities = new();
     Dictionary<int, Vector2> goreVelocities = new();
 
+    public override void PostUpdateTime()
+    {
+        pausedForEffect = pauseCue && BlackScreen.PauseGameDuringDayTransitions;
+    }
+
     public override void PostUpdatePlayers()
     {
-        if (!BlackScreen.pausedForEffect)
+        if (!pausedForEffect)
         {
             if (wasPaused)
             {
@@ -352,7 +381,7 @@ public class PauseGame : ModSystem
 
     public override void PostUpdateNPCs()
     {
-        if (!BlackScreen.pausedForEffect)
+        if (!pausedForEffect)
         {
             if (wasPaused)
             {
@@ -389,7 +418,7 @@ public class PauseGame : ModSystem
 
     public override void PostUpdateProjectiles()
     {
-        if (!BlackScreen.pausedForEffect)
+        if (!pausedForEffect)
         {
             if (wasPaused)
             {
@@ -419,7 +448,7 @@ public class PauseGame : ModSystem
 
     public override void PostUpdateItems()
     {
-        if (!BlackScreen.pausedForEffect)
+        if (!pausedForEffect)
         {
             if (wasPaused)
             {
@@ -449,7 +478,7 @@ public class PauseGame : ModSystem
 
     public override void PostUpdateEverything()
     {
-        wasPaused = BlackScreen.pausedForEffect;
+        wasPaused = pausedForEffect;
     }
 }
 

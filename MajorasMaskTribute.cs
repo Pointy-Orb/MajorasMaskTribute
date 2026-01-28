@@ -44,7 +44,8 @@ namespace MajorasMaskTribute
             GetCycleCount,
             TellEveryoneToWait,
             DoneWaitingNow,
-            OcarinaReset
+            OcarinaReset,
+            UpdatePauseCue
         }
 
         public override void Load()
@@ -213,6 +214,10 @@ namespace MajorasMaskTribute
                     ApocalypseSystem.ResetCounter();
                     MiniatureClockTowerPlayer.PlayRooster();
                     ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
+                    foreach (Item item in Main.ActiveItems)
+                    {
+                        item.active = false;
+                    }
                     break;
                 case MessageType.DoneWaitingNow:
                     ApocalypseSystem.FinishedResetting = true;
@@ -235,6 +240,9 @@ namespace MajorasMaskTribute
                     NetData.TellEveryoneToWait();
                     OcarinaOfTimePlayer.ResetEverything();
                     NetData.SavePlayerBackups();
+                    break;
+                case MessageType.UpdatePauseCue:
+                    PauseGame.pauseCue = reader.ReadBoolean();
                     break;
             }
         }
@@ -361,6 +369,14 @@ namespace MajorasMaskTribute
                 var packet = MajorasMaskTribute.mod.GetPacket();
                 packet.Write((byte)MajorasMaskTribute.MessageType.UpdateDeathPositions);
                 packet.Send(target);
+            }
+
+            public static void UpdatePause(bool value)
+            {
+                var packet = MajorasMaskTribute.mod.GetPacket();
+                packet.Write((byte)MajorasMaskTribute.MessageType.UpdatePauseCue);
+                packet.Write(value);
+                packet.Send();
             }
         }
     }

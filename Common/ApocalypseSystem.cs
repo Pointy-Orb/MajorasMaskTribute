@@ -861,10 +861,6 @@ public class ApocalypseSystem : ModSystem
         foreach (Item item in Main.ActiveItems)
         {
             item.active = false;
-            if (Main.netMode != NetmodeID.SinglePlayer)
-            {
-                NetMessage.SendData(MessageID.SyncItem, -1, -1, null, item.whoAmI, 1f);
-            }
         }
         bool sparedOldMan = ModContent.GetInstance<ServerConfig>().OldManDoesntAppearOnFirstDay;
         for (int i = 0; i < Main.npc.Length; i++)

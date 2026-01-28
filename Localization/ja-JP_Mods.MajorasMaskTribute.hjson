@@ -1,41 +1,41 @@
 AnyWatchGroup: Any Watch
-WatchDisplay: Day {0}: {1}
-Loading: Loading...
-PylonCutoff: when
+WatchDisplay: {0}日目：{1}
+Loading: ロード中
+PylonCutoff: むらびとが2人
 ProperPylonMessage:
 	'''
-	Teleport to another pylon
-	Will persist between resets
+	べつのパイロンへテレポートする
+	リセットの中間でもてる
 	'''
 
 HUDDayDisplay: {
-	Day: Day {0}
-	Night: Night {0}
-	LastDay: Final Day
-	LastNight: Final Night
+	Day: {0}日目
+	Night: {0}日目の夜
+	LastDay: 最期の日
+	LastNight: 最期の夜
 }
 
-ResetXTimes: This world has been reset {0} {^0:time;times}.
+ResetXTimes: この世界が{0}回リセットされました。
 
 MultiplayerResetMessage: {
-	Violent: The moon has destroyed your world, you must rejoin now.
+	Violent: 月が世界をほろぼした、you must rejoin now.
 	Peaceful: ""
 }
 
 Announcements: {
-	HoursRemaining: -{0} {^0:hour;hours} {^0:remains;remain}-
-	NewDayMessage: A New Day
-	Day0: The First Day
-	Day1: The Second Day
-	Day2: The Final Day
-	DawnOf: "Dawn of "
-	NightOf: "Night of "
-	DaySuffix: ""
-	NightSuffix: ""
-	DayMisc: It is day {0}, {1} {^1:hour;hours} {^1:remains;remain}.
-	HardmodeReset: The ancient spirits have pushed back the falling moon... for now.
-	HourLeft: "{0} {0^:hour;hours} {0^:remains;remain}."
-	EndIsNear: The end is near...
+	HoursRemaining: ーあと{0}時間ー
+	NewDayMessage: 新しい日の
+	Day0: 最初の
+	Day1: 次の日の
+	Day2: 最期の
+	DawnOf: ""
+	NightOf: ""
+	DaySuffix: 朝
+	NightSuffix: 夜
+	DayMisc: {0}日目、あと{0}時間。
+	HardmodeReset: ひとまずこだいの霊がおちる月を押し戻した…
+	HourLeft: "あと{0}時間"
+	EndIsNear: 終末が近い...
 	LivesInMask: The spirit of {0} has been sealed in the mask...
 }
 
@@ -49,30 +49,30 @@ DeathMessages: {
 
 Items: {
 	OcarinaOfTime: {
-		DisplayName: Ocarina of Time
+		DisplayName: 時のオカリナ
 		Tooltip:
 			'''
 			Rewinds time to the dawn of the first day when played.
 			Can also play the Song of Healing to remove transformation masks from those wearing them.
 			Playing the Song of Healing while near town residents who are happy enough will transform them into masks
-			'The Goddess of Time is protecting you.'
+			'時の女神はあなたを守っています'
 			'''
 	}
 
 	NPCMask: {
-		DisplayName: "{0} Mask"
+		DisplayName: "{0}仮面"
 		Tooltip:
 			'''
 			A mask that embodies the spirit of the {0}.
 			Throw onto any creature to impart {1} form onto it.
 			'''
-		MalePronoun: his
-		FemalePronoun: her
+		MalePronoun: 彼
+		FemalePronoun: 彼女
 	}
 
 	InvertedSongOfTime: {
-		DisplayName: Inverted Song Of Time
-		Tooltip: Slows the flow of time when equipped
+		DisplayName: 時の逆さ歌
+		Tooltip: 装着されたと時の流れを遅くする
 	}
 
 	MiniatureClockTower: {
@@ -81,12 +81,12 @@ Items: {
 	}
 
 	PhaseDisc: {
-		DisplayName: Phase Disc
-		Tooltip: Changes the moon's phase when used
+		DisplayName: 月相ディスク
+		Tooltip: 使われの時は月相を変える
 	}
 
 	MajorasMask: {
-		DisplayName: Majora's Mask
+		DisplayName: ムジュラの仮面
 		Tooltip:
 			'''
 			Can be used to toggle the 3-day cycle on and off
@@ -96,14 +96,14 @@ Items: {
 	}
 
 	ItemSpirit: {
-		DisplayName: "{0} Spirit"
+		DisplayName: "{0}霊"
 		Tooltip:
 			'''
 			{$Mods.MajorasMaskTribute.Items.ItemSpirit.TooltipNoDisclaimer}
 			{$Mods.MajorasMaskTribute.Items.ItemSpirit.WoSModeDisclaimer}
 			'''
 		# Used for find-and-replace
-		Mask: " Mask"
+		Mask: "おめん"
 		WoSModeDisclaimer: Wand of Sparking Mode content
 		TooltipNoDisclaimer:
 			'''
@@ -118,29 +118,28 @@ Items: {
 		{0} will count as defeated for all future cycles 
 		where this is in your inventory.
 		'''
-	TheWoSMaskTooltip: The {$Mods.MajorasMaskTribute.Items.WoSMaskTooltip}
+	TheWoSMaskTooltip: {$Mods.MajorasMaskTribute.Items.WoSMaskTooltip}
 
 	EclipseDisc: {
-		DisplayName: Eclipsing Stone
+		DisplayName: 日食する石
 		Tooltip:
 			'''
 			Playing the Song of Time while this is in your inventory will trigger a Solar Eclipse at the start of the next cycle.
 			That eclipse will be equivalent to one at your current level of progression.
-			Consumed upon usage.
+			つかうとなくなる
 			'''
 	}
 
 	MoonTear: {
-		DisplayName: Moon's Tear
+		DisplayName: 月のなみだ
 		Tooltip:
 			'''
-			Its sparkling beauty radiates rather strangely.
-			Many will pay high for this.
+			美しい輝きの中に怪しさを漂わせる月の石
 			'''
 	}
 
 	TerminianWatch: {
-		DisplayName: Terminian Watch (Original)
+		DisplayName: タルミナの時計（原形）
 		Tooltip:
 			'''
 			Tells the time with a fancy display
@@ -150,21 +149,21 @@ Items: {
 	}
 
 	DoomMonolith: {
-		DisplayName: Doom Monolith
+		DisplayName: 凶運のモノリス
 		Tooltip:
 			'''
-			Cannot be shimmered
-			'Sustain a fraction of Majora's power'
+			キラメかせられられない
+			'ムジュラのちからをすこしつかう'
 			'''
 	}
 
 	FinalHoursMusicBox: {
-		DisplayName: Music Box (Final Hours)
+		DisplayName: ジュークボックス（終末）
 		Tooltip: ""
 	}
 
 	BurntGuideMask: {
-		DisplayName: Guide Mask
+		DisplayName: ガイドのおめん
 		Tooltip:
 			'''
 			A mask that formerly embodied the spirit of the Guide.
@@ -174,7 +173,7 @@ Items: {
 	}
 
 	TerminianWatch3D: {
-		DisplayName: Terminian Watch (3D)
+		DisplayName: タルミナの時計（3D）
 		Tooltip:
 			'''
 			Tells the time with a fancy digital display
@@ -184,7 +183,7 @@ Items: {
 	}
 
 	MaskIndicator: {
-		DisplayName: This NPC can become a mask
+		DisplayName: この街人は仮面になれる。
 		Tooltip: ""
 	}
 }
@@ -194,7 +193,7 @@ Configs: {
 		DisplayName: Gameplay Settings
 
 		VanillaBloodMoonLogic: {
-			Label: Vanilla Blood Moon Logic
+			Label: Vanilla ブラッドムーンの理屈
 			Tooltip:
 				'''
 				By default, a blood moon will be triggered during the final hours (when the countdown shows up).
@@ -283,7 +282,7 @@ Configs: {
 		}
 
 		Headers: {
-			General: General
+			General: 一般
 			Progression: Progression
 		}
 
@@ -303,7 +302,7 @@ Configs: {
 	}
 
 	ClientConfig: {
-		DisplayName: Visual Settings
+		DisplayName: みため設定
 
 		NoScaryTextures: {
 			Label: Use Vanilla Moon Texture
@@ -315,23 +314,23 @@ Configs: {
 		}
 
 		RealisticPhaseShading: {
-			Label: Draw Phases Realistically
+			Label: 月相を現実的に描く
 			Tooltip:
 				'''
 				Enabling will draw black pixels in the "empty" parts of the moon phases, 
-				preventing starts from appearing behind it
+				preventing stars from appearing behind it
 
 				Does nothing if "Use Vanilla Moon Texture" is enabled.
 				'''
 		}
 
 		SupersizedMoon: {
-			Label: Supersized Moon
-			Tooltip: Makes the moon really big
+			Label: でかい月
+			Tooltip: 月を本当に大きいになる
 		}
 
 		SupersizedMoon2: {
-			Label: Supersized Moon 2
+			Label: でかい月 2
 			Tooltip:
 				'''
 				Makes the moon even bigger than the Supersized Moon.
@@ -361,13 +360,13 @@ Configs: {
 			Inspired by Wand of Sparking's similar challenge.
 
 			Setting to 'On' will will make it so that every time you reset, you lose all of your items except:
-			The items in your first three inventory slots
-			Any axes, pickaxes, or hammers
-			Your ocarina
-			Your watch
+			さきの三のもちものスロットのアイテムたち
+			すべてのツルハシとオノとハンマー
+			あなたのオカリナ
+			あなたのとけい
 			Any boss masks you collect
-			Any money in your piggy bank
-			Equipped vanity items
+			ちょきんばこの金
+			装着したみためアイテムたち
 
 			It also makes it so that any boss masks you have count as that boss being defeated in future cycles,
 			as long as it is in your inventory.
@@ -450,15 +449,15 @@ Configs: {
 	}
 
 	UIConfig: {
-		DisplayName: UI Settings
+		DisplayName: UI設定
 
 		PreserveMapBetweenResets: {
-			Label: Preserve Map Between Resets
+			Label: 地図をリセットの間に保存する
 			Tooltip: ""
 		}
 
 		DisplayCurrentDay: {
-			Label: Display Current Day
+			Label: 現在の日を見せる
 			Tooltip:
 				'''
 				Displays which of the three days it is in the bottom right corner when enabled.
@@ -468,26 +467,26 @@ Configs: {
 		}
 
 		HUDClockSize: {
-			Label: Terminian Clock Scale
+			Label: タルミナの時計の大きさ
 			Tooltip: Affects how big the clock from the Terminian Watch appears in the HUD
 		}
 	}
 }
 
-DroppedMask: "{0} has dropped the {1} mask!"
-TwinsBossName: Twins
+DroppedMask: "{0}が{1}仮面を落とした!"
+TwinsBossName: ツインズ
 Empty: ""
 
 DropConditions: {
 	MajorasMask: Drops when nobody already has Majora's Mask
-	WandOfSparkingOn: Wand of Sparking Mode item
+	WandOfSparkingOn: ワンドオアブスパーキングモードのアイテム
 	VanillaBloodMoonOn: Drops when Vanilla Blood Moon Logic Enabled
 	VanillaBloodMoonOff: Drops when Vanilla Blood Moon Logic Disabled
 }
 
 VanillaEclipseLogicDisabled: When Vanilla Eclipse Logic is disabled
 NPCIsHappyEnough: When NPC is happy enough
-Tiles.DoomMonolith.MapEntry: DoomMonolith
+Tiles.DoomMonolith.MapEntry: 凶運のモノリス
 
 ItemConditions: {
 	Hardmode: The ancient spirits of light and dark confine its power.
