@@ -53,6 +53,11 @@ public class EclipseSystem : ModSystem
         IL_Main.UpdateTime_StartDay += IL_StopEclipse;
     }
 
+    public override void Unload()
+    {
+        IL_Main.UpdateTime_StartDay -= IL_StopEclipse;
+    }
+
     public override void PostUpdateTime()
     {
         if (!Main.dayTime)

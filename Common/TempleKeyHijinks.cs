@@ -66,6 +66,12 @@ public class TempleKeySystem : ModSystem
         //On_CultistRitual.CheckRitual += On_CultistCheck;
     }
 
+    public override void Unload()
+    {
+        IL_Player.TileInteractionsUse -= IL_ChangeSummonGolemCondition;
+        IL_CultistRitual.CheckRitual -= IL_PrehardmodeCultists;
+    }
+
     private static void IL_ChangeSummonGolemCondition(ILContext il)
     {
         try

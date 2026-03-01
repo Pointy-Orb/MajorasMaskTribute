@@ -19,6 +19,11 @@ public class SetTime : ModSystem
         IL_WorldFile.ResetTempsToDayTime += IL_ChangeDefaultTime;
     }
 
+    public override void Unload()
+    {
+        IL_WorldFile.ResetTempsToDayTime -= IL_ChangeDefaultTime;
+    }
+
     private static void IL_ChangeDefaultTime(ILContext il)
     {
         var c = new ILCursor(il);

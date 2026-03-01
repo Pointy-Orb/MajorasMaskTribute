@@ -1,4 +1,5 @@
 using Terraria;
+using Terraria.GameContent.Bestiary;
 using System.Threading;
 using System.IO;
 using Terraria.Social;
@@ -102,12 +103,19 @@ public class ApocalypseSystem : ModSystem
         }
         IL_Main.DrawSunAndMoon += IL_BiggerMoon;
         IL_Main.UpdateTime_StartNight += IL_StopBloodMoon;
+        IL_WorldGen.clearWorld += IL_NoResetBestiary;
         On_Main.EraseWorld += On_EraseWorld;
         On_FileUtilities.Delete += On_Delete;
     }
 
     public override void Unload()
     {
+        IL_Main.DrawSunAndMoon -= IL_BiggerMoon;
+        IL_Main.UpdateTime_StartNight -= IL_StopBloodMoon;
+        IL_WorldGen.clearWorld -= IL_NoResetBestiary;
+        On_Main.EraseWorld -= On_EraseWorld;
+        On_FileUtilities.Delete -= On_Delete;
+
         TextureAssets.PumpkinMoon = Main.Assets.Request<Texture2D>("Images/Moon_Pumpkin");
         TextureAssets.SnowMoon = Main.Assets.Request<Texture2D>("Images/Moon_Snow");
     }
@@ -291,6 +299,26 @@ public class ApocalypseSystem : ModSystem
             });
             c.Emit(Mul);
             c.Emit(Stloc, sunSizeIndex);
+        }
+        catch
+        {
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
+        }
+    }
+
+    private static void IL_NoResetBestiary(ILContext il)
+    {
+        try
+        {
+            var c = new ILCursor(il);
+            var postResetLabel = il.DefineLabel();
+
+            c.GotoNext(i => i.MatchLdsfld(typeof(Main).GetField(nameof(Main.BestiaryTracker))));
+            c.EmitDelegate<Func<bool>>(() => ApocalypseSystem.FinishedResetting);
+            c.Emit(Brfalse_S, postResetLabel);
+            c.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(BestiaryUnlocksTracker).GetMethod(nameof(BestiaryUnlocksTracker.Reset))));
+            c.MarkLabel(postResetLabel);
+            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
         catch
         {
