@@ -1,25 +1,16 @@
-using Terraria;
-using System.Threading;
-using Terraria.Achievements;
-using Terraria.Localization;
-using Terraria.Chat;
-using Terraria.GameContent.Events;
-using System.Linq;
-using System.IO;
-using Newtonsoft.Json;
-using Terraria.GameContent.Bestiary;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading;
 using MajorasMaskTribute.Common;
-using Terraria.IO;
-using Terraria.Utilities;
-using System;
-using Terraria.GameContent;
-using Microsoft.Xna.Framework.Graphics;
-using Terraria.Audio;
-using Terraria.ModLoader;
-using Terraria.ID;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.Utilities;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -28,7 +19,7 @@ public enum SongPlaying
     None,
     SongOfTime,
     SongOfHealing,
-    InvertedSongOfTime
+    InvertedSongOfTime,
 }
 
 public class OcarinaOfTime : ModItem
@@ -135,11 +126,7 @@ public class OcarinaOfTime : ModItem
 
     public override void AddRecipes()
     {
-        CreateRecipe()
-            .AddIngredient(ItemID.ClayBlock, 5)
-            .AddIngredient(ItemID.FallenStar, 10)
-            .AddTile(TileID.Furnaces)
-            .Register();
+        CreateRecipe().AddIngredient(ItemID.ClayBlock, 5).AddIngredient(ItemID.FallenStar, 10).AddTile(TileID.Furnaces).Register();
     }
 }
 
@@ -232,7 +219,8 @@ public class OcarinaOfTimePlayer : ModPlayer
     {
         foreach (Player player in Main.ActivePlayers)
         {
-            if (player == Player) continue;
+            if (player == Player)
+                continue;
             if (player.GetModPlayer<OcarinaOfTimePlayer>().animationTimer > 0)
             {
                 return false;
@@ -251,9 +239,21 @@ public class OcarinaOfTimePlayer : ModPlayer
 
     public override void PostUpdate()
     {
-        if (animationTimer >= 659 && songPlaying == SongPlaying.SongOfTime)
+        if (animationTimer >= 659 && songPlaying == SongPlaying.SongOfTime && Main.netMode == NetmodeID.SinglePlayer)
         {
-            MiniatureClockTowerPlayer.PlayRooster();
+            if (Main.LocalPlayer.GetModPlayer<EclipseDiscPlayer>().CheckForEclipseDisc())
+            {
+                if (!EclipseSystem.waitingOnEclipse)
+                {
+                    EclipseSystem.waitingOnEclipse = true;
+                    var key = Main.remixWorld ? "LegacyMisc.106" : "LegacyMisc.20";
+                    Main.NewText(Language.GetTextValue(key), 50, byte.MaxValue, 130);
+                }
+            }
+            else
+            {
+                MiniatureClockTowerPlayer.PlayRooster();
+            }
             ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
             OcarinaOfTime.whiteScreen.forceDisplayFrames = 2;
         }
@@ -328,7 +328,7 @@ public class OcarinaOfTimePlayer : ModPlayer
                     SoundEngine.PlaySound(SoundID.NPCDeath6, npc.Center);
                     npc.active = false;
                     npc.type = NPCID.Bunny;
-					*/
+                    */
                 }
             }
             else
@@ -386,8 +386,12 @@ public class OcarinaOfTimePlayer : ModPlayer
         {
             MiniatureClockTowerPlayer.PlayRooster();
             ApocalypseSystem.dayOfText?.DisplayDayOf(true, 0, 72);
+            ThreadPool.QueueUserWorkItem(ApocalypseSystem.ResetWorldInner);
         }
-        ThreadPool.QueueUserWorkItem(ApocalypseSystem.ResetWorldInner);
+        else if (Main.dedServ)
+        {
+            ApocalypseSystem.ResetWorldInner(true);
+        }
         foreach (Player player in Main.ActivePlayers)
         {
             var spawnPos = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16 - player.height);
@@ -402,23 +406,6 @@ public class OcarinaOfTimePlayer : ModPlayer
             {
                 player.GetModPlayer<WandOfSparkingModePlayer>().ResetInventory();
                 player.GetModPlayer<WandOfSparkingModePlayer>().RegisterBossDeathsByMask();
-            }
-        }
-        foreach (Player player in Main.ActivePlayers)
-        {
-            if (player.GetModPlayer<EclipseDiscPlayer>().CheckForEclipseDisc())
-            {
-                var key = Main.remixWorld ? "LegacyMisc.106" : "LegacyMisc.20";
-                if (Main.dedServ)
-                {
-                    ChatHelper.BroadcastChatMessage(NetworkText.FromKey(key), new Color(50, byte.MaxValue, 130));
-                    MajorasMaskTribute.NetData.RemoveEclipseDisc((byte)player.whoAmI);
-                }
-                else
-                {
-                    Main.NewText(Language.GetTextValue(key), 50, byte.MaxValue, 130);
-                }
-                break;
             }
         }
         //Main.time = 0;

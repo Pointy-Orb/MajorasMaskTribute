@@ -210,6 +210,9 @@ namespace MajorasMaskTribute
                     ChatHelper.SendChatMessageToClient(message.ToNetworkText(), Color.White, messageTarget);
                     break;
                 case MessageType.TellEveryoneToWait:
+                    bool eclipseStarting = reader.ReadBoolean();
+                    EclipseSystem.waitingOnEclipse = eclipseStarting;
+                    Main.eclipse = eclipseStarting;
                     ApocalypseSystem.FinishedResetting = false;
                     ApocalypseSystem.ResetCounter();
                     MiniatureClockTowerPlayer.PlayRooster();
@@ -237,7 +240,16 @@ namespace MajorasMaskTribute
                     ApocalypseSystem.ResetCounter();
                     Main.time = 0;
                     Main.dayTime = true;
-                    NetData.TellEveryoneToWait();
+                    bool someoneHasStone = false;
+                    foreach (Player stonePlayer in Main.ActivePlayers)
+                    {
+                        if (stonePlayer.GetModPlayer<EclipseDiscPlayer>().CheckForEclipseDisc())
+                        {
+                            someoneHasStone = true;
+                            break;
+                        }
+                    }
+                    NetData.TellEveryoneToWait(someoneHasStone);
                     OcarinaOfTimePlayer.ResetEverything();
                     NetData.SavePlayerBackups();
                     break;
@@ -331,7 +343,7 @@ namespace MajorasMaskTribute
                 packet.Send();
             }
 
-            public static void TellEveryoneToWait()
+            public static void TellEveryoneToWait(bool someoneHasStone)
             {
                 if (!Main.dedServ)
                 {
@@ -339,6 +351,7 @@ namespace MajorasMaskTribute
                 }
                 var packet = MajorasMaskTribute.mod.GetPacket();
                 packet.Write((byte)MajorasMaskTribute.MessageType.TellEveryoneToWait);
+                packet.Write(someoneHasStone);
                 packet.Send();
             }
 

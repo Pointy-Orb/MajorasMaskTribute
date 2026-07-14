@@ -1,14 +1,14 @@
-using Terraria;
-using Terraria.GameContent.Drawing;
 using System;
 using System.Collections.Generic;
-using Terraria.Localization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 using Terraria.Audio;
-using Terraria.ModLoader;
-using Terraria.ID;
+using Terraria.GameContent.Drawing;
 using Terraria.Graphics;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -56,7 +56,11 @@ public class MiniatureClockTower : ModItem
                 onRing?.Invoke();
             }
         }
-        else if (Main.curMusic == MusicLoader.GetMusicSlot(MajorasMaskTribute.mod, "Assets/Music/finalhours") && !broadcast && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime)))
+        else if (
+            Main.curMusic == MusicLoader.GetMusicSlot(MajorasMaskTribute.mod, "Assets/Music/finalhours")
+            && !broadcast
+            && !(Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25 && (Common.ApocalypseSystem.apocalypseDay >= 2 && !Main.dayTime))
+        )
         {
             if (Utils.GetDayTimeAs24FloatStartingFromMidnight() % (5f / 60f) < 0.001f)
             {
@@ -197,7 +201,8 @@ public class MiniatureClockTower : ModItem
             }
             for (int i = 0; i < bellTimes.Count; i++)
             {
-                if (bellsPlayed > i) continue;
+                if (bellsPlayed > i)
+                    continue;
                 if (Utils.GetDayTimeAs24FloatStartingFromMidnight() > bellTimes[i])
                 {
                     onRing?.Invoke();
@@ -229,12 +234,7 @@ public class MiniatureClockTower : ModItem
 
     public override void AddRecipes()
     {
-        CreateRecipe()
-            .AddRecipeGroup("MajorasMaskTribute:AnyWatch")
-            .AddIngredient(ItemID.StoneBlock, 10)
-            .AddRecipeGroup(RecipeGroupID.Wood, 4)
-            .AddTile(TileID.WorkBenches)
-            .Register();
+        CreateRecipe().AddRecipeGroup("MajorasMaskTribute:AnyWatch").AddIngredient(ItemID.StoneBlock, 10).AddRecipeGroup(RecipeGroupID.Wood, 4).AddTile(TileID.WorkBenches).Register();
     }
 }
 
@@ -250,7 +250,17 @@ public class AnyWatchSystem : ModSystem
 public class BellRingingEffect : ModSceneEffect
 {
     //Using actual silence (Music => 0) will cut the preceding music off abruptly instead of fading it out.
-    public override int Music => Common.DayOfText.newDay || Common.ApocalypseSystem.dayOfText.time > 0 ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
+    public override int Music
+    {
+        get
+        {
+            if (Common.EclipseSystem.waitingOnEclipse)
+            {
+                return MusicID.Eclipse;
+            }
+            return Common.DayOfText.newDay || Common.ApocalypseSystem.dayOfText.time > 0 ? 0 : MusicLoader.GetMusicSlot(Mod, "Assets/Music/silence");
+        }
+    }
 
     public override SceneEffectPriority Priority => SceneEffectPriority.Environment;
 
@@ -269,7 +279,8 @@ public class BellRingingEffect : ModSceneEffect
             return true;
         if (!Common.ApocalypseSystem.FinishedResetting)
             return true;
-        return (player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped || Tiles.TowerTileSystem.nearClockTower) && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
+        return (player.GetModPlayer<MiniatureClockTowerPlayer>().miniClockEquipped || Tiles.TowerTileSystem.nearClockTower)
+            && ((Utils.GetDayTimeAs24FloatStartingFromMidnight() < 19.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 19.2) || (Utils.GetDayTimeAs24FloatStartingFromMidnight() < 28.5 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 28.2));
     }
 }
 
@@ -297,6 +308,7 @@ public class MiniatureClockTowerPlayer : ModPlayer
 
     public static bool wasDay = true;
     bool started = false;
+
     public override void PostUpdate()
     {
         if (!started)
@@ -327,7 +339,7 @@ public class MiniatureClockTowerPlayer : ModPlayer
 
     public static void PlayRooster()
     {
-        if (Main.eclipse && !ModContent.GetInstance<Common.ServerConfig>().VanillaEclipseLogic)
+        if (Common.EclipseSystem.waitingOnEclipse)
         {
             return;
         }

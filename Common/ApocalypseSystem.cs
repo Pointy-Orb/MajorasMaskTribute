@@ -1,30 +1,30 @@
-using Terraria;
-using Terraria.GameContent.Bestiary;
-using System.Threading;
-using System.IO;
-using Terraria.Social;
-using ReLogic.OS;
 using System;
-using Terraria.GameContent.Events;
-using MajorasMaskTribute.Content.Items;
-using Terraria.ID;
-using Terraria.Audio;
-using Terraria.GameContent;
-using Terraria.GameContent.Creative;
-using Terraria.DataStructures;
-using Terraria.Utilities;
-using Terraria.IO;
-using Terraria.Chat;
-using Terraria.Localization;
-using Microsoft.Xna.Framework;
-using Terraria.ModLoader;
-using MonoMod.Cil;
-using static Mono.Cecil.Cil.OpCodes;
 using System.Collections.Generic;
-using Terraria.WorldBuilding;
-using Terraria.ModLoader.IO;
+using System.IO;
+using System.Threading;
+using MajorasMaskTribute.Content.Items;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoMod.Cil;
 using ReLogic.Content;
+using ReLogic.OS;
+using Terraria;
+using Terraria.Audio;
+using Terraria.Chat;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.GameContent.Bestiary;
+using Terraria.GameContent.Creative;
+using Terraria.GameContent.Events;
+using Terraria.ID;
+using Terraria.IO;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
+using Terraria.Social;
+using Terraria.Utilities;
+using Terraria.WorldBuilding;
+using static Mono.Cecil.Cil.OpCodes;
 
 namespace MajorasMaskTribute.Common;
 
@@ -140,7 +140,7 @@ public class ApocalypseSystem : ModSystem
             MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
     }
-	*/
+    */
 
     private static void IL_StopBloodMoon(ILContext il)
     {
@@ -236,15 +236,17 @@ public class ApocalypseSystem : ModSystem
             //Going to after that variable is set ensures that the size is changed without the posiiton.
             c.GotoNext(MoveType.After, i => i.MatchStloc(out _));
             c.Emit(Ldloc, sizeMultIndex);
-            c.EmitDelegate<Func<double, double>>((double input) =>
-            {
-                if (!cycleActive)
+            c.EmitDelegate<Func<double, double>>(
+                (double input) =>
                 {
-                    return input;
+                    if (!cycleActive)
+                    {
+                        return input;
+                    }
+                    var midnightValue = (float)Math.Pow(1.0 - 0.5 * 2.0, 2.0);
+                    return (double)Utils.Remap((float)Main.time, (float)Main.nightLength / 2f, (float)Main.nightLength, midnightValue, 0);
                 }
-                var midnightValue = (float)Math.Pow(1.0 - 0.5 * 2.0, 2.0);
-                return (double)Utils.Remap((float)Main.time, (float)Main.nightLength / 2f, (float)Main.nightLength, midnightValue, 0);
-            });
+            );
             c.Emit(Stloc, sizeMultIndex);
 
             //Give the normal moon phases, since it is not considered a regular moon texture the phases have to be added manually
@@ -318,7 +320,6 @@ public class ApocalypseSystem : ModSystem
             c.Emit(Brfalse_S, postResetLabel);
             c.GotoNext(MoveType.After, i => i.MatchCallvirt(typeof(BestiaryUnlocksTracker).GetMethod(nameof(BestiaryUnlocksTracker.Reset))));
             c.MarkLabel(postResetLabel);
-            MonoModHooks.DumpIL(ModContent.GetInstance<MajorasMaskTribute>(), il);
         }
         catch
         {
@@ -345,10 +346,7 @@ public class ApocalypseSystem : ModSystem
                 SocialAPI.Cloud.Delete(tWldPath);
             }
         }
-        catch
-        {
-
-        }
+        catch { }
     }
 
     private static void On_Delete(On_FileUtilities.orig_Delete orig, string path, bool cloud, bool forceDeleteFile = false)
@@ -421,7 +419,6 @@ public class ApocalypseSystem : ModSystem
             }
         }
     }
-
 
     public override void PostWorldGen()
     {
@@ -626,7 +623,11 @@ public class ApocalypseSystem : ModSystem
         {
             backgroundColor = backgroundColor.MultiplyRGB(new Color(0.7f, 1f, 0.7f));
         }
-        if (((apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25) || Main.LocalPlayer.GetModPlayer<Content.Tiles.DoomMonolithPlayer>().doomMonolithActive || Content.Tiles.DoomMonolithSystem.nearDoomMonolith) && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic && (Main.bloodMoon || Main.SceneMetrics.BloodMoonMonolith || Main.LocalPlayer.bloodMoonMonolithShader))
+        if (
+            ((apocalypseDay >= 2 && Utils.GetDayTimeAs24FloatStartingFromMidnight() > 25) || Main.LocalPlayer.GetModPlayer<Content.Tiles.DoomMonolithPlayer>().doomMonolithActive || Content.Tiles.DoomMonolithSystem.nearDoomMonolith)
+            && !ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic
+            && (Main.bloodMoon || Main.SceneMetrics.BloodMoonMonolith || Main.LocalPlayer.bloodMoonMonolithShader)
+        )
         {
             //Counteract blood moon brightening by doing our own darkening
             backgroundColor = Color.Black;
@@ -749,7 +750,8 @@ public class ApocalypseSystem : ModSystem
 
     public class SaveDayOnePass : GenPass
     {
-        public SaveDayOnePass(string name, float loadWeight) : base(name, loadWeight) { }
+        public SaveDayOnePass(string name, float loadWeight)
+            : base(name, loadWeight) { }
 
         protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration)
         {
@@ -826,7 +828,8 @@ public class ApocalypseSystem : ModSystem
             }
             foreach (NPC npc in Main.ActiveNPCs)
             {
-                if (npc.boss) npc.Transform(NPCID.Bunny);
+                if (npc.boss)
+                    npc.Transform(NPCID.Bunny);
                 npc.StrikeInstantKill();
             }
             ResetWorldInner(true);
@@ -834,12 +837,15 @@ public class ApocalypseSystem : ModSystem
     }
 
     public static bool FinishedResetting = true;
+
     public static void ResetWorldInner(object threadContext)
     {
         FinishedResetting = false;
         int temp = CycleCounter.cycles;
         var pylons = PreservePylons.GetPylons();
         Rain.ClearRain();
+        bool downedMechs = NPC.downedMechBoss1 && NPC.downedMechBoss2 && NPC.downedMechBoss3;
+        bool downedPlantera = NPC.downedPlantBoss;
         WorldGen.clearWorld();
         FileUtilities.Copy(Main.ActiveWorldFileData.Path + ".dayone", Main.ActiveWorldFileData.Path, Main.ActiveWorldFileData.IsCloudSave);
         FileUtilities.Copy(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld") + ".dayone", Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"), Main.ActiveWorldFileData.IsCloudSave);
@@ -856,7 +862,8 @@ public class ApocalypseSystem : ModSystem
         {
             for (int j = 0; j < Main.maxTilesY; j++)
             {
-                if (!WorldGen.InWorld(i, j)) continue;
+                if (!WorldGen.InWorld(i, j))
+                    continue;
                 WorldGen.Reframe(i, j, true);
             }
         }
@@ -871,11 +878,11 @@ public class ApocalypseSystem : ModSystem
                     var rangeY = chunkSize;
                     if (!WorldGen.InWorld(i + rangeX, j))
                     {
-                        rangeX = Main.maxTilesX - i;
+                        rangeX = Main.maxTilesX - i - 1;
                     }
                     if (!WorldGen.InWorld(i, j + rangeY))
                     {
-                        rangeY = Main.maxTilesY - j;
+                        rangeY = Main.maxTilesY - j - 1;
                     }
                     NetMessage.SendTileSquare(-1, i, j, rangeX, rangeY);
                 }
@@ -917,12 +924,12 @@ public class ApocalypseSystem : ModSystem
                 NetMessage.SendData(MessageID.SyncNPC, number: i);
             }
         }
-        ResetApocalypseVariables();
+        ResetApocalypseVariables(downedMechs, downedPlantera);
         FinishedResetting = true;
         MajorasMaskTribute.NetData.DoneWaitingNow();
     }
 
-    public static void ResetApocalypseVariables()
+    public static void ResetApocalypseVariables(bool downedMechs = false, bool downedPlantera = false)
     {
         Main.StopRain();
         Main.moonPhase = 0;
@@ -930,6 +937,25 @@ public class ApocalypseSystem : ModSystem
         Main.windSpeedCurrent = 0;
         Main.time = 0;
         Main.dayTime = true;
+        foreach (Player player in Main.ActivePlayers)
+        {
+            if (player.GetModPlayer<EclipseDiscPlayer>().CheckForEclipseDisc(true))
+            {
+                if (Main.eclipse)
+                {
+                    continue;
+                }
+                Main.eclipse = true;
+                EclipseSystem.PhonyDownedMechs = downedMechs;
+                EclipseSystem.PhonyDownedPlantera = downedPlantera;
+                if (Main.dedServ)
+                {
+                    var key = Main.remixWorld ? "LegacyMisc.106" : "LegacyMisc.20";
+                    ChatHelper.BroadcastChatMessage(NetworkText.FromKey(key), new Color(50, byte.MaxValue, 130));
+                    MajorasMaskTribute.NetData.RemoveEclipseDisc((byte)player.whoAmI);
+                }
+            }
+        }
         if (Main.zenithWorld)
         {
             Main.afterPartyOfDoom = true;

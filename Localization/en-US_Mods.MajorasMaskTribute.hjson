@@ -300,6 +300,17 @@ Configs: {
 				If you want to keep using the old method, enable this option.
 				'''
 		}
+
+		WerewolfSpawningChange: {
+			Tooltip:
+				'''
+				In vanilla, werewolves spawn very frequently during a full moon.
+				This works when there is a full moon every 8 nights, but not one every night.
+				This rework changes it so that werewolves instead spawn if there is a full moon AND the time is between 11:00 pm and 1:00 am.
+				Even if this setting is on, werewolves will still revert to their vanilla spawning logic if it is a blood moon or if the cycle is inactive.
+				'''
+			Label: Change Werewolf Spawning
+		}
 	}
 
 	ClientConfig: {

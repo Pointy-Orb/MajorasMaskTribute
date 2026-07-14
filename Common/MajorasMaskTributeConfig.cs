@@ -1,11 +1,11 @@
 using System.ComponentModel;
-using Terraria.GameContent;
-using Terraria.ModLoader;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
-using Terraria;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using ReLogic.Content;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.ModLoader;
 using Terraria.ModLoader.Config;
 
 namespace MajorasMaskTribute.Common;
@@ -14,21 +14,21 @@ public enum PauseDuringTransition
 {
     Off,
     OnlyWithMiniClock,
-    On
+    On,
 }
 
 public enum WandOfSparkingMode
 {
     Off,
     On,
-    Brutal
+    Brutal,
 }
 
 public enum SigilSettings
 {
     EarlyUse,
     Vanilla,
-    Uncraftable
+    Uncraftable,
 }
 
 public class ServerConfig : ModConfig
@@ -49,6 +49,9 @@ public class ServerConfig : ModConfig
     public bool VanillaEclipseLogic { get; set; }
 
     public bool VanillaTimeRate { get; set; }
+
+    [DefaultValue(true)]
+    public bool WerewolfSpawningChange { get; set; }
 
     public bool MurderForMasks { get; set; }
 
@@ -75,7 +78,7 @@ public enum CurrentDayDisplay
 {
     Off,
     LastResort,
-    On
+    On,
 }
 
 public class ClientConfig : ModConfig

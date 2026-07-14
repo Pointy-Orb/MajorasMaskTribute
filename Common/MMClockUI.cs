@@ -1,16 +1,16 @@
-using Terraria;
-using MajorasMaskTribute.Content.Items;
-using System.Collections.Generic;
-using ReLogic.Content;
-using Terraria.GameContent;
 using System;
-using Terraria.GameContent.UI.Elements;
-using Terraria.UI;
-using Terraria.ModLoader;
-using Terraria.ID;
-using Terraria.Localization;
+using System.Collections.Generic;
+using MajorasMaskTribute.Content.Items;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using Terraria;
+using Terraria.GameContent;
+using Terraria.GameContent.UI.Elements;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.UI;
 
 namespace MajorasMaskTribute.Common;
 
@@ -40,10 +40,7 @@ public class MMClockUI : UIElement
 
     public Vector2 position
     {
-        get
-        {
-            return new Vector2((float)Main.screenWidth * HAlign, (float)Main.screenHeight * VAlign);
-        }
+        get { return new Vector2((float)Main.screenWidth * HAlign, (float)Main.screenHeight * VAlign); }
     }
 
     public Vector2 diamondPosition => new Vector2((float)Main.screenWidth * HAlign, ((float)Main.screenHeight * VAlign) - (20 * scale));
@@ -258,16 +255,19 @@ public class MMClockUI : UIElement
 
     private void DrawSunMoon(SpriteBatch spriteBatch, float scale)
     {
-        var rotation = Utils.Remap((float)Main.time - (Main.dayTime ? 900 : 270), 0, Main.dayTime ? (float)Main.dayLength : (float)Main.nightLength, 0, MathF.PI) - MathHelper.PiOver2;
-        var origin = new Vector2(sunMoonRect.Width / 2, sunMoonRect.Height * 3.3f);
-        var numOrigin = new Vector2(numberRect.Width / 2, numberRect.Height * 5.6f);
+        var rotation = Utils.Remap((float)Main.time - 1800, 0, Main.dayTime ? ((float)Main.dayLength - 3600) : ((float)Main.nightLength - 3600), 0, MathF.PI, false) - MathHelper.PiOver2;
+        var offset = new Vector2(MathF.Cos(rotation - MathHelper.PiOver2) * 60, MathF.Sin(rotation - MathHelper.PiOver2) * 58);
+        offset *= scale;
+        var origin = new Vector2(sunMoonRect.Width / 2, sunMoonRect.Height / 2);
+        var numOrigin = new Vector2(numberRect.Width / 2, numberRect.Height + 15);
         var color = Color.White;
         if (!Main.dayTime && Main.bloodMoon && (ModContent.GetInstance<ServerConfig>().VanillaBloodMoonLogic || !ApocalypseSystem.cycleActive))
         {
             color = Color.PaleVioletRed;
         }
-        spriteBatch.Draw(texture.Value, position, sunMoonRect, color, rotation, origin, scale, SpriteEffects.None, 0f);
-        spriteBatch.Draw(texture.Value, position, numberRect, Color.White, rotation, numOrigin, scale, SpriteEffects.None, 0f);
+        var frameAlignment = new Vector2(0, -12) * scale;
+        spriteBatch.Draw(texture.Value, position + offset + frameAlignment, sunMoonRect, color, 0f, origin, scale, SpriteEffects.None, 0f);
+        spriteBatch.Draw(texture.Value, position + (offset * new Vector2(1, 66f / 58f)) + frameAlignment, numberRect, Color.White, rotation, numOrigin, scale, SpriteEffects.None, 0f);
     }
 
     List<int> digits = new();
@@ -412,14 +412,17 @@ public class ClockSystem : ModSystem
         int mouseTextIndex = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
         if (mouseTextIndex != -1)
         {
-            layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
-                "MajorasMaskTribute: Clock Display",
-                delegate
-                {
-                    _clockDisplay.Draw(Main.spriteBatch, new GameTime());
-                    return true;
-                },
-                InterfaceScaleType.UI)
+            layers.Insert(
+                mouseTextIndex,
+                new LegacyGameInterfaceLayer(
+                    "MajorasMaskTribute: Clock Display",
+                    delegate
+                    {
+                        _clockDisplay.Draw(Main.spriteBatch, new GameTime());
+                        return true;
+                    },
+                    InterfaceScaleType.UI
+                )
             );
         }
     }

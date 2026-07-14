@@ -36,7 +36,8 @@ Announcements: {
 	HardmodeReset: ひとまずこだいの霊がおちる月を押し戻した…
 	HourLeft: "あと{0}時間"
 	EndIsNear: 終末が近い...
-	LivesInMask: The spirit of {0} has been sealed in the mask...
+	LivesInMask: {0}の魂が仮面に
+	has been sealed in the mask...
 }
 
 DeathMessages: {
@@ -190,7 +191,7 @@ Items: {
 
 Configs: {
 	ServerConfig: {
-		DisplayName: Gameplay Settings
+		DisplayName: ゲームプレイ設定
 
 		VanillaBloodMoonLogic: {
 			Label: Vanilla ブラッドムーンの理屈
@@ -247,7 +248,7 @@ Configs: {
 		}
 
 		VanillaTimeRate: {
-			Label: Vanilla Time Rate
+			Label: バニラの時の速度
 			Tooltip:
 				'''
 				By default, time will move 1.5x more slowly than in vanilla.
@@ -261,7 +262,7 @@ Configs: {
 		}
 
 		VanillaEclipseLogic: {
-			Label: Vanilla Eclipse Logic
+			Label: バニラ日食の理屈
 			Tooltip:
 				'''
 				By default, random eclipses will be disabled and the player will be expected to use Eclipsing Stones
@@ -298,6 +299,17 @@ Configs: {
 				This used to be the only way it worked in previous updates, but has since been replaced by a newer method.
 				If you want to keep using the old method, enable this option.
 				'''
+		}
+
+		WerewolfSpawningChange: {
+			Tooltip:
+				'''
+                    In vanilla, werewolves spawn very frequently during a full moon. 
+                    This works when there is a full moon every 8 nights, but not one every night.
+                    This rework changes it so that werewolves instead spawn if there is a full moon AND the time is between 11:00 pm and 1:00 am.
+                    Even if this setting is on, werewolves will still revert to their vanilla spawning logic if it is a blood moon or if the cycle is inactive.
+				'''
+			Label: Change Werewolf Spawning
 		}
 	}
 

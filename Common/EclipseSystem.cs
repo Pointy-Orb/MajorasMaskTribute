@@ -13,6 +13,8 @@ namespace MajorasMaskTribute.Common;
 
 public class EclipseSystem : ModSystem
 {
+    public static bool waitingOnEclipse = false;
+
     public static bool PhonyDownedMechs
     {
         get
@@ -64,6 +66,10 @@ public class EclipseSystem : ModSystem
         {
             _downedMechsOverride = false;
             _downedPlanteraOverride = false;
+        }
+        if (ApocalypseSystem.dayOfText?.time <= 0)
+        {
+            waitingOnEclipse = false;
         }
     }
 

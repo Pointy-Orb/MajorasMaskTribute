@@ -1,12 +1,12 @@
-using Terraria;
-using Terraria.Localization;
 using MajorasMaskTribute.Common;
-using Terraria.Enums;
-using Terraria.ModLoader;
-using Terraria.ID;
-using ReLogic.Content;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
+using Terraria;
+using Terraria.Enums;
+using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace MajorasMaskTribute.Content.Items;
 
@@ -65,9 +65,20 @@ public class EclipseDisc : ModItem
 
 public class EclipseDiscPlayer : ModPlayer
 {
-    public bool CheckForEclipseDisc()
+    public bool CheckForEclipseDisc(bool remove = false)
     {
         var eclipseDiscSlot = Player.FindItem(ModContent.ItemType<EclipseDisc>(), Player.inventory);
+        if (!remove || eclipseDiscSlot < 0)
+        {
+            return eclipseDiscSlot >= 0;
+        }
+        Player.inventory[eclipseDiscSlot].stack--;
+        if (Player.inventory[eclipseDiscSlot].stack <= 0)
+        {
+            Player.inventory[eclipseDiscSlot].TurnToAir();
+        }
+        return true;
+        /*
         if (eclipseDiscSlot < 0)
             return false;
         if (Player.inventory[eclipseDiscSlot].ModItem is EclipseDisc disc)
@@ -75,12 +86,8 @@ public class EclipseDiscPlayer : ModPlayer
             EclipseSystem.PhonyDownedMechs = disc.downedAllMechs;
             EclipseSystem.PhonyDownedPlantera = disc.downedPlantBoss;
         }
-        Player.inventory[eclipseDiscSlot].stack--;
-        if (Player.inventory[eclipseDiscSlot].stack <= 0)
-        {
-            Player.inventory[eclipseDiscSlot].TurnToAir();
-        }
-        Main.eclipse = true;
+        hasEclipseDisc = true;
         return true;
+         */
     }
 }
